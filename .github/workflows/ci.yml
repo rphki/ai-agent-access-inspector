@@ -25,7 +25,7 @@ jobs:
       - run: cargo fmt --all --check
 
   test:
-    name: Clippy und Tests (${{ matrix.os }})
+    name: Clippy and tests (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:

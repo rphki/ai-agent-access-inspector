@@ -1,20 +1,20 @@
 # AI Agent Access Inspector
 
-Eine lokale, plattformübergreifende Anwendung, die zeigt, welche Ordner laut Konfigurationen, Projektdateien und erkennbaren Einstellungen für lokale KI-Agenten freigegeben oder potenziell erreichbar sind.
+A local, cross-platform application that shows which folders local AI agents are granted or can potentially reach, according to their configuration, project files and detectable settings.
 
-Der erste unterstützte Agent ist **Claude Code**. Weitere Agenten folgen als eigenständige Scanner.
+The first supported agent is **Claude Code**. More agents will follow as independent scanners.
 
-Die Anwendung arbeitet vollständig lokal, verändert keine Agentenkonfiguration und überträgt keine Daten.
+The application works entirely locally, never changes agent configuration and transmits no data.
 
-> **Status:** frühe Entwicklung. Das Datenmodell steht, ein Scanner für Claude Code folgt. Bisher liefert nur der Demo-Scanner Beispieldaten:
+> **Status:** early development. The data model is in place; a scanner for Claude Code is next. So far only the demo scanner returns example data:
 >
 > ```bash
 > cargo run -p inspector-cli -- scan --agent demo
 > ```
 
-## Entwicklung
+## Development
 
-Voraussetzung: [Rust](https://rustup.rs/) (stable). Die benötigten Komponenten werden über `rust-toolchain.toml` festgelegt.
+Requirement: [Rust](https://rustup.rs/) (stable). The required components are pinned in `rust-toolchain.toml`.
 
 ```bash
 cargo build
@@ -24,16 +24,16 @@ cargo clippy --all-targets -- -D warnings
 cargo run -p inspector-cli -- --version
 ```
 
-### Aufbau
+### Layout
 
-| Pfad | Inhalt |
+| Path | Content |
 |---|---|
-| `crates/inspector-core` | Datenmodell, Pfadanalyse, Scanner (ohne Tauri) |
-| `crates/inspector-cli` | Kommandozeilenprogramm `ai-agent-access-inspector` |
-| `docs/` | Roadmap und Dokumentation |
+| `crates/inspector-core` | data model, path analysis, scanners (without Tauri) |
+| `crates/inspector-cli` | command line program `ai-agent-access-inspector` |
+| `docs/` | roadmap and documentation |
 
-Planung und Stand: [docs/roadmap.md](docs/roadmap.md).
+Planning and status: [docs/roadmap.md](docs/roadmap.md).
 
-## Lizenz
+## License
 
 [Apache-2.0](LICENSE)

@@ -50,8 +50,8 @@ impl AgentScanner for DemoScanner {
         let projects = Finding::builder(
             &meta,
             FindingScope::User,
-            FindingTarget::path("~/projekte", PatternKind::Directory, home.join("projekte")),
-            source("/permissions/additionalDirectories/0", "~/projekte"),
+            FindingTarget::path("~/projects", PatternKind::Directory, home.join("projects")),
+            source("/permissions/additionalDirectories/0", "~/projects"),
         )
         .effect(RuleEffect::Allow)
         .access(AccessKind::ReadWrite)
@@ -96,7 +96,7 @@ impl AgentScanner for DemoScanner {
             FindingScope::Project,
             FindingTarget::path("/srv/data", PatternKind::Directory, "/srv/data".into()),
             FindingSource::new("demo/mcp", SourceDocumentation::Documented, PARSER_VERSION)
-                .file(home.join("projekte/app/.mcp.json"))
+                .file(home.join("projects/app/.mcp.json"))
                 .pointer("/mcpServers/files/args/2")
                 .raw_value("/srv/data"),
         )
@@ -146,7 +146,7 @@ mod tests {
         assert_eq!(output.findings.len(), 4);
         assert_eq!(
             output.findings[0].target.base_path,
-            Some(PathBuf::from("/home/alice/projekte"))
+            Some(PathBuf::from("/home/alice/projects"))
         );
         let ids: Vec<&str> = output.findings.iter().map(|f| f.id.as_str()).collect();
         assert!(ids.iter().all(|id| id.starts_with("demo-")));

@@ -73,7 +73,7 @@ fn demo_scan_prints_json_report() {
     assert_eq!(findings.len(), 4);
     assert_eq!(
         findings[0]["target"]["basePath"],
-        home.join("projekte").to_string_lossy().as_ref()
+        home.join("projects").to_string_lossy().as_ref()
     );
 }
 

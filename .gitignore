@@ -1,15 +1,15 @@
 # Rust
 /target/
 
-# Frontend (ab Phase 5)
+# Frontend (from phase 5)
 node_modules/
 /dist/
 
-# Tauri (ab Phase 5)
+# Tauri (from phase 5)
 /src-tauri/target/
 /src-tauri/gen/
 
-# Editoren und Betriebssysteme
+# Editors and operating systems
 .DS_Store
 Thumbs.db
 .idea/

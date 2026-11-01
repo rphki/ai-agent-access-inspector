@@ -1,4 +1,4 @@
-> **Historisch.** Dies ist der ursprüngliche Umsetzungsplan. Maßgeblich ist inzwischen die [Roadmap](roadmap.md).
+> **Historical.** This is the original implementation plan, kept in its original German. The authoritative document is now the [roadmap](roadmap.md).
 
 # Umsetzungsplan: AI Agent Access Inspector
 

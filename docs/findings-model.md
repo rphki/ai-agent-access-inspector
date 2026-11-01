@@ -1,23 +1,23 @@
-# Datenmodell
+# Data model
 
-Dieses Dokument beschreibt das agentenunabhängige Datenmodell in `crates/inspector-core/src/model/` und das JSON-Format, in dem es ausgegeben wird. Bis Version 1.0 kann sich das Format inkompatibel ändern; die Version steht im Feld `formatVersion` jedes Berichts.
+This document describes the agent-independent data model in `crates/inspector-core/src/model/` and the JSON format it is serialised to. Until version 1.0 the format may change incompatibly; the version is in the `formatVersion` field of every report.
 
-## 1. JSON-Konventionen
+## 1. JSON conventions
 
-- Feldnamen in `camelCase` (`agentId`, `basePath`).
-- Aufzählungswerte in `camelCase` (`readWrite`, `projectLocal`, `notChecked`). Ausnahme: Betriebssystem `macos`, `linux`, `windows`.
-- Varianten mit Daten tragen ein Unterscheidungsfeld: `kind` bei `subject` und `anchor`, `type` bei Warnungsarten.
-- Nicht vorhandene Werte werden als `null` ausgegeben, nicht weggelassen. So hat jedes Objekt immer dieselben Felder.
-- Pfade sind Zeichenketten im Format des gescannten Systems.
+- Field names in `camelCase` (`agentId`, `basePath`).
+- Enum values in `camelCase` (`readWrite`, `projectLocal`, `notChecked`). Exception: operating system `macos`, `linux`, `windows`.
+- Variants with data carry a discriminator field: `kind` for `subject` and `anchor`, `type` for warning kinds.
+- Missing values are written as `null`, not omitted, so every object always has the same fields.
+- Paths are strings in the format of the scanned system.
 
-## 2. Aufbau eines Berichts
+## 2. Report structure
 
 ```text
 ScanReport
 ├── formatVersion        "0.1"
 ├── tool                 { name, version }
 ├── operatingSystem      macos | linux | windows
-└── results[]            ein ScanResult pro Scanner
+└── results[]            one ScanResult per scanner
     ├── scanner          { id, name, description, parserVersion }
     ├── detection        { status, evidence[], version }
     ├── findings[]       Finding
@@ -25,60 +25,60 @@ ScanReport
     └── summary[]        { key, label, value }
 ```
 
-- `detection.status`: `notDetected` oder `configured` (Konfiguration gefunden; das Programm selbst wird nicht gesucht).
-- `summary` enthält Kernaussagen zur Konfiguration eines Agenten, z. B. Permission-Modus oder ob eine Sandbox aktiv ist. Schlüssel und Bezeichnungen legt der jeweilige Scanner fest.
+- `detection.status`: `notDetected` or `configured` (configuration found; the program itself is not looked for).
+- `summary` holds key facts about an agent's configuration, e.g. permission mode or whether a sandbox is active. Each scanner defines its own keys and labels.
 
 ## 3. Finding
 
-Ein Finding ist ein Pfad oder eine Regel, die Dateizugriff für einen Agenten gewährt, einschränkt oder nahelegt.
+A finding is a path or rule that grants, restricts or suggests file access for an agent.
 
-| Feld | Bedeutung |
+| Field | Meaning |
 |---|---|
-| `id` | Stabile Kennung: `<agentId>-<16 Hex-Zeichen>`, berechnet aus Agent, Subjekt, Quelldatei, JSON-Pointer und Rohwert. Unveränderte Konfiguration ergibt bei jedem Scan dieselbe Kennung. |
-| `agentId`, `agentName` | Scanner, der das Finding erzeugt hat |
-| `subject` | Wer den Zugriff hat: `{ "kind": "agent" }` oder `{ "kind": "mcpServer", "name": "…" }` |
-| `target` | Pfad bzw. Regel, siehe 3.1 |
-| `effect` | `allow`, `ask`, `deny` oder `notApplicable` (kein Regelursprung, z. B. beobachteter Projektpfad) |
+| `id` | Stable identifier: `<agentId>-<16 hex characters>`, computed from agent, subject, source file, JSON pointer and raw value. Unchanged configuration yields the same identifier on every scan. |
+| `agentId`, `agentName` | scanner that produced the finding |
+| `subject` | who holds the access: `{ "kind": "agent" }` or `{ "kind": "mcpServer", "name": "…" }` |
+| `target` | path or rule, see 3.1 |
+| `effect` | `allow`, `ask`, `deny` or `notApplicable` (not from a rule, e.g. an observed project path) |
 | `access` | `read`, `write`, `execute`, `readWrite`, `unknown` |
-| `status` | `configured`, `observed`, `potential`, `blocked`, `unknown` (Bedeutung siehe Roadmap 4.1) |
+| `status` | `configured`, `observed`, `potential`, `blocked`, `unknown` (meaning see roadmap 4.1) |
 | `scope` | `managed`, `user`, `project`, `projectLocal`, `session`, `runtime`, `operatingSystem` |
-| `source` | Herkunft, siehe 3.2 |
-| `explanation` | Für Menschen verständliche Erklärung |
+| `source` | origin, see 3.2 |
+| `explanation` | human-readable explanation |
 | `confidence` | `low`, `medium`, `high` |
-| `pathState` | Zustand auf dem Datenträger, siehe 3.3 |
-| `warnings` | Sicherheitsrelevante Hinweise, siehe 3.4 |
+| `pathState` | state on disk, see 3.3 |
+| `warnings` | security-relevant remarks, see 3.4 |
 
 ### 3.1 Target
 
-| Feld | Bedeutung |
+| Field | Meaning |
 |---|---|
-| `raw` | Wert wie in der Quelle, z. B. `Read(~/projekt/**)` |
-| `patternKind` | `exactPath`, `directory`, `glob`, `everything` (alles, was das Subjekt erreicht, z. B. Shell ohne Sandbox), `unparsed` |
-| `basePath` | Pfad, an dem die Regel verankert ist; `null`, wenn nicht bestimmbar |
-| `displayPath` | Pfad für die Anzeige |
+| `raw` | value as in the source, e.g. `Read(~/project/**)` |
+| `patternKind` | `exactPath`, `directory`, `glob`, `everything` (everything the subject can reach, e.g. a shell without sandbox), `unparsed` |
+| `basePath` | path the rule is anchored at; `null` if it cannot be determined |
+| `displayPath` | path for display |
 
 ### 3.2 Source
 
-| Feld | Bedeutung |
+| Field | Meaning |
 |---|---|
-| `file` | Gelesene Datei; `null` bei abgeleiteten Findings |
-| `configKind` | Art der Konfiguration, z. B. `claude-code/settings` |
-| `documentation` | `documented` (offiziell beschrieben), `heuristic` (beobachtet, nicht oder kaum dokumentiert), `derived` (vom Inspector abgeleitet) |
-| `pointer` | JSON-Pointer zum Wert in `file`, z. B. `/permissions/deny/0` |
-| `rawValue` | Wert vor der Normalisierung |
-| `anchor` | Bezugspunkt relativer Muster: `filesystemRoot`, `home`, `workingDirectory` oder `{ "kind": "directory", "path": "…" }` |
-| `parserVersion` | Version der Parserlogik des Scanners |
-| `excerpt` | Kurzer Beleg ohne Geheimnisse |
+| `file` | file that was read; `null` for derived findings |
+| `configKind` | kind of configuration, e.g. `claude-code/settings` |
+| `documentation` | `documented` (officially described), `heuristic` (observed, not or barely documented), `derived` (computed by the inspector) |
+| `pointer` | JSON pointer to the value in `file`, e.g. `/permissions/deny/0` |
+| `rawValue` | value before normalisation |
+| `anchor` | base for relative patterns: `filesystemRoot`, `home`, `workingDirectory` or `{ "kind": "directory", "path": "…" }` |
+| `parserVersion` | version of the scanner's parsing logic |
+| `excerpt` | short evidence without secrets |
 
 ### 3.3 PathState
 
-Wird von der Pfadanalyse (Phase 3) gefüllt; bis dahin `notChecked`.
+Filled in by the path analysis (phase 3); until then `notChecked`.
 
-| Feld | Werte |
+| Field | Values |
 |---|---|
-| `existence` | `exists`, `missing`, `unknown` (Prüfung fehlgeschlagen), `notChecked` |
+| `existence` | `exists`, `missing`, `unknown` (check failed), `notChecked` |
 | `kind` | `file`, `directory`, `other`, `unknown` |
-| `symlinkTarget` | Ziel, falls der Pfad ein Symlink ist |
+| `symlinkTarget` | target, if the path is a symlink |
 
 ### 3.4 Warning
 
@@ -86,42 +86,42 @@ Wird von der Pfadanalyse (Phase 3) gefüllt; bis dahin `notChecked`.
 { "kind": { "type": "notEffective", "reason": "trustNotAccepted" }, "severity": "info", "message": "…" }
 ```
 
-| `kind.type` | Bedeutung |
+| `kind.type` | Meaning |
 |---|---|
-| `homeDirectory` | Freigabe des gesamten Home-Verzeichnisses |
-| `filesystemRoot` | Freigabe der Dateisystemwurzel |
-| `wholeDrive` | Freigabe eines ganzen Laufwerks |
-| `broadPath` | sonstiger besonders breiter Pfad |
-| `missingPath` | Pfad existiert nicht |
-| `symlinkElsewhere` | Symlink zeigt in einen anderen Bereich |
-| `conflictingRules` | widersprüchliche Allow-/Deny-Regeln |
-| `dangerousMode` | gefährlicher Permission-Modus |
-| `unsandboxedShell` | Shell-Befehle ohne Sandbox |
-| `likelyMisconfigured` | vermutlicher Konfigurationsfehler, z. B. falsch verankerter Pfad |
-| `notEffective` | Konfiguration vorhanden, aber nicht wirksam; Grund in `reason` |
+| `homeDirectory` | the entire home directory is granted |
+| `filesystemRoot` | the filesystem root is granted |
+| `wholeDrive` | a whole drive is granted |
+| `broadPath` | another particularly broad path |
+| `missingPath` | the path does not exist |
+| `symlinkElsewhere` | a symlink points to another area |
+| `conflictingRules` | conflicting allow/deny rules |
+| `dangerousMode` | dangerous permission mode |
+| `unsandboxedShell` | shell commands without sandbox |
+| `likelyMisconfigured` | probable configuration mistake, e.g. a misanchored path |
+| `notEffective` | configuration present but not effective; reason in `reason` |
 
-Gründe für `notEffective`: `trustNotAccepted`, `managedRulesOnly`, `scopeNotAllowed`, `ruleNeverMatches`, `overriddenByHigherScope`, `platformUnsupported`.
+Reasons for `notEffective`: `trustNotAccepted`, `managedRulesOnly`, `scopeNotAllowed`, `ruleNeverMatches`, `overriddenByHigherScope`, `platformUnsupported`.
 
 `severity`: `info`, `low`, `medium`, `high`.
 
-„Nicht wirksam“ ist bewusst eine Warnung und kein eigener Status: Das Finding bleibt `configured`, weil es so in der Konfiguration steht, und die Warnung erklärt, warum es derzeit nicht greift.
+"Not effective" is deliberately a warning, not a status of its own: the finding stays `configured` because that is what the configuration says, and the warning explains why it currently does not apply.
 
 ## 4. Diagnostic
 
-Diagnosen beschreiben Probleme beim Scannen. Sie brechen den Scan nie ab.
+Diagnostics describe problems while scanning. They never abort the scan.
 
-| Feld | Bedeutung |
+| Field | Meaning |
 |---|---|
 | `level` | `info`, `warning`, `error` |
 | `code` | `unreadableFile`, `invalidJson`, `unexpectedType`, `unknownKey`, `unparsableRule`, `unresolvedVariable`, `deprecatedLocation`, `unevaluatedSource`, `internal`, `other` |
-| `message` | Beschreibung |
-| `file`, `pointer` | betroffene Datei und Stelle, sofern bekannt |
+| `message` | description |
+| `file`, `pointer` | affected file and location, if known |
 
-Ein Scanner, der unerwartet abstürzt, erzeugt eine Diagnose mit Code `internal`; die übrigen Scanner laufen weiter.
+A scanner that crashes unexpectedly produces a diagnostic with code `internal`; the other scanners keep running.
 
-## 5. Beispiel
+## 5. Example
 
-Ausgabe von `ai-agent-access-inspector scan --agent demo --home /home/alice` (gekürzt):
+Output of `ai-agent-access-inspector scan --agent demo --home /home/alice` (shortened):
 
 ```json
 {
@@ -134,15 +134,15 @@ Ausgabe von `ai-agent-access-inspector scan --agent demo --home /home/alice` (ge
       "detection": { "status": "configured", "evidence": [], "version": null },
       "findings": [
         {
-          "id": "demo-de0a8d3dac098aed",
+          "id": "demo-093040fc34e02283",
           "agentId": "demo",
           "agentName": "Demo",
           "subject": { "kind": "agent" },
           "target": {
-            "raw": "~/projekte",
+            "raw": "~/projects",
             "patternKind": "directory",
-            "basePath": "/home/alice/projekte",
-            "displayPath": "/home/alice/projekte"
+            "basePath": "/home/alice/projects",
+            "displayPath": "/home/alice/projects"
           },
           "effect": "allow",
           "access": "readWrite",
@@ -153,7 +153,7 @@ Ausgabe von `ai-agent-access-inspector scan --agent demo --home /home/alice` (ge
             "configKind": "demo/settings",
             "documentation": "documented",
             "pointer": "/permissions/additionalDirectories/0",
-            "rawValue": "~/projekte",
+            "rawValue": "~/projects",
             "anchor": null,
             "parserVersion": "1",
             "excerpt": null

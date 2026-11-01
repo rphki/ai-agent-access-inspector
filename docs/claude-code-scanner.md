@@ -1,17 +1,17 @@
-# Spezifikation: Claude-Code-Scanner
+# Specification: Claude Code scanner
 
-Ergebnis von Phase 1 der [Roadmap](roadmap.md). Dieses Dokument legt fest, welche Dateien der Claude-Code-Scanner liest, welche Schlüssel er auswertet und wie er sie in Findings übersetzt.
+Result of phase 1 of the [roadmap](roadmap.md). This document defines which files the Claude Code scanner reads, which keys it evaluates and how it translates them into findings.
 
-## 1. Stand und Geltungsbereich
+## 1. Status and scope
 
 | | |
 |---|---|
-| Recherchedatum | 2026-11-01 |
-| Geprüfte Dokumentation | bezieht sich auf Claude Code bis v2.1.311 |
-| Lokal untersuchte Installation | Claude Code 2.1.309 (macOS, über die Claude-Desktop-App) |
-| Unterstütztes Format | nur das aktuell dokumentierte (siehe Roadmap, Abschnitt 2) |
+| Research date | 2026-11-01 |
+| Documentation checked | refers to Claude Code up to v2.1.311 |
+| Local installation examined | Claude Code 2.1.309 (macOS, via the Claude desktop app) |
+| Supported format | only the currently documented one (see roadmap, section 2) |
 
-Quellen (offizielle Dokumentation):
+Sources (official documentation):
 
 - [Settings](https://code.claude.com/docs/en/settings)
 - [Settings reference](https://code.claude.com/docs/en/settings-reference)
@@ -22,333 +22,333 @@ Quellen (offizielle Dokumentation):
 - [Sandboxing](https://code.claude.com/docs/en/sandboxing)
 - [Environment variables](https://code.claude.com/docs/en/env-vars)
 
-### Einstufung von Quellen
+### Source classification
 
-- **Dokumentiert:** Datei und Schlüssel sind in der offiziellen Dokumentation beschrieben.
-- **Heuristisch:** Datei oder Schlüssel ist nicht oder nur beiläufig dokumentiert, wurde aber in einer lokalen Installation beobachtet. Findings daraus erhalten höchstens `Confidence::Medium`.
-- **Unbestätigt:** Angabe stammt aus einer zusammengefassten statt wörtlich gelesenen Dokumentationsstelle. Muss in Phase 4 gegen die Dokumentation oder eine Installation geprüft werden, bevor sie implementiert wird. Solche Stellen sind unten mit *(unbestätigt)* markiert.
+- **Documented:** file and key are described in the official documentation.
+- **Heuristic:** file or key is not documented, or only in passing, but was observed in a local installation. Findings from it get at most `Confidence::Medium`.
+- **Unconfirmed:** the statement comes from a summarised rather than verbatim reading of the documentation. It must be checked against the documentation or an installation in phase 4 before it is implemented. Such statements are marked *(unconfirmed)* below.
 
-## 2. Wie Claude Code Dateizugriff regelt
+## 2. How Claude Code controls file access
 
-Für die Übersetzung in Findings sind diese dokumentierten Grundregeln maßgeblich:
+These documented ground rules govern the translation into findings:
 
-1. **Arbeitsverzeichnis.** Claude Code darf ohne Rückfrage Dateien im Startverzeichnis und in zusätzlichen Verzeichnissen lesen. Schreiben hängt vom Permission-Modus ab.
-2. **Zusätzliche Verzeichnisse** (`permissions.additionalDirectories`, `--add-dir`, `/add-dir`) werden wie das Arbeitsverzeichnis behandelt.
-3. **Permission-Regeln** (`allow`, `ask`, `deny`) gelten für Claudes eigene Werkzeuge. Reihenfolge: zuerst `deny`, dann `ask`, dann `allow`. Eine Deny-Regel aus irgendeiner Ebene schlägt jede Allow-Regel.
-4. **Read-/Edit-Deny-Regeln** gelten auch für erkannte Dateibefehle in Bash (`cat`, `head`, `sed`, Umleitungen), aber **nicht** für beliebige Unterprozesse (z. B. ein Python-Skript) oder Befehle ohne genannten Pfad (`grep -r muster .`). Bash-Regeln sind textbasiert und laut Dokumentation „keine Sicherheitsgrenze“.
-5. **Die Sandbox** gilt nur für Shell-Befehle (Bash, PowerShell, Monitor) und deren Kindprozesse. Datei-Werkzeuge, MCP-Server und Hooks laufen außerhalb der Sandbox. Ohne Sandbox kann ein Shell-Befehl alles erreichen, was der Benutzer erreichen kann.
-6. **Sandbox-Standard:** Schreiben im Arbeitsverzeichnis, im temporären Benutzerverzeichnis und in zusätzlichen Verzeichnissen; **Lesen auf dem gesamten Rechner** mit Ausnahme einzelner gesperrter Bereiche. Auf nativem Windows gibt es keine Sandbox.
-7. **MCP-Server** sind eigene Prozesse mit den Rechten des Benutzers. Ihr Dateizugriff ergibt sich aus ihrem Programm und ihren Argumenten, nicht aus Claude-Code-Regeln.
+1. **Working directory.** Claude Code may read files in the start directory and in additional directories without a prompt. Writing depends on the permission mode.
+2. **Additional directories** (`permissions.additionalDirectories`, `--add-dir`, `/add-dir`) are treated like the working directory.
+3. **Permission rules** (`allow`, `ask`, `deny`) apply to Claude's own tools. Order: `deny` first, then `ask`, then `allow`. A deny rule from any level beats every allow rule.
+4. **Read/Edit deny rules** also apply to file commands recognised in Bash (`cat`, `head`, `sed`, redirections), but **not** to arbitrary subprocesses (e.g. a Python script) or commands that do not name the path (`grep -r pattern .`). Bash rules are text-based and, according to the documentation, "not a security boundary".
+5. **The sandbox** only applies to shell commands (Bash, PowerShell, Monitor) and their child processes. File tools, MCP servers and hooks run outside the sandbox. Without a sandbox, a shell command can reach everything the user can reach.
+6. **Sandbox defaults:** writing in the working directory, the per-user temp directory and additional directories; **reading the entire computer** except for a few denied areas. There is no sandbox on native Windows.
+7. **MCP servers** are separate processes with the user's rights. Their file access follows from their program and arguments, not from Claude Code rules.
 
-Daraus folgt für den Scanner:
+Consequences for the scanner:
 
-- Konfigurierte Pfade und Regeln → Findings mit Status `Configured`.
-- Shell ohne Sandbox → ein zusammenfassendes `Potential`-Finding „effektiv Benutzerrechte“ (Roadmap 4.4).
-- Shell mit Sandbox → `Potential`-Findings für die von der Sandbox erlaubten Bereiche; Lesen bleibt rechnerweit.
-- Jeder MCP-Server mit lokalem Prozess → eigenes Finding mit Subjekt `McpServer`.
+- Configured paths and rules → findings with status `Configured`.
+- Shell without sandbox → one summarising `Potential` finding "effectively user rights" (roadmap 4.4).
+- Shell with sandbox → `Potential` findings for the areas the sandbox allows; reading stays computer-wide.
+- Every MCP server with a local process → its own finding with subject `McpServer`.
 
-## 3. Konfigurationsorte
+## 3. Configuration locations
 
-### 3.1 Settings-Dateien
+### 3.1 Settings files
 
-| Ebene | Pfad | OS | Einstufung |
+| Level | Path | OS | Classification |
 |---|---|---|---|
-| Managed | `/Library/Application Support/ClaudeCode/managed-settings.json` | macOS | dokumentiert |
-| Managed | `/etc/claude-code/managed-settings.json` | Linux, WSL | dokumentiert |
-| Managed | `C:\Program Files\ClaudeCode\managed-settings.json` | Windows | dokumentiert |
-| Managed (Drop-ins) | `managed-settings.d/*.json` im selben Verzeichnis, alphabetisch nach `managed-settings.json` zusammengeführt; versteckte Dateien und andere Endungen werden ignoriert | alle | dokumentiert |
-| Benutzer | `~/.claude/settings.json` bzw. `$CLAUDE_CONFIG_DIR/settings.json` (Windows: `%USERPROFILE%\.claude\settings.json`) | alle | dokumentiert |
-| Benutzer, lokal | `~/.claude/settings.local.json`, nur für Sitzungen im Home-Verzeichnis wirksam | alle | *(unbestätigt)* |
-| Projekt | `<projekt>/.claude/settings.json` | alle | dokumentiert |
-| Projekt, lokal | `<projekt>/.claude/settings.local.json` (bei Git-Repositories im Repository-Root, bei Worktrees im Haupt-Checkout) | alle | dokumentiert |
+| Managed | `/Library/Application Support/ClaudeCode/managed-settings.json` | macOS | documented |
+| Managed | `/etc/claude-code/managed-settings.json` | Linux, WSL | documented |
+| Managed | `C:\Program Files\ClaudeCode\managed-settings.json` | Windows | documented |
+| Managed (drop-ins) | `managed-settings.d/*.json` in the same directory, merged alphabetically after `managed-settings.json`; hidden files and other extensions are ignored | all | documented |
+| User | `~/.claude/settings.json` or `$CLAUDE_CONFIG_DIR/settings.json` (Windows: `%USERPROFILE%\.claude\settings.json`) | all | documented |
+| User, local | `~/.claude/settings.local.json`, only effective for sessions in the home directory | all | *(unconfirmed)* |
+| Project | `<project>/.claude/settings.json` | all | documented |
+| Project, local | `<project>/.claude/settings.local.json` (in Git repositories at the repository root, in worktrees in the main checkout) | all | documented |
 
-Hinweise:
+Notes:
 
-- Der alte Windows-Pfad `C:\ProgramData\ClaudeCode\managed-settings.json` wird von Claude Code **nicht** mehr gelesen. Findet der Scanner dort eine Datei, erzeugt er eine Diagnose „veralteter Ort, nicht wirksam“, aber keine Findings.
-- Managed-Dateien dürfen Symlinks sein. Zeigt ein Link außerhalb des Systemverzeichnisses, gilt die Datei trotzdem; der Scanner erzeugt eine Warnung.
+- Claude Code **no longer** reads the old Windows path `C:\ProgramData\ClaudeCode\managed-settings.json`. If the scanner finds a file there, it produces a diagnostic "deprecated location, not effective" but no findings.
+- Managed files may be symlinks. If a link points outside the system directory, the file still applies; the scanner produces a warning.
 
-### 3.2 Weitere Managed-Quellen
+### 3.2 Other managed sources
 
-| Quelle | Ort | Behandlung im MVP |
+| Source | Location | Handling in the MVP |
 |---|---|---|
-| MDM, macOS | Managed-Preferences-Domäne `com.anthropic.claudecode` | erkennen und als Diagnose „Managed-Quelle vorhanden, nicht ausgewertet“ melden |
-| Registry, Windows | `HKLM\SOFTWARE\Policies\ClaudeCode`, Wert `Settings` | wie MDM |
-| Registry, Windows (Benutzer) | `HKCU\SOFTWARE\Policies\ClaudeCode`, Wert `Settings` | wie MDM |
-| Server-managed | Admin-Konsole bzw. Gateway, beim Start geladen | lokal nicht sichtbar; bekannte Grenze |
-| Policy-Helper | Schlüssel `policyHelper` (externes Programm) | nicht ausführen; Vorhandensein als Diagnose melden |
-| SDK-Host | Option `managedSettings` einer einbettenden App | nicht sichtbar; bekannte Grenze |
+| MDM, macOS | managed preferences domain `com.anthropic.claudecode` | detect and report as diagnostic "managed source present, not evaluated" |
+| Registry, Windows | `HKLM\SOFTWARE\Policies\ClaudeCode`, value `Settings` | like MDM |
+| Registry, Windows (user) | `HKCU\SOFTWARE\Policies\ClaudeCode`, value `Settings` | like MDM |
+| Server-managed | admin console or gateway, loaded at startup | not visible locally; known limitation |
+| Policy helper | key `policyHelper` (external program) | never executed; presence reported as diagnostic |
+| SDK host | option `managedSettings` of an embedding app | not visible; known limitation |
 
-Rangfolge der Managed-Quellen (dokumentiert): Server-managed, dann MDM/Registry HKLM, dann Managed-Dateien, dann HKCU. Standard ist `managedSourcesBehavior: "first-wins"`; mit `"merge"` werden sie kombiniert. Da der Scanner höhere Quellen nicht immer sehen kann, erhalten Findings aus Managed-Dateien einen Hinweis, dass eine höhere, unsichtbare Quelle sie überlagern kann.
+Precedence of managed sources (documented): server-managed, then MDM/HKLM registry, then managed files, then HKCU. The default is `managedSourcesBehavior: "first-wins"`; with `"merge"` they are combined. Because the scanner cannot always see higher sources, findings from managed files carry a note that a higher, invisible source may override them.
 
 ### 3.3 `~/.claude.json`
 
-Von Claude Code selbst geschriebene Datei (dokumentiert). Enthält Kontodaten, MCP-Server der Ebenen Benutzer und Lokal, projektbezogenen Zustand (z. B. Vertrauensentscheidungen) und globale Einstellungen.
+A file Claude Code writes itself (documented). It contains account data, MCP servers of the user and local levels, per-project state (e.g. trust decisions) and global settings.
 
-| Aspekt | Festlegung | Einstufung |
+| Aspect | Decision | Classification |
 |---|---|---|
-| Ort | `~/.claude.json` | dokumentiert |
-| Ort unter Windows | `%USERPROFILE%\.claude.json` | heuristisch |
-| Ort mit `CLAUDE_CONFIG_DIR` | erst `$CLAUDE_CONFIG_DIR/.claude.json`, dann `~/.claude.json`; Diagnose, welche gelesen wurde | heuristisch |
-| Gelesene Bereiche | ausschließlich `mcpServers` und `projects` | – |
-| Nie gelesen oder ausgegeben | `oauthAccount`, `userID`, `machineID`, Caches und alle übrigen Schlüssel | – |
+| Location | `~/.claude.json` | documented |
+| Location on Windows | `%USERPROFILE%\.claude.json` | heuristic |
+| Location with `CLAUDE_CONFIG_DIR` | first `$CLAUDE_CONFIG_DIR/.claude.json`, then `~/.claude.json`; diagnostic states which one was read | heuristic |
+| Areas read | only `mcpServers` and `projects` | – |
+| Never read or output | `oauthAccount`, `userID`, `machineID`, caches and all other keys | – |
 
-Ausgewertete Schlüssel unter `projects["<absoluter Pfad>"]`:
+Evaluated keys under `projects["<absolute path>"]`:
 
-| Schlüssel | Bedeutung | Einstufung |
+| Key | Meaning | Classification |
 |---|---|---|
-| Objektschlüssel selbst | bekannter Projektpfad | heuristisch (Struktur nur beiläufig dokumentiert) |
-| `mcpServers` | MCP-Server der Ebene Lokal | dokumentiert |
-| `hasTrustDialogAccepted` | Vertrauensdialog akzeptiert | dokumentiert |
-| `enabledMcpjsonServers`, `disabledMcpjsonServers` | Freigabe einzelner `.mcp.json`-Server | heuristisch an diesem Ort (als Settings-Schlüssel dokumentiert) |
-| `disabledMcpServers`, `enabledMcpServers` | per `/mcp` umgeschaltete Server | dokumentiert |
-| `allowedTools` | ältere Ablage erlaubter Werkzeuge | heuristisch; nur Diagnose, wenn nicht leer |
+| object key itself | known project path | heuristic (structure only documented in passing) |
+| `mcpServers` | MCP servers of the local level | documented |
+| `hasTrustDialogAccepted` | trust dialog accepted | documented |
+| `enabledMcpjsonServers`, `disabledMcpjsonServers` | approval of individual `.mcp.json` servers | heuristic at this location (documented as settings keys) |
+| `disabledMcpServers`, `enabledMcpServers` | servers toggled via `/mcp` | documented |
+| `allowedTools` | older storage of allowed tools | heuristic; diagnostic only, if not empty |
 
-Lokal beobachtete, nicht ausgewertete Projektschlüssel: `mcpContextUris`, `hasClaudeMdExternalIncludesApproved`, `hasClaudeMdExternalIncludesWarningShown`. Unbekannte Projektschlüssel erzeugen keine Diagnose, weil die Datei viele interne Felder enthält.
+Project keys observed locally but not evaluated: `mcpContextUris`, `hasClaudeMdExternalIncludesApproved`, `hasClaudeMdExternalIncludesWarningShown`. Unknown project keys produce no diagnostic, because the file contains many internal fields.
 
-### 3.4 MCP-Konfiguration
+### 3.4 MCP configuration
 
-| Ebene | Ort | Einstufung |
+| Level | Location | Classification |
 |---|---|---|
-| Managed | `managed-mcp.json` im Managed-Verzeichnis (siehe 3.1); gleiches Format wie `.mcp.json`; wenn vorhanden, exklusiv | dokumentiert |
-| Managed | Schlüssel `managedMcpServers` in Managed-Settings (nur `http`/`sse`) | dokumentiert |
-| Lokal | `~/.claude.json` → `projects["<pfad>"].mcpServers` | dokumentiert |
-| Projekt | `<projekt>/.mcp.json` → `mcpServers` | dokumentiert |
-| Benutzer | `~/.claude.json` → `mcpServers` (oberste Ebene) | dokumentiert, Schlüsselpfad nur implizit |
-| Plugin | `.mcp.json` im Plugin-Verzeichnis oder `mcpServers` in `plugin.json` | dokumentiert; **nicht im MVP** |
+| Managed | `managed-mcp.json` in the managed directory (see 3.1); same format as `.mcp.json`; exclusive if present | documented |
+| Managed | key `managedMcpServers` in managed settings (`http`/`sse` only) | documented |
+| Local | `~/.claude.json` → `projects["<path>"].mcpServers` | documented |
+| Project | `<project>/.mcp.json` → `mcpServers` | documented |
+| User | `~/.claude.json` → `mcpServers` (top level) | documented, key path only implied |
+| Plugin | `.mcp.json` in the plugin directory or `mcpServers` in `plugin.json` | documented; **not in the MVP** |
 
-Rangfolge bei gleichem Servernamen: Lokal vor Projekt vor Benutzer vor Plugin; `managedMcpServers` über allen. `managed-mcp.json` schließt alle anderen Quellen aus.
+Precedence for the same server name: local before project before user before plugin; `managedMcpServers` above all. `managed-mcp.json` excludes all other sources.
 
-Server-Felder: `type` (`stdio`, wenn kein `type` und keine `url`; sonst `http`, `streamable-http`, `sse`, `ws`), `command`, `args`, `env`, `url`, `headers`, `headersHelper`, `timeout`, `oauth`. Einträge mit `type: "sdk"` überspringt Claude Code; der Scanner ebenfalls.
+Server fields: `type` (`stdio` if neither `type` nor `url` is set; otherwise `http`, `streamable-http`, `sse`, `ws`), `command`, `args`, `env`, `url`, `headers`, `headersHelper`, `timeout`, `oauth`. Claude Code skips entries with `type: "sdk"`; so does the scanner.
 
-Variablen: `${VAR}` und `${VAR:-default}` in `command`, `args`, `env`, `url`, `headers`. Der Scanner expandiert nur in `command` und `args` und nur über den `ScanContext`; nicht gesetzte Variablen bleiben wörtlich stehen und erzeugen eine Diagnose.
+Variables: `${VAR}` and `${VAR:-default}` in `command`, `args`, `env`, `url`, `headers`. The scanner expands only in `command` and `args` and only via the `ScanContext`; unset variables stay literal and produce a diagnostic.
 
-### 3.5 Sitzungsdaten
+### 3.5 Session data
 
-| Ort | Inhalt | Einstufung |
+| Location | Content | Classification |
 |---|---|---|
-| `~/.claude/projects/<kodierter Pfad>/` bzw. `$CLAUDE_CONFIG_DIR/projects/…` | ein Verzeichnis pro Projekt mit Sitzungsprotokollen (`<uuid>.jsonl`) und `memory/` | heuristisch |
-| `CLAUDE_CODE_PROJECT_DIR_NAME` | ändert den Unterordnernamen unter `projects/` | dokumentiert |
+| `~/.claude/projects/<encoded path>/` or `$CLAUDE_CONFIG_DIR/projects/…` | one directory per project with session logs (`<uuid>.jsonl`) and `memory/` | heuristic |
+| `CLAUDE_CODE_PROJECT_DIR_NAME` | changes the subdirectory name under `projects/` | documented |
 
-Der Verzeichnisname ersetzt Pfadtrenner durch `-`. Die Kodierung ist **nicht umkehrbar** (`ai-agent-access-inspector` und `ai/agent/access/inspector` ergeben denselben Namen). Der Scanner leitet Pfade daher nie aus dem Verzeichnisnamen ab, sondern liest aus der jeweils jüngsten `.jsonl`-Datei das Feld `cwd`:
+The directory name replaces path separators with `-`. The encoding is **not reversible** (`ai-agent-access-inspector` and `ai/agent/access/inspector` produce the same name). The scanner therefore never derives paths from the directory name but reads the `cwd` field from the most recent `.jsonl` file:
 
-- zeilenweise lesen, beim ersten Datensatz mit `cwd` abbrechen,
-- nur `cwd` und `version` übernehmen, alle übrigen Felder sofort verwerfen,
-- Ergebnis: Finding mit Status `Observed`, Confidence `Low` bis `Medium`.
+- read line by line, stop at the first record with `cwd`,
+- keep only `cwd` and `version`, discard all other fields immediately,
+- result: finding with status `Observed`, confidence `Low` to `Medium`.
 
-## 4. Ausgewertete Settings-Schlüssel
+## 4. Evaluated settings keys
 
 ### 4.1 Permissions
 
-| Schlüssel | Bedeutung | Finding |
+| Key | Meaning | Finding |
 |---|---|---|
-| `permissions.allow` | erlaubte Werkzeugaufrufe | `Read(…)` / `Edit(…)` → Configured, Effekt Allow |
-| `permissions.ask` | Aufrufe mit Rückfrage | `Read(…)` / `Edit(…)` → Configured, Effekt Ask |
-| `permissions.deny` | verbotene Aufrufe | `Read(…)` / `Edit(…)` → Configured, Effekt Deny |
-| `permissions.additionalDirectories` | zusätzliche Arbeitsverzeichnisse | Configured, Effekt Allow, Zugriff Read; Write abhängig vom Modus |
-| `permissions.defaultMode` | Startmodus: `default` (Alias `manual`), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions` | Warnung bei `bypassPermissions` und `auto`; `acceptEdits` erhöht Schreibzugriff auf Arbeits- und Zusatzverzeichnisse |
-| `permissions.disableBypassPermissionsMode` | `"disable"` sperrt den Bypass-Modus | entschärft die Bypass-Warnung |
-| `permissions.disableAutoMode` | `"disable"` sperrt den Auto-Modus | entschärft die Auto-Warnung |
-| `permissions.blockReadsOutsideWorkingDirectories` | `true`: Datei-Werkzeuge lesen nichts außerhalb der Arbeitsverzeichnisse (ab v2.1.257) | schränkt Read-Findings außerhalb ein; aus jeder Ebene wirksam |
-| `allowManagedPermissionRulesOnly` | nur Managed-Regeln gelten | Regeln aus anderen Ebenen → Finding mit Hinweis „nicht wirksam“ |
+| `permissions.allow` | allowed tool calls | `Read(…)` / `Edit(…)` → Configured, effect Allow |
+| `permissions.ask` | calls with prompt | `Read(…)` / `Edit(…)` → Configured, effect Ask |
+| `permissions.deny` | forbidden calls | `Read(…)` / `Edit(…)` → Configured, effect Deny |
+| `permissions.additionalDirectories` | additional working directories | Configured, effect Allow, access Read; Write depends on the mode |
+| `permissions.defaultMode` | start mode: `default` (alias `manual`), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions` | warning for `bypassPermissions` and `auto`; `acceptEdits` increases write access to working and additional directories |
+| `permissions.disableBypassPermissionsMode` | `"disable"` locks bypass mode | defuses the bypass warning |
+| `permissions.disableAutoMode` | `"disable"` locks auto mode | defuses the auto warning |
+| `permissions.blockReadsOutsideWorkingDirectories` | `true`: file tools read nothing outside the working directories (from v2.1.257) | restricts read findings outside them; effective from any level |
+| `allowManagedPermissionRulesOnly` | only managed rules apply | rules from other levels → finding with note "not effective" |
 
-Weitere Werkzeugregeln (`Bash(…)`, `WebFetch(…)`, `mcp__…`, `Agent(…)`) erzeugen keine Ordner-Findings. Ausnahmen:
+Other tool rules (`Bash(…)`, `WebFetch(…)`, `mcp__…`, `Agent(…)`) produce no folder findings. Exceptions:
 
-- `Bash` oder `Bash(*)` in `allow` → Warnung „Shell ohne Rückfrage erlaubt“, verstärkt das Potential-Finding.
-- `Bash`, `Read` oder `Edit` ohne Klammern in `deny` → Werkzeug ist vollständig entfernt; das schränkt das entsprechende Potential-Finding ein.
+- `Bash` or `Bash(*)` in `allow` → warning "shell allowed without prompt", strengthens the potential finding.
+- `Bash`, `Read` or `Edit` without parentheses in `deny` → the tool is removed entirely; this restricts the corresponding potential finding.
 
-Regeln für `Write(…)`, `NotebookEdit(…)`, `Glob(…)` und `MultiEdit(…)` greifen laut Dokumentation nie. Der Scanner meldet sie als Diagnose „wirkungslose Regel“.
+Rules for `Write(…)`, `NotebookEdit(…)`, `Glob(…)` and `MultiEdit(…)` never match according to the documentation. The scanner reports them as diagnostic "ineffective rule".
 
 ### 4.2 Sandbox
 
-| Schlüssel | Bedeutung | Finding |
+| Key | Meaning | Finding |
 |---|---|---|
-| `sandbox.enabled` | Sandbox für Shell-Befehle (Standard `false`) | bestimmt, ob das Potential-Finding „Benutzerrechte“ oder „Sandbox-Bereich“ lautet |
-| `sandbox.filesystem.allowWrite` | zusätzliche beschreibbare Pfade | Potential, Effekt Allow, Zugriff Write |
-| `sandbox.filesystem.denyWrite` | gesperrte Schreibpfade | Configured, Effekt Deny, Zugriff Write |
-| `sandbox.filesystem.denyRead` | gesperrte Lesepfade (nicht für das Read-Werkzeug) | Configured, Effekt Deny, Zugriff Read |
-| `sandbox.filesystem.allowRead` | Lesezugriff innerhalb von `denyRead` wieder öffnen | Configured, Effekt Allow, Zugriff Read |
-| `sandbox.filesystem.disabled` | Dateisystem-Isolation aus (nur Benutzer-, Managed-Ebene, `--settings`) | Sandbox gilt fürs Dateisystem als aus; Warnung |
-| `sandbox.excludedCommands` | Befehle außerhalb der Sandbox | Warnung je Eintrag |
-| `sandbox.allowUnsandboxedCommands` | Wiederholung ohne Sandbox erlaubt (Standard `true`) | Hinweis am Sandbox-Finding |
-| `sandbox.autoAllowBashIfSandboxed` | Sandbox-Befehle ohne Rückfrage (Standard `true`) | Hinweis am Sandbox-Finding |
-| `sandbox.failIfUnavailable` | Start abbrechen, wenn keine Sandbox möglich | Hinweis |
+| `sandbox.enabled` | sandbox for shell commands (default `false`) | determines whether the potential finding reads "user rights" or "sandbox area" |
+| `sandbox.filesystem.allowWrite` | additional writable paths | Potential, effect Allow, access Write |
+| `sandbox.filesystem.denyWrite` | blocked write paths | Configured, effect Deny, access Write |
+| `sandbox.filesystem.denyRead` | blocked read paths (not for the Read tool) | Configured, effect Deny, access Read |
+| `sandbox.filesystem.allowRead` | re-open reading inside `denyRead` | Configured, effect Allow, access Read |
+| `sandbox.filesystem.disabled` | filesystem isolation off (user and managed level, `--settings` only) | sandbox counts as off for the filesystem; warning |
+| `sandbox.excludedCommands` | commands outside the sandbox | warning per entry |
+| `sandbox.allowUnsandboxedCommands` | retry without sandbox allowed (default `true`) | note on the sandbox finding |
+| `sandbox.autoAllowBashIfSandboxed` | sandboxed commands without prompt (default `true`) | note on the sandbox finding |
+| `sandbox.failIfUnavailable` | abort startup if no sandbox is possible | note |
 
-Pfadsyntax der Sandbox-Schlüssel unterscheidet sich von Permission-Regeln: `/` ist absolut, `~/` relativ zum Home, `./` oder ohne Präfix relativ zum Projekt (Projekt-Settings) bzw. zu `~/.claude` (Benutzer-Settings) *(unbestätigt)*.
+The path syntax of sandbox keys differs from permission rules: `/` is absolute, `~/` relative to home, `./` or no prefix relative to the project (project settings) or to `~/.claude` (user settings) *(unconfirmed)*.
 
-Auf nativem Windows meldet der Scanner `sandbox.enabled: true` mit Warnung „auf diesem System ohne Wirkung“.
+On native Windows the scanner reports `sandbox.enabled: true` with the warning "no effect on this system".
 
-### 4.3 MCP-Freigaben
+### 4.3 MCP approvals
 
-| Schlüssel | Wirkung im Scanner |
+| Key | Effect in the scanner |
 |---|---|
-| `enableAllProjectMcpServers` | alle Server aus `.mcp.json` gelten als freigegeben |
-| `enabledMcpjsonServers` | genannte `.mcp.json`-Server gelten als freigegeben |
-| `disabledMcpjsonServers` | genannte Server gelten als abgelehnt (aus jeder Ebene) |
-| `allowedMcpServers`, `deniedMcpServers` | Allow-/Denylisten mit Einträgen `{"serverName"}`, `{"serverCommand"}`, `{"serverUrl"}` |
-| `allowManagedMcpServersOnly` | nur Managed-Allowlist gilt |
+| `enableAllProjectMcpServers` | all servers from `.mcp.json` count as approved |
+| `enabledMcpjsonServers` | named `.mcp.json` servers count as approved |
+| `disabledMcpjsonServers` | named servers count as rejected (from any level) |
+| `allowedMcpServers`, `deniedMcpServers` | allow/deny lists with entries `{"serverName"}`, `{"serverCommand"}`, `{"serverUrl"}` |
+| `allowManagedMcpServersOnly` | only the managed allowlist applies |
 
-`enableAllProjectMcpServers` und `enabledMcpjsonServers` aus `<projekt>/.claude/settings.json` gelten nur in vertrauten Projekten.
+`enableAllProjectMcpServers` and `enabledMcpjsonServers` from `<project>/.claude/settings.json` only apply in trusted projects.
 
-Freigabestatus eines `.mcp.json`-Servers: freigegeben, abgelehnt oder **offen** (Claude Code fragt beim Start). Offene Server erhalten Status `Unknown`.
+Approval state of a `.mcp.json` server: approved, rejected or **pending** (Claude Code asks at startup). Pending servers get status `Unknown`.
 
-### 4.4 Sonstige relevante Schlüssel
+### 4.4 Other relevant keys
 
-| Schlüssel | Behandlung |
+| Key | Handling |
 |---|---|
-| `hooks`, `disableAllHooks`, `allowManagedHooksOnly` | Hooks führen Befehle außerhalb der Sandbox aus → Warnung „Hooks konfiguriert“ mit Anzahl; Inhalte werden nicht ausgegeben |
-| `env` | wird nicht gelesen (kann Geheimnisse enthalten); Ausnahme `CLAUDE_CONFIG_DIR` aus Benutzer- und Managed-Settings |
-| `autoMemoryDirectory`, `plansDirectory` | vorerst nicht ausgewertet; in Phase 4 prüfen |
+| `hooks`, `disableAllHooks`, `allowManagedHooksOnly` | hooks run commands outside the sandbox → warning "hooks configured" with count; contents are not output |
+| `env` | not read (may contain secrets); exception: `CLAUDE_CONFIG_DIR` from user and managed settings |
+| `autoMemoryDirectory`, `plansDirectory` | not evaluated for now; check in phase 4 |
 
-Alle übrigen Schlüssel werden ignoriert. Unbekannte Schlüssel innerhalb von `permissions` und `sandbox` erzeugen eine Diagnose.
+All other keys are ignored. Unknown keys inside `permissions` and `sandbox` produce a diagnostic.
 
-## 5. Rangfolge und Zusammenführung
+## 5. Precedence and merging
 
-Rangfolge der Settings (dokumentiert, höchste zuerst):
+Settings precedence (documented, highest first):
 
 1. Managed
-2. Kommandozeile (`--settings`) – für den Scanner unsichtbar
-3. Projekt, lokal (`.claude/settings.local.json`)
-4. Projekt (`.claude/settings.json`)
-5. Benutzer (`~/.claude/settings.json`)
+2. Command line (`--settings`) – invisible to the scanner
+3. Project, local (`.claude/settings.local.json`)
+4. Project (`.claude/settings.json`)
+5. User (`~/.claude/settings.json`)
 
-Regeln für den Scanner:
+Rules for the scanner:
 
-- **Listen werden zusammengeführt**, nicht ersetzt (`permissions.allow`, `deny`, `ask`, `additionalDirectories`, Sandbox-Pfadlisten). Jeder Eintrag wird als eigenes Finding mit seiner Quelle geführt.
-- **Einzelwerte** (`defaultMode`, `sandbox.enabled` usw.) nimmt der Scanner aus der höchsten Ebene, die sie setzt, und vermerkt überstimmte Werte.
-- **Deny-Regeln** schlagen Allow-Regeln aus jeder Ebene; Managed-Deny kann durch nichts aufgehoben werden.
-- **Einschränkungen für Projektdateien:**
-  - `permissions.allow` und `permissions.additionalDirectories` aus `.claude/settings.json` wirken erst nach akzeptiertem Vertrauensdialog. Ist `hasTrustDialogAccepted` in `~/.claude.json` nicht `true`, erhält das Finding eine Warnung „noch nicht wirksam“.
-  - `deny` und `ask` wirken sofort.
-  - `defaultMode` mit `auto` oder `bypassPermissions` wirkt aus Projekt- und lokalen Settings nicht → Diagnose statt Warnung.
-  - `CLAUDE_CONFIG_DIR` in Projekt- oder lokalen Settings wird ignoriert.
-- **Restriktive Ausnahme:** `permissions.blockReadsOutsideWorkingDirectories: true` gilt aus jeder Ebene, auch wenn Managed `false` setzt.
+- **Lists are merged**, not replaced (`permissions.allow`, `deny`, `ask`, `additionalDirectories`, sandbox path lists). Each entry becomes its own finding with its source.
+- **Single values** (`defaultMode`, `sandbox.enabled` etc.) are taken from the highest level that sets them; overridden values are recorded.
+- **Deny rules** beat allow rules from any level; nothing can lift a managed deny.
+- **Restrictions for project files:**
+  - `permissions.allow` and `permissions.additionalDirectories` from `.claude/settings.json` only take effect after the trust dialog has been accepted. If `hasTrustDialogAccepted` in `~/.claude.json` is not `true`, the finding gets a warning "not yet effective".
+  - `deny` and `ask` take effect immediately.
+  - `defaultMode` with `auto` or `bypassPermissions` has no effect from project and local settings → diagnostic instead of warning.
+  - `CLAUDE_CONFIG_DIR` in project or local settings is ignored.
+- **Restrictive exception:** `permissions.blockReadsOutsideWorkingDirectories: true` applies from any level, even if managed settings set `false`.
 
-## 6. Regelsyntax und Pfadauflösung
+## 6. Rule syntax and path resolution
 
-Format: `Werkzeug` oder `Werkzeug(Spezifizierer)`. `Read` und `Edit` verwenden gitignore-Muster.
+Format: `Tool` or `Tool(specifier)`. `Read` and `Edit` use gitignore patterns.
 
-| Präfix | Bedeutung | Beispiel |
+| Prefix | Meaning | Example |
 |---|---|---|
-| `//pfad` | absolut ab Dateisystemwurzel | `Read(//Users/alice/secrets/**)` |
-| `~/pfad` | relativ zum Home-Verzeichnis | `Read(~/Documents/*.pdf)` |
-| `/pfad` | relativ zur **Quelle der Einstellung** | siehe unten |
-| `pfad`, `./pfad` | relativ zum aktuellen Verzeichnis | `Read(*.env)` |
+| `//path` | absolute from the filesystem root | `Read(//Users/alice/secrets/**)` |
+| `~/path` | relative to the home directory | `Read(~/Documents/*.pdf)` |
+| `/path` | relative to the **source of the setting** | see below |
+| `path`, `./path` | relative to the current directory | `Read(*.env)` |
 
-Anker von `/pfad`:
+Anchor of `/path`:
 
-| Quelle | Anker |
+| Source | Anchor |
 |---|---|
-| `.claude/settings.json`, `.claude/settings.local.json` | primäres Arbeitsverzeichnis (Projekt) |
+| `.claude/settings.json`, `.claude/settings.local.json` | primary working directory (project) |
 | `~/.claude/settings.json` | `~/.claude` |
-| `--settings <datei>` | Verzeichnis der Datei |
+| `--settings <file>` | directory of the file |
 
-Wichtige Fallstricke, für die der Scanner eine Erklärung im Finding erzeugt:
+Important pitfalls, for which the scanner adds an explanation to the finding:
 
-- `Read(/Users/alice/file)` ist **nicht** absolut. In Benutzer-Settings meint es `~/.claude/Users/alice/file`. Der Scanner erkennt dieses Muster (einzelner Schrägstrich, gefolgt von typischem Wurzelverzeichnis wie `Users`, `home`, `etc`) und warnt „vermutlich als absoluter Pfad gemeint“.
-- Relative Muster in Allow-Regeln gelten nur ab dem Arbeitsverzeichnis (`Edit(src/**)` = `<cwd>/src/**`), in Deny-/Ask-Regeln in jeder Tiefe.
-- `!muster` in Deny-/Ask-Regeln ist eine Negation, die vorhergehende relative Regeln ausnimmt.
-- Unter Windows werden Pfade vor dem Abgleich in POSIX-Form gebracht; Laufwerke als `//c/…`.
-- Symlinks: Allow-Regeln gelten nur, wenn Pfad **und** Ziel passen; Deny-Regeln, wenn Pfad **oder** Ziel passt.
-- `.claudeignore` hat keine Wirkung und wird nicht ausgewertet.
+- `Read(/Users/alice/file)` is **not** absolute. In user settings it means `~/.claude/Users/alice/file`. The scanner detects this pattern (single slash followed by a typical root directory such as `Users`, `home`, `etc`) and warns "probably meant as an absolute path".
+- Relative patterns in allow rules only apply from the working directory (`Edit(src/**)` = `<cwd>/src/**`), in deny/ask rules at any depth.
+- `!pattern` in deny/ask rules is a negation that excludes paths from preceding relative rules.
+- On Windows, paths are converted to POSIX form before matching; drives as `//c/…`.
+- Symlinks: allow rules only apply if path **and** target match; deny rules if path **or** target matches.
+- `.claudeignore` has no effect and is not evaluated.
 
-Ableitung des Basispfads für Findings: der längste Präfix ohne Glob-Zeichen (`*`, `?`, `[`, `{`, `!`). `Read(~/projekte/**/*.md)` → Basispfad `~/projekte`, Musterart `Glob`.
+Deriving the base path for findings: the longest prefix without glob characters (`*`, `?`, `[`, `{`, `!`). `Read(~/projects/**/*.md)` → base path `~/projects`, pattern kind `Glob`.
 
-Zugriffsart:
+Access kind:
 
-| Regel | `AccessKind` |
+| Rule | `AccessKind` |
 |---|---|
 | `Read(…)` | Read |
-| `Edit(…)` | Write (Edit-Regeln decken alle Datei-Schreibwerkzeuge ab) |
-| `additionalDirectories` | Read, im Modus `acceptEdits`/`bypassPermissions` ReadWrite |
+| `Edit(…)` | Write (Edit rules cover all file-writing tools) |
+| `additionalDirectories` | Read, in mode `acceptEdits`/`bypassPermissions` ReadWrite |
 | `sandbox.filesystem.allowWrite` | Write |
 
-## 7. Projektermittlung
+## 7. Project discovery
 
-Ein Projekt ist ein Verzeichnis, dessen Projekt-Settings und `.mcp.json` untersucht werden. Quellen in dieser Reihenfolge, dedupliziert:
+A project is a directory whose project settings and `.mcp.json` are examined. Sources in this order, deduplicated:
 
-1. `current_dir` aus dem `ScanContext`, falls angegeben
-2. Schlüssel von `projects` in `~/.claude.json`
-3. `cwd` aus `~/.claude/projects/*/` (siehe 3.5)
+1. `current_dir` from the `ScanContext`, if given
+2. keys of `projects` in `~/.claude.json`
+3. `cwd` from `~/.claude/projects/*/` (see 3.5)
 
-Bei Git-Repositories wird zusätzlich der Repository-Root auf `.claude/settings.local.json` geprüft. Nicht mehr vorhandene Projektverzeichnisse erzeugen eine Warnung, aber keinen Abbruch.
+For Git repositories the repository root is also checked for `.claude/settings.local.json`. Project directories that no longer exist produce a warning, not an abort.
 
-## 8. Erkennung der Installation
+## 8. Detecting the installation
 
-Claude Code gilt als **konfiguriert**, wenn mindestens eines existiert: `~/.claude/`, `~/.claude.json`, `$CLAUDE_CONFIG_DIR`, eine Managed-Datei.
+Claude Code counts as **configured** if at least one of these exists: `~/.claude/`, `~/.claude.json`, `$CLAUDE_CONFIG_DIR`, a managed file.
 
-Die Installation selbst (Programmdatei) wird im MVP nicht gesucht und `claude` wird **nicht ausgeführt**. Die Version wird, falls verfügbar, aus dem Feld `version` des jüngsten Sitzungsprotokolls gelesen (heuristisch).
+The installation itself (program file) is not searched for in the MVP and `claude` is **never executed**. The version is read, if available, from the `version` field of the most recent session log (heuristic).
 
-## 9. Datenschutz beim Lesen
+## 9. Privacy while reading
 
-- Aus `~/.claude.json` nur `mcpServers` und `projects` (siehe 3.3).
-- Aus Sitzungsprotokollen nur `cwd` und `version`, Abbruch nach dem ersten Treffer.
-- MCP: `env`, `headers`, `headersHelper` und `oauth` werden nie ausgegeben. In `args` werden Werte redigiert, die wie Geheimnisse aussehen (Token-Präfixe, lange Zufallszeichenketten, Werte nach `--token`, `--api-key` u. ä.).
-- Settings-Schlüssel `env` wird nicht gelesen.
-- Belegausschnitte enthalten nur den ausgewerteten Wert, nie die umgebende Datei.
+- From `~/.claude.json` only `mcpServers` and `projects` (see 3.3).
+- From session logs only `cwd` and `version`, stopping after the first hit.
+- MCP: `env`, `headers`, `headersHelper` and `oauth` are never output. In `args`, values that look like secrets are redacted (token prefixes, long random strings, values after `--token`, `--api-key` and similar).
+- The settings key `env` is not read.
+- Excerpts contain only the evaluated value, never the surrounding file.
 
-## 10. MCP-Server als Findings
+## 10. MCP servers as findings
 
-Für jeden wirksamen MCP-Server:
+For every effective MCP server:
 
-| Servertyp | Finding |
+| Server type | Finding |
 |---|---|
-| `stdio` | Subjekt `McpServer`, Status Potential, Zugriff Unknown, Erklärung „lokaler Prozess mit Benutzerrechten“ |
-| `stdio` mit pfadartigen Argumenten | zusätzlich je Pfad ein Finding, Status Configured, Confidence Medium |
-| bekannter Filesystem-Server (`@modelcontextprotocol/server-filesystem`) | Pfadargumente mit Zugriff ReadWrite, Confidence High |
-| `http`, `sse`, `ws` | kein Ordner-Finding; Server wird in der Übersicht aufgeführt |
+| `stdio` | subject `McpServer`, status Potential, access Unknown, explanation "local process with user rights" |
+| `stdio` with path-like arguments | additionally one finding per path, status Configured, confidence Medium |
+| known filesystem server (`@modelcontextprotocol/server-filesystem`) | path arguments with access ReadWrite, confidence High |
+| `http`, `sse`, `ws` | no folder finding; the server is listed in the overview |
 
-Pfadartig ist ein Argument, das mit `/`, `~`, `./`, `../`, einem Laufwerksbuchstaben oder `\\` beginnt und kein Schalter ist. Die Liste bekannter Server wird in Phase 4 festgelegt und bleibt bewusst kurz.
+An argument is path-like if it starts with `/`, `~`, `./`, `../`, a drive letter or `\\` and is not a flag. The list of known servers is defined in phase 4 and kept deliberately short.
 
-## 11. Bekannte Grenzen
+## 11. Known limitations
 
-Diese Punkte werden in der Anwendung und im README sichtbar dokumentiert:
+These points are documented visibly in the application and the README:
 
-- **Sitzungsbezogene Angaben** (`--add-dir`, `/add-dir`, `--settings`, `--allowedTools`, `--permission-mode`) werden nicht gespeichert und sind für den Scanner unsichtbar.
-- **Server-managed Settings**, Policy-Helper und SDK-Host-Einstellungen sind lokal nicht sichtbar.
-- **MDM-Profile und Registry-Werte** werden im MVP nur erkannt, nicht ausgewertet.
-- **Bash-Regeln** sind keine Sicherheitsgrenze; die tatsächliche Erreichbarkeit hängt von der Sandbox ab.
-- **Read-Deny-Regeln** verhindern keinen Zugriff durch beliebige Unterprozesse.
-- **MCP-Server** können unabhängig von ihren Argumenten auf alles zugreifen, was der Benutzer erreicht.
-- **Plugins** (inkl. Plugin-MCP-Server) werden im MVP nicht ausgewertet.
-- **Heuristische Quellen** (`~/.claude.json`-Projektliste, Sitzungsprotokolle) können sich ohne Ankündigung ändern.
+- **Session-only settings** (`--add-dir`, `/add-dir`, `--settings`, `--allowedTools`, `--permission-mode`) are not stored and invisible to the scanner.
+- **Server-managed settings**, policy helpers and SDK host settings are not visible locally.
+- **MDM profiles and registry values** are only detected in the MVP, not evaluated.
+- **Bash rules** are not a security boundary; actual reachability depends on the sandbox.
+- **Read deny rules** do not prevent access by arbitrary subprocesses.
+- **MCP servers** can access everything the user can reach, regardless of their arguments.
+- **Plugins** (including plugin MCP servers) are not evaluated in the MVP.
+- **Heuristic sources** (`~/.claude.json` project list, session logs) may change without notice.
 
-## 12. Fixture-Anforderungen
+## 12. Fixture requirements
 
-Für Phase 4 werden unter `fixtures/claude-code/` mindestens benötigt:
+Phase 4 needs at least the following under `fixtures/claude-code/`:
 
-| Fixture | Inhalt |
+| Fixture | Content |
 |---|---|
-| `macos/basic` | Benutzer-Settings, ein Projekt mit Projekt- und lokalen Settings, `~/.claude.json` mit einem Projekt |
-| `linux/basic` | wie macOS, Linux-Pfade, Managed-Datei unter `/etc/claude-code` |
-| `windows/basic` | Windows-Pfade, Laufwerks- und `//c/`-Muster, Managed-Pfad unter `Program Files`, alter `ProgramData`-Pfad |
-| `managed/drop-ins` | `managed-settings.json` plus `managed-settings.d/` mit mehreren Dateien und einer versteckten Datei |
-| `rules/anchors` | alle vier Präfixe, `/Users/…`-Fallstrick, Negation, Glob-Basispfade |
-| `rules/conflicts` | Allow und Deny auf denselben Pfad aus verschiedenen Ebenen |
-| `modes/bypass` | `defaultMode: bypassPermissions` in Benutzer- und Projekt-Settings, mit und ohne `disableBypassPermissionsMode` |
-| `sandbox/on` und `sandbox/off` | Sandbox mit `allowWrite`, `denyRead`, `excludedCommands`; ohne Sandbox |
-| `mcp/scopes` | Server in allen Ebenen, Namenskonflikt, Filesystem-Server, Server mit `env`-Geheimnis |
-| `mcp/approval` | `.mcp.json` mit freigegebenen, abgelehnten und offenen Servern |
-| `trust/untrusted` | Projekt mit `allow`-Regeln ohne akzeptierten Vertrauensdialog |
-| `sessions/encoded` | `projects/`-Verzeichnis mit mehrdeutigem Namen und `cwd` in der `.jsonl` |
-| `config-dir` | `CLAUDE_CONFIG_DIR` gesetzt, `.claude.json` an beiden möglichen Orten |
-| `malformed/*` | ungültiges JSON, abgeschnittene Datei, falsche Typen, unbekannte Schlüssel, nicht lesbare Datei |
+| `macos/basic` | user settings, one project with project and local settings, `~/.claude.json` with one project |
+| `linux/basic` | like macOS, Linux paths, managed file under `/etc/claude-code` |
+| `windows/basic` | Windows paths, drive and `//c/` patterns, managed path under `Program Files`, old `ProgramData` path |
+| `managed/drop-ins` | `managed-settings.json` plus `managed-settings.d/` with several files and one hidden file |
+| `rules/anchors` | all four prefixes, the `/Users/…` pitfall, negation, glob base paths |
+| `rules/conflicts` | allow and deny on the same path from different levels |
+| `modes/bypass` | `defaultMode: bypassPermissions` in user and project settings, with and without `disableBypassPermissionsMode` |
+| `sandbox/on` and `sandbox/off` | sandbox with `allowWrite`, `denyRead`, `excludedCommands`; without sandbox |
+| `mcp/scopes` | servers on all levels, name conflict, filesystem server, server with an `env` secret |
+| `mcp/approval` | `.mcp.json` with approved, rejected and pending servers |
+| `trust/untrusted` | project with `allow` rules without accepted trust dialog |
+| `sessions/encoded` | `projects/` directory with an ambiguous name and `cwd` in the `.jsonl` |
+| `config-dir` | `CLAUDE_CONFIG_DIR` set, `.claude.json` at both possible locations |
+| `malformed/*` | invalid JSON, truncated file, wrong types, unknown keys, unreadable file |
 
-Fixtures enthalten nur erfundene Pfade und Werte.
+Fixtures contain only invented paths and values.
 
-## 13. Folgen für das Datenmodell (Phase 2)
+## 13. Consequences for the data model (phase 2)
 
-- `FindingSubject` (Agent / MCP-Server) und `RuleEffect` (Allow / Ask / Deny) werden bestätigt.
-- Zusätzlich nötig: ein Kennzeichen **„nicht wirksam“** mit Grund (Vertrauensdialog fehlt, nur Managed-Regeln erlaubt, Ebene darf Schlüssel nicht setzen, wirkungslose Regel). Statt eines neuen Status wird das als Warnung mit eigenem Typ modelliert.
-- `FindingSource` braucht den **Anker** für relative Muster (Projekt, `~/.claude`, Datei-Verzeichnis).
-- `AccessKind` reicht aus; `additionalDirectories` hängt zusätzlich vom Modus ab, das wird in der Erklärung festgehalten.
-- Eine **Scan-Zusammenfassung** pro Agent (Modus, Sandbox an/aus, Anzahl MCP-Server, nicht ausgewertete Managed-Quellen) ergänzt die Finding-Liste.
+- `FindingSubject` (agent / MCP server) and `RuleEffect` (allow / ask / deny) are confirmed.
+- Additionally needed: a **"not effective"** marker with a reason (trust dialog missing, only managed rules allowed, level may not set the key, ineffective rule). Instead of a new status this is modelled as a warning of its own kind.
+- `FindingSource` needs the **anchor** for relative patterns (project, `~/.claude`, file directory).
+- `AccessKind` is sufficient; `additionalDirectories` additionally depends on the mode, which is recorded in the explanation.
+- A **scan summary** per agent (mode, sandbox on/off, number of MCP servers, unevaluated managed sources) complements the list of findings.
 
-## 14. Offene Prüfpunkte für Phase 4
+## 14. Open checks for phase 4
 
-Vor der Implementierung gegen Dokumentation oder Installation zu verifizieren:
+To be verified against documentation or an installation before implementation:
 
-- `~/.claude/settings.local.json` und seine Gültigkeit *(unbestätigt)*
-- Pfadsyntax der Sandbox-Schlüssel *(unbestätigt)*
-- Ort von `.claude.json` bei gesetztem `CLAUDE_CONFIG_DIR`
-- genaue Typen von `enabledMcpjsonServers` / `disabledMcpjsonServers` (vermutlich Liste von Servernamen)
-- vollständige Liste der Schlüssel, die nur in Managed-Settings wirken
+- `~/.claude/settings.local.json` and its validity *(unconfirmed)*
+- path syntax of sandbox keys *(unconfirmed)*
+- location of `.claude.json` when `CLAUDE_CONFIG_DIR` is set
+- exact types of `enabledMcpjsonServers` / `disabledMcpjsonServers` (presumably a list of server names)
+- complete list of keys that only work in managed settings

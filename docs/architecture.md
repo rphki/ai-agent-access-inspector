@@ -1,38 +1,38 @@
-# Architektur
+# Architecture
 
-## 1. Überblick
+## 1. Overview
 
 ```text
 ┌──────────────────┐   ┌──────────────────┐
-│  inspector-cli   │   │  src-tauri (GUI) │   ab Phase 5
+│  inspector-cli   │   │  src-tauri (GUI) │   from phase 5
 └────────┬─────────┘   └────────┬─────────┘
          │                      │
          └──────────┬───────────┘
                     ▼
           ┌───────────────────┐
-          │  inspector-core   │   ohne Tauri-Abhängigkeit
+          │  inspector-core   │   no Tauri dependency
           │                   │
-          │  context          │   ScanContext: System oder Fixture
-          │  scanner          │   AgentScanner, run_scan, Registry
-          │  scanners/*       │   ein Modul pro Agent
+          │  context          │   ScanContext: system or fixture
+          │  scanner          │   AgentScanner, run_scan, registry
+          │  scanners/*       │   one module per agent
           │  model            │   Finding, Diagnostic, ScanReport
-          │  platform         │   Betriebssystem
-          │  analysis         │   Pfadanalyse (Phase 3)
-          │  export           │   JSON, Markdown (Phase 4/6)
+          │  platform         │   operating system
+          │  analysis         │   path analysis (phase 3)
+          │  export           │   JSON, Markdown (phase 4/6)
           └───────────────────┘
 ```
 
-Die gesamte Logik liegt in `inspector-core`. CLI und GUI sind dünne Schichten: Sie bauen einen `ScanContext`, wählen Scanner aus, rufen `run_scan` auf und stellen den `ScanReport` dar.
+All logic lives in `inspector-core`. CLI and GUI are thin layers: they build a `ScanContext`, select scanners, call `run_scan` and present the `ScanReport`.
 
-## 2. Ablauf eines Scans
+## 2. Scan flow
 
-1. **Kontext bilden.** `ScanContext::from_system()` oder `ScanContext::from_fixture(dir)`. Optionale Überschreibungen (Home-Verzeichnis, aktuelles Projekt) setzt der Aufrufer.
-2. **Scanner wählen.** `default_scanners()` liefert alle Scanner für echte Agenten, `find_scanner(id)` einen bestimmten, auch den Demo-Scanner.
-3. **Scannen.** `run_scan` ruft je Scanner `detect` auf und nur bei erkanntem Agenten `scan`. Ein Absturz eines Scanners wird abgefangen und als Diagnose `internal` gemeldet.
-4. **Analyse** (ab Phase 3). Pfadnormalisierung, Existenzprüfung, Deduplizierung und Warnungen über alle Findings.
-5. **Ausgabe.** Der `ScanReport` wird serialisiert (JSON, später Markdown) oder an die GUI übergeben.
+1. **Build the context.** `ScanContext::from_system()` or `ScanContext::from_fixture(dir)`. The caller applies optional overrides (home directory, current project).
+2. **Select scanners.** `default_scanners()` returns all scanners for real agents, `find_scanner(id)` a specific one, including the demo scanner.
+3. **Scan.** `run_scan` calls `detect` for each scanner and `scan` only for detected agents. A crashing scanner is caught and reported as diagnostic `internal`.
+4. **Analysis** (from phase 3). Path normalisation, existence checks, deduplication and warnings across all findings.
+5. **Output.** The `ScanReport` is serialised (JSON, later Markdown) or handed to the GUI.
 
-## 3. Scanner
+## 3. Scanners
 
 ```rust
 pub trait AgentScanner: Send + Sync {
@@ -42,35 +42,35 @@ pub trait AgentScanner: Send + Sync {
 }
 ```
 
-- `scan` liefert `ScanOutput` (Findings, Diagnosen, Zusammenfassung). Metadaten und Erkennungsergebnis fügt `run_scan` hinzu, damit jeder Scanner dieselbe Ergebnisstruktur liefert.
-- Scanner sind zustandslose statische Werte und in `scanners/mod.rs` registriert: `REAL` für echte Agenten, `EXTRA` für Scanner, die nur ausdrücklich laufen (derzeit `demo`).
-- Scanner lesen ausschließlich über den `ScanContext`. Systemweite Pfade (z. B. Managed-Settings) bilden sie mit `context.system_path("/etc/…")`, damit Fixture-Scans sie umlenken können.
-- Scanner normalisieren Pfade nicht global, deduplizieren nicht über Scanner hinweg, exportieren nichts und verändern keine Konfiguration.
+- `scan` returns `ScanOutput` (findings, diagnostics, summary). `run_scan` adds metadata and detection result, so every scanner yields the same result structure.
+- Scanners are stateless static values registered in `scanners/mod.rs`: `REAL` for real agents, `EXTRA` for scanners that only run when selected explicitly (currently `demo`).
+- Scanners read only through the `ScanContext`. They build system-wide paths (e.g. managed settings) with `context.system_path("/etc/…")`, so that fixture scans can redirect them.
+- Scanners do not normalise paths globally, do not deduplicate across scanners, export nothing and never change configuration.
 
-## 4. Scan-Kontext
+## 4. Scan context
 
-| Feld | Systemscan | Fixture-Scan |
+| Field | System scan | Fixture scan |
 |---|---|---|
-| `home_dir` | echtes Home-Verzeichnis | `<fixture>/<home>` aus `fixture.json` (Standard `home`) |
-| `current_dir` | nur wenn angegeben | `<fixture>/<currentDir>` aus `fixture.json` |
-| `operating_system` | laufendes System | aus `fixture.json` |
-| `env` | nur die Variablen aus `CAPTURED_ENV_VARS` | `env` aus `fixture.json` |
+| `home_dir` | real home directory | `<fixture>/<home>` from `fixture.json` (default `home`) |
+| `current_dir` | only if given | `<fixture>/<currentDir>` from `fixture.json` |
+| `operating_system` | running system | from `fixture.json` |
+| `env` | only the variables in `CAPTURED_ENV_VARS` | `env` from `fixture.json` |
 | `system_root` | `None` | `<fixture>/system` |
 
-`system_path` bildet einen absoluten Systempfad auf den zu lesenden Pfad ab. Im Fixture-Scan landet `/etc/claude-code` unter `<fixture>/system/etc/claude-code` und `C:\Program Files\ClaudeCode` unter `<fixture>/system/C/Program Files/ClaudeCode`. So lassen sich Windows-Fixtures auch unter macOS und Linux testen.
+`system_path` maps an absolute system path to the path to read. In a fixture scan, `/etc/claude-code` ends up at `<fixture>/system/etc/claude-code` and `C:\Program Files\ClaudeCode` at `<fixture>/system/C/Program Files/ClaudeCode`. This way Windows fixtures can be tested on macOS and Linux too.
 
-Beispiel für `fixture.json`:
+Example `fixture.json`:
 
 ```json
 {
   "operatingSystem": "linux",
   "home": "home/alice",
-  "currentDir": "home/alice/projekt",
+  "currentDir": "home/alice/project",
   "env": { "CLAUDE_CONFIG_DIR": "/srv/claude" }
 }
 ```
 
-Unbekannte Felder in `fixture.json` sind ein Fehler, damit Tippfehler in Fixtures auffallen.
+Unknown fields in `fixture.json` are an error, so that typos in fixtures are noticed.
 
 ## 5. CLI
 
@@ -79,13 +79,13 @@ ai-agent-access-inspector scan [--agent ID]... [--format json] [--home DIR] [--c
 ai-agent-access-inspector list-scanners
 ```
 
-Exit-Codes: `0` Erfolg (auch bei Diagnosen), `1` Fehler (z. B. unbekannter Scanner, ungültige Fixture), `2` falsche Aufrufparameter.
+Exit codes: `0` success (also with diagnostics), `1` error (e.g. unknown scanner, invalid fixture), `2` invalid arguments.
 
-## 6. Abhängigkeiten
+## 6. Dependencies
 
-| Crate | Abhängigkeiten |
+| Crate | Dependencies |
 |---|---|
 | `inspector-core` | `serde`, `serde_json` |
 | `inspector-cli` | `inspector-core`, `clap`, `serde_json` |
 
-Neue Abhängigkeiten im Kern werden sparsam aufgenommen, weil der Kern in CLI und GUI eingebunden wird und lokal mit Benutzerdaten arbeitet.
+New dependencies in the core are added sparingly, because the core is embedded in both CLI and GUI and works locally with user data.

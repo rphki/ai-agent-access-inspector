@@ -1,86 +1,87 @@
 # Roadmap: AI Agent Access Inspector
 
-Diese Roadmap ist das maßgebliche Planungsdokument des Projekts. Sie enthält Ziel, Anforderungen, Architektur und Umsetzungsreihenfolge. Der ursprüngliche Umsetzungsplan liegt unter [`plan-initial.md`](plan-initial.md) und ist nur noch historisch von Interesse.
+This roadmap is the project's authoritative planning document. It covers goals, requirements, architecture and implementation order. The original implementation plan is in [`plan-initial.md`](plan-initial.md) and is of historical interest only.
 
-## 1. Ziel
+## 1. Goal
 
-Eine lokale, plattformübergreifende Desktop-Anwendung zeigt, welche Ordner laut Konfigurationen, Projektdateien und erkennbaren Einstellungen für lokale KI-Agenten freigegeben oder potenziell erreichbar sind.
+A local, cross-platform desktop application shows which folders local AI agents are granted or can potentially reach, according to their configuration, project files and detectable settings.
 
-Der erste unterstützte Agent ist **Claude Code**. Die Architektur ist so angelegt, dass später Claude Desktop, Codex, ChatGPT, Cursor und weitere Anwendungen als unabhängige Scanner ergänzt werden können.
+The first supported agent is **Claude Code**. The architecture allows Claude Desktop, Codex, ChatGPT, Cursor and other applications to be added later as independent scanners.
 
-Die Anwendung:
+The application:
 
-- läuft unter macOS, Windows und Linux,
-- arbeitet vollständig lokal,
-- benötigt kein Benutzerkonto und kein Backend,
-- verändert keine Agentenkonfiguration,
-- überträgt keine Dateipfade,
-- erklärt zu jedem Fund, woher die Information stammt,
-- unterscheidet zwischen konfiguriertem und nur potenziellem Zugriff.
+- runs on macOS, Windows and Linux,
+- works entirely locally,
+- needs no user account and no backend,
+- never changes agent configuration,
+- transmits no file paths,
+- explains for every finding where the information comes from,
+- distinguishes between configured and merely potential access.
 
-## 2. Entscheidungen
+## 2. Decisions
 
-| Thema | Entscheidung |
+| Topic | Decision |
 |---|---|
-| Repository | öffentliches GitHub-Repository [`rphki/ai-agent-access-inspector`](https://github.com/rphki/ai-agent-access-inspector) |
-| Lokaler Ordner | wird von `agent-access-inspector` in `ai-agent-access-inspector` umbenannt |
-| Lizenz | Apache-2.0 |
-| Projektstruktur | Cargo-Workspace mit getrennten Crates für Kern, CLI und Tauri |
-| Reihenfolge | Kern und CLI zuerst (`v0.1.0`), Oberfläche danach (`v0.2.0`) |
-| Recherche | Claude-Code-Recherche vor dem Datenmodell, weil sie dessen Form bestimmt |
-| MCP-Server | werden im MVP mitgescannt |
-| Claude-Code-Versionen | unterstützt wird nur das aktuell offiziell dokumentierte Konfigurationsformat; ältere Formate werden nicht gezielt ausgewertet, führen aber nie zum Abbruch (siehe 8.1) |
-| Vorgehen | phasenweise; nach jeder Phase Abnahme und Abstimmung |
+| Repository | public GitHub repository [`rphki/ai-agent-access-inspector`](https://github.com/rphki/ai-agent-access-inspector) |
+| Local folder | renamed from `agent-access-inspector` to `ai-agent-access-inspector` |
+| License | Apache-2.0 |
+| Project structure | Cargo workspace with separate crates for core, CLI and Tauri |
+| Order | core and CLI first (`v0.1.0`), GUI afterwards (`v0.2.0`) |
+| Research | Claude Code research before the data model, because it determines the model's shape |
+| MCP servers | scanned in the MVP |
+| Claude Code versions | only the currently documented configuration format is supported; older formats are not specifically evaluated but never cause an abort (see 8.1) |
+| Language | English for documentation, code and commits (see `CLAUDE.md`) |
+| Approach | phase by phase; acceptance check and alignment after each phase |
 
-## 3. Technologiestack
+## 3. Technology stack
 
-- **Kern und Scanner:** Rust (Crate `inspector-core`, ohne Tauri-Abhängigkeit)
-- **CLI:** Rust (Crate `inspector-cli`)
-- **Desktop-Framework:** Tauri 2
-- **Frontend:** React mit TypeScript
-- **Build-System Frontend:** Vite
-- **Paketmanager Frontend:** pnpm
-- **Tests Backend:** Rust Unit- und Integrationstests
-- **Tests Frontend:** Vitest und React Testing Library
-- **End-to-End-Tests:** nach dem MVP
+- **Core and scanners:** Rust (crate `inspector-core`, no Tauri dependency)
+- **CLI:** Rust (crate `inspector-cli`)
+- **Desktop framework:** Tauri 2
+- **Frontend:** React with TypeScript
+- **Frontend build system:** Vite
+- **Frontend package manager:** pnpm
+- **Backend tests:** Rust unit and integration tests
+- **Frontend tests:** Vitest and React Testing Library
+- **End-to-end tests:** after the MVP
 - **CI/CD:** GitHub Actions
-- **Veröffentlichung:** GitHub Releases
+- **Distribution:** GitHub Releases
 
-## 4. Produktbegriffe
+## 4. Product terms
 
-Die Anwendung verwendet bewusst nicht pauschal den Begriff „zugreifbar“.
+The application deliberately avoids the blanket term "accessible".
 
-### 4.1 Status eines Findings
+### 4.1 Finding status
 
-- **Configured:** Der Pfad bzw. die Regel steht ausdrücklich in einer Konfiguration.
-- **Observed:** Der Pfad wurde in einer gespeicherten Projekt- oder Sitzungsinformation gefunden.
-- **Potential:** Der Pfad könnte aufgrund des Prozesskontexts oder der Betriebssystemrechte erreichbar sein (siehe 4.4).
-- **Blocked:** Der Pfad ist konfiguriert, aber gegenwärtig nicht erreichbar.
-- **Unknown:** Es liegen nicht genügend Informationen für eine belastbare Bewertung vor.
+- **Configured:** the path or rule is explicitly written in a configuration.
+- **Observed:** the path was found in stored project or session information.
+- **Potential:** the path could be reachable because of the process context or operating system rights (see 4.4).
+- **Blocked:** the path is configured but currently not reachable.
+- **Unknown:** there is not enough information for a reliable assessment.
 
-### 4.2 Geltungsebene
+### 4.2 Scope
 
-- **Managed:** systemweite, administrativ verwaltete Einstellungen (höchste Priorität)
-- **Benutzerweit**
-- **Projektbezogen**
-- **Lokal im Projekt**
-- **Sitzungsbezogen**
-- **Laufzeitbezogen**
-- **Betriebssystembezogen**
+- **Managed:** system-wide, administratively managed settings (highest priority)
+- **User**
+- **Project**
+- **Project-local**
+- **Session**
+- **Runtime**
+- **Operating system**
 
-### 4.3 Wirkung einer Regel
+### 4.3 Rule effect
 
-- **Allow:** erlaubt den Zugriff ohne Rückfrage.
-- **Ask:** erlaubt den Zugriff nach Rückfrage.
-- **Deny:** verbietet den Zugriff.
+- **Allow:** permits access without a prompt.
+- **Ask:** permits access after a prompt.
+- **Deny:** forbids access.
 
-Deny-Regeln sind kein Zugriff. Sie werden trotzdem als Findings geführt, weil sie andere Findings einschränken und für die Erkennung widersprüchlicher Regeln nötig sind.
+Deny rules do not grant access. They are still listed as findings because they restrict other findings and are needed to detect conflicting rules.
 
-### 4.4 Bedeutung von „Potential“
+### 4.4 Meaning of "Potential"
 
-Ohne Sandbox kann ein Agent über Shell-Werkzeuge alles erreichen, was der Benutzer erreichen kann. Statt jeden Ordner einzeln als `Potential` auszuweisen, erzeugt der Scanner ein zusammenfassendes Finding, z. B. „Shell-Werkzeug ohne Sandbox – effektiv Benutzerrechte“. Eine konfigurierte Sandbox schränkt dieses Finding ein und erzeugt stattdessen Findings für die von ihr erlaubten Bereiche.
+Without a sandbox, an agent can reach everything the user can reach through shell tools. Instead of listing every folder as `Potential`, the scanner produces one summarising finding, e.g. "shell tool without sandbox – effectively user rights". A configured sandbox narrows this finding and produces findings for the areas it allows instead.
 
-## 5. Projektstruktur
+## 5. Project structure
 
 ```text
 ai-agent-access-inspector/
@@ -89,20 +90,21 @@ ai-agent-access-inspector/
 │   │   ├── ci.yml
 │   │   └── release.yml
 │   └── ISSUE_TEMPLATE/
-├── Cargo.toml                     # Workspace
+├── Cargo.toml                     # workspace
+├── CLAUDE.md                      # guidance for Claude Code
 ├── crates/
-│   ├── inspector-core/            # ohne Tauri-Abhängigkeit
+│   ├── inspector-core/            # no Tauri dependency
 │   │   └── src/
-│   │       ├── model/             # Finding, Diagnose, ScanResult
-│   │       ├── analysis/          # Pfadanalyse, Deduplizierung, Risiko
-│   │       ├── platform/          # Verzeichnisse und Eigenheiten je OS
+│   │       ├── model/             # Finding, Diagnostic, ScanReport
+│   │       ├── analysis/          # path analysis, deduplication, risk
+│   │       ├── platform/          # operating system specifics
 │   │       ├── scanners/
 │   │       │   └── claude_code/
-│   │       ├── export/            # JSON, Markdown, Anonymisierung
+│   │       ├── export/            # JSON, Markdown, anonymisation
 │   │       └── lib.rs
-│   └── inspector-cli/             # CLI-Diagnosemodus
+│   └── inspector-cli/             # CLI diagnostic mode
 │       └── src/main.rs
-├── src-tauri/                     # dünne Schicht: Tauri-Kommandos
+├── src-tauri/                     # thin layer: Tauri commands
 │   ├── src/
 │   │   ├── commands/
 │   │   ├── lib.rs
@@ -110,7 +112,7 @@ ai-agent-access-inspector/
 │   ├── capabilities/
 │   ├── Cargo.toml
 │   └── tauri.conf.json
-├── src/                           # React-Frontend
+├── src/                           # React frontend
 │   ├── components/
 │   ├── pages/
 │   ├── hooks/
@@ -124,7 +126,7 @@ ai-agent-access-inspector/
 │       └── malformed/
 ├── docs/
 │   ├── roadmap.md
-│   ├── plan-initial.md            # historisch
+│   ├── plan-initial.md            # historical, German
 │   ├── architecture.md
 │   ├── findings-model.md
 │   ├── claude-code-scanner.md
@@ -140,33 +142,33 @@ ai-agent-access-inspector/
 └── CHANGELOG.md
 ```
 
-`src-tauri/` und `src/` entstehen erst in Phase 5.
+`src-tauri/` and `src/` are created in phase 5.
 
-## 6. Datenmodell
+## 6. Data model
 
-Der Kern stellt ein agentenunabhängiges Modell bereit (`crates/inspector-core/src/model/`). Die vollständige Beschreibung inklusive JSON-Format steht in [`findings-model.md`](findings-model.md).
+The core provides an agent-independent model (`crates/inspector-core/src/model/`). The full description including the JSON format is in [`findings-model.md`](findings-model.md).
 
-Kernelemente eines Findings:
+Key elements of a finding:
 
-| Feld | Inhalt |
+| Field | Content |
 |---|---|
-| `subject` | Agent selbst oder ein MCP-Server |
-| `target` | Rohwert, Musterart (`exactPath`, `directory`, `glob`, `everything`, `unparsed`), Basispfad, Anzeigepfad |
+| `subject` | the agent itself or one of its MCP servers |
+| `target` | raw value, pattern kind (`exactPath`, `directory`, `glob`, `everything`, `unparsed`), base path, display path |
 | `effect` | `allow`, `ask`, `deny`, `notApplicable` |
-| `access`, `status`, `scope`, `confidence` | siehe Abschnitt 4 |
-| `source` | Datei, Konfigurationsart, Einstufung (`documented`, `heuristic`, `derived`), JSON-Pointer, Rohwert, Anker für relative Muster, Parser-Version, Belegausschnitt |
-| `pathState` | Existenz, Pfadtyp, Symlink-Ziel (gefüllt durch die Pfadanalyse) |
-| `warnings` | Art, Schweregrad, Text; „nicht wirksam“ ist eine Warnungsart mit Grund, kein eigener Status |
+| `access`, `status`, `scope`, `confidence` | see section 4 |
+| `source` | file, configuration kind, classification (`documented`, `heuristic`, `derived`), JSON pointer, raw value, anchor for relative patterns, parser version, excerpt |
+| `pathState` | existence, path kind, symlink target (filled in by the path analysis) |
+| `warnings` | kind, severity, message; "not effective" is a warning kind with a reason, not a status of its own |
 
-Jedes Finding hat eine stabile `id`, die aus Agent, Subjekt, Quelle und Rohwert berechnet wird.
+Every finding has a stable `id`, computed from agent, subject, source and raw value.
 
-Neben Findings liefert ein Scan **Diagnosen** (z. B. ungültiges JSON, nicht lesbare Datei, unbekannter Schlüssel) und eine **Zusammenfassung** pro Agent (z. B. Permission-Modus, Sandbox). Diagnosen führen nie zum Abbruch des Scans. Der Gesamtbericht (`ScanReport`) trägt eine Formatversion.
+Besides findings, a scan returns **diagnostics** (e.g. invalid JSON, unreadable file, unknown key) and a **summary** per agent (e.g. permission mode, sandbox). Diagnostics never abort a scan. The overall report (`ScanReport`) carries a format version.
 
-## 7. Scanner-Schnittstelle und Scan-Kontext
+## 7. Scanner interface and scan context
 
 ### 7.1 Scanner
 
-Jeder Agent erhält einen eigenen Scanner.
+Every agent gets its own scanner.
 
 ```rust
 pub trait AgentScanner: Send + Sync {
@@ -176,175 +178,175 @@ pub trait AgentScanner: Send + Sync {
 }
 ```
 
-`scan` liefert Findings, Diagnosen und Zusammenfassung; Metadaten und Erkennungsergebnis ergänzt der Scan-Runner. Er ruft `scan` nur für erkannte Agenten auf und fängt Abstürze einzelner Scanner als Diagnose ab. Details: [`architecture.md`](architecture.md).
+`scan` returns findings, diagnostics and summary; the scan runner adds metadata and detection result. It only calls `scan` for detected agents and turns crashes of individual scanners into diagnostics. Details: [`architecture.md`](architecture.md).
 
-Ein Scanner ist verantwortlich für:
+A scanner is responsible for:
 
-- Erkennung der Agenteninstallation,
-- Ermittlung relevanter Konfigurationsorte,
-- fehlertolerantes Einlesen,
-- Übersetzung agentenspezifischer Einstellungen in das gemeinsame Datenmodell,
-- Warnungen bei unbekannten oder nicht unterstützten Formaten.
+- detecting the agent installation,
+- locating relevant configuration files,
+- tolerant parsing,
+- translating agent-specific settings into the common data model,
+- warnings about unknown or unsupported formats.
 
-Ein Scanner ist nicht verantwortlich für:
+A scanner is not responsible for:
 
-- Darstellung,
-- globale Deduplizierung,
-- allgemeine Pfadnormalisierung,
-- Export,
-- Telemetrie,
-- Änderungen an den gefundenen Konfigurationen.
+- presentation,
+- global deduplication,
+- general path normalisation,
+- export,
+- telemetry,
+- changes to the configurations it finds.
 
-### 7.2 Scan-Kontext
+### 7.2 Scan context
 
-Scanner dürfen nicht direkt auf das echte Home-Verzeichnis oder die echte Umgebung zugreifen, sondern nur über den Kontext.
+Scanners must not access the real home directory or the real environment directly, only through the context.
 
 ```rust
 pub struct ScanContext {
     pub home_dir: PathBuf,
     pub current_dir: Option<PathBuf>,
     pub operating_system: OperatingSystem,
-    pub env: EnvSnapshot,             // nur ausgewählte Variablen, z. B. CLAUDE_CONFIG_DIR, APPDATA
-    pub system_root: Option<PathBuf>, // im Fixture-Scan Ersatz für die Dateisystemwurzel
+    pub env: EnvSnapshot,             // selected variables only, e.g. CLAUDE_CONFIG_DIR, APPDATA
+    pub system_root: Option<PathBuf>, // stands in for the filesystem root in fixture scans
 }
 ```
 
-Systemweite Pfade (z. B. Managed-Settings) bilden Scanner über `context.system_path(…)`, damit Fixture-Scans sie in das Fixture-Verzeichnis umlenken können. Das ersetzt die ursprünglich geplanten `PlatformConfigDirs`.
+Scanners build system-wide paths (e.g. managed settings) with `context.system_path(…)`, so that fixture scans can redirect them into the fixture directory. This replaces the originally planned `PlatformConfigDirs`.
 
-Dadurch können alle Plattformvarianten auf jedem Entwicklungssystem mit Fixtures getestet werden.
+This way all platform variants can be tested with fixtures on every development machine.
 
-Der Kern unterstützt zwei Modi:
+The core supports two modes:
 
-- **Systemscan:** verwendet die tatsächlichen Verzeichnisse und Umgebungsvariablen des Benutzers.
-- **Fixture-Scan:** verwendet ein kontrolliertes Testverzeichnis und eine vorgegebene Umgebung.
+- **System scan:** uses the user's actual directories and environment variables.
+- **Fixture scan:** uses a controlled test directory and a predefined environment.
 
-## 8. Claude-Code-Scanner
+## 8. Claude Code scanner
 
-### 8.1 Spezifikation
+### 8.1 Specification
 
-Vor der Implementierung werden die aktuellen Konfigurationsorte und -ebenen aus offizieller Dokumentation und überprüfbaren lokalen Installationen erfasst und in `docs/claude-code-scanner.md` dokumentiert:
+Before implementation, the current configuration locations and levels are collected from official documentation and verifiable local installations and documented in `docs/claude-code-scanner.md`:
 
-- die Claude-Code-Version, gegen die die Spezifikation geprüft wurde, und das Datum der Recherche,
-- Konfigurationsorte pro Betriebssystem,
-- Managed-, Benutzer-, Projekt- und lokale Konfiguration sowie deren Priorität,
-- zusätzliche Verzeichnisse,
-- Allow-/Ask-/Deny-Regeln und deren Mustersyntax,
-- gefährliche Permission-Modi,
-- Sandbox-Einstellungen,
-- MCP-Server-Konfiguration,
-- gespeicherte Projekt- oder Sitzungsinformationen,
-- bekannte Grenzen des Scanners.
+- the Claude Code version the specification was checked against, and the research date,
+- configuration locations per operating system,
+- managed, user, project and local configuration and their precedence,
+- additional directories,
+- allow/ask/deny rules and their pattern syntax,
+- dangerous permission modes,
+- sandbox settings,
+- MCP server configuration,
+- stored project or session information,
+- known limitations of the scanner.
 
-Unterstützt wird nur das aktuell dokumentierte Konfigurationsformat. Schlüssel oder Dateien aus älteren Formaten werden nicht gezielt interpretiert; sie erscheinen als Diagnose (z. B. „unbekannter Schlüssel“) oder als Finding mit Status `Unknown`. Ändert Claude Code sein Format, wird die Spezifikation aktualisiert.
+Only the currently documented configuration format is supported. Keys or files from older formats are not specifically interpreted; they appear as diagnostics (e.g. "unknown key") or as findings with status `Unknown`. If Claude Code changes its format, the specification is updated.
 
-Undokumentierte Dateien werden ausdrücklich als heuristische Quelle gekennzeichnet.
+Undocumented files are explicitly marked as heuristic sources.
 
-Die Spezifikation liegt in [`claude-code-scanner.md`](claude-code-scanner.md) vor (Stand 2026-11-01). Sie ist für den Scanner maßgeblich; die Abschnitte 8.2 bis 8.4 sind nur eine Übersicht.
+The specification is available in [`claude-code-scanner.md`](claude-code-scanner.md) (as of 2026-11-01). It is authoritative for the scanner; sections 8.2 to 8.4 are an overview only.
 
-### 8.2 Zu untersuchende Quellen
+### 8.2 Sources to examine
 
-- Managed/Enterprise-Settings je Betriebssystem
-- Benutzerkonfiguration (`~/.claude/settings.json` und ggf. weitere)
-- `.claude/settings.json` im Projekt
-- `.claude/settings.local.json` im Projekt
-- Umgebungsvariable `CLAUDE_CONFIG_DIR` und andere ortsverändernde Variablen
-- zusätzliche Verzeichnisse (z. B. `additionalDirectories`)
-- dateisystembezogene Allow-/Ask-/Deny-Regeln
-- Permission-Modi, insbesondere Einstellungen zum Überspringen von Rückfragen und deren Sperre
-- Sandbox-Einstellungen
-- MCP-Konfiguration (`.mcp.json` im Projekt, benutzerweite und projektbezogene MCP-Einträge) mit Pfadargumenten
-- `~/.claude.json` (Projektliste und projektbezogene Einträge) – voraussichtlich heuristisch
-- `~/.claude/projects/` (gespeicherte Sitzungen) – voraussichtlich heuristisch, Status `Observed`
-- sitzungsbezogene Angaben wie `--add-dir`, sofern sie überhaupt persistiert werden
+- managed/enterprise settings per operating system
+- user configuration (`~/.claude/settings.json` and possibly others)
+- `.claude/settings.json` in the project
+- `.claude/settings.local.json` in the project
+- environment variable `CLAUDE_CONFIG_DIR` and other location-changing variables
+- additional directories (e.g. `additionalDirectories`)
+- filesystem-related allow/ask/deny rules
+- permission modes, especially settings that skip prompts and their locks
+- sandbox settings
+- MCP configuration (`.mcp.json` in the project, user and project MCP entries) with path arguments
+- `~/.claude.json` (project list and per-project entries) – heuristic
+- `~/.claude/projects/` (stored sessions) – heuristic, status `Observed`
+- session-only settings such as `--add-dir`, if they are persisted at all
 
-`CLAUDE.md` wird nicht als Ordnerfreigabe gewertet. Enthaltene Pfade dürfen höchstens später als unverifizierte Referenzen ausgewiesen werden.
+`CLAUDE.md` is not treated as a folder grant. Paths it contains may at most be listed later as unverified references.
 
-Aus Sitzungsdaten werden nur Pfade bzw. Projektzuordnungen gelesen, keine Inhalte.
+From session data only paths or project assignments are read, never contents.
 
-### 8.3 Verhalten
+### 8.3 Behaviour
 
-Der Scanner:
+The scanner:
 
-1. erkennt, ob Claude Code installiert oder konfiguriert ist,
-2. ermittelt die Konfigurationsorte unter Berücksichtigung von Umgebungsvariablen,
-3. liest Managed- und Benutzerkonfiguration,
-4. ermittelt bekannte Projekte,
-5. untersucht deren Projekt- und lokale Konfigurationen,
-6. extrahiert Regeln, zusätzliche Verzeichnisse, MCP-Server, Modi und Sandbox-Einstellungen,
-7. übergibt Pfade und Muster an die Pfadanalyse,
-8. erzeugt Findings, Warnungen und Diagnosen,
-9. erzeugt das zusammenfassende `Potential`-Finding gemäß 4.4.
+1. detects whether Claude Code is installed or configured,
+2. determines configuration locations, taking environment variables into account,
+3. reads managed and user configuration,
+4. determines known projects,
+5. examines their project and local configurations,
+6. extracts rules, additional directories, MCP servers, modes and sandbox settings,
+7. passes paths and patterns to the path analysis,
+8. produces findings, warnings and diagnostics,
+9. produces the summarising `Potential` finding according to 4.4.
 
-Die Deduplizierung inhaltlich identischer Ergebnisse übernimmt die gemeinsame Analysekomponente.
+Deduplication of identical results is done by the shared analysis component.
 
-### 8.4 Fehlerbehandlung
+### 8.4 Error handling
 
-Die Anwendung darf in folgenden Fällen nicht abbrechen:
+The application must not abort in these cases:
 
-- ungültiges JSON,
-- teilweise geschriebene Konfigurationsdateien,
-- nicht lesbare Dateien,
-- nicht vorhandene Pfade,
-- unbekannte Konfigurationsschlüssel,
-- nicht interpretierbare Regelmuster,
-- Symlink-Schleifen,
-- unterschiedliche Groß-/Kleinschreibung,
-- ungültige Windows- oder UNC-Pfade.
+- invalid JSON,
+- partially written configuration files,
+- unreadable files,
+- missing paths,
+- unknown configuration keys,
+- uninterpretable rule patterns,
+- symlink loops,
+- differences in letter case,
+- invalid Windows or UNC paths.
 
-Stattdessen wird ein Diagnoseeintrag erzeugt.
+A diagnostic entry is produced instead.
 
-## 9. Pfadanalyse
+## 9. Path analysis
 
-Eine gemeinsame Analysekomponente in `inspector-core` übernimmt:
+A shared analysis component in `inspector-core` handles:
 
-- Auflösung von `~`,
-- Auflösung unterstützter Umgebungsvariablen,
-- Umwandlung relativer in absolute Pfade (relativ zu Projekt bzw. Konfigurationsdatei, je nach Regel),
-- Ableitung des Basispfads aus Regelmustern,
-- lexikalische Normalisierung,
-- optionale kanonische Auflösung,
-- Erkennung von Symlinks,
-- Prüfung, ob ein Pfad existiert,
-- Prüfung, ob er Datei oder Verzeichnis ist,
-- Erkennung verschachtelter Freigaben,
-- Deduplizierung,
-- plattformspezifische Behandlung der Groß-/Kleinschreibung,
-- Erkennung besonders breiter Pfade.
+- resolving `~`,
+- resolving supported environment variables,
+- turning relative paths into absolute ones (relative to project or configuration file, depending on the rule),
+- deriving the base path from rule patterns,
+- lexical normalisation,
+- optional canonical resolution,
+- detecting symlinks,
+- checking whether a path exists,
+- checking whether it is a file or a directory,
+- detecting nested grants,
+- deduplication,
+- platform-specific handling of letter case,
+- detecting particularly broad paths.
 
-Warnungen werden unter anderem erzeugt für:
+Warnings are produced, among others, for:
 
-- Home-Verzeichnis,
-- Dateisystemwurzel,
-- gesamtes Laufwerk,
-- Benutzerverzeichnis mit persönlichen Unterordnern,
-- nicht mehr vorhandenen Pfad,
-- auf einen anderen Bereich zeigenden Symlink,
-- widersprüchliche Allow-/Deny-Regeln,
-- aktivierte gefährliche Permission-Modi,
-- Shell-Zugriff ohne Sandbox,
-- MCP-Server mit breitem Dateisystemzugriff.
+- the home directory,
+- the filesystem root,
+- a whole drive,
+- a user directory with personal subfolders,
+- a path that no longer exists,
+- a symlink pointing to another area,
+- conflicting allow/deny rules,
+- enabled dangerous permission modes,
+- shell access without sandbox,
+- MCP servers with broad filesystem access.
 
-## 10. CLI-Diagnosemodus
+## 10. CLI diagnostic mode
 
-Vor der GUI wird ein CLI bereitgestellt:
+A CLI is provided before the GUI:
 
 ```text
 ai-agent-access-inspector scan --agent claude-code --format json
 ```
 
-Optionen:
+Options:
 
-- alternatives Home-Verzeichnis,
-- Fixture-Verzeichnis,
-- JSON-Ausgabe,
-- Markdown-Ausgabe,
-- ausführliche Diagnosen.
+- alternative home directory,
+- fixture directory,
+- JSON output,
+- Markdown output,
+- verbose diagnostics.
 
-Das CLI bleibt auch nach Einführung der GUI erhalten und dient als Test- und Diagnosewerkzeug.
+The CLI remains after the GUI is introduced and serves as a testing and diagnostic tool.
 
-## 11. Tauri-Kommandos
+## 11. Tauri commands
 
-Das Frontend erhält nur klar begrenzte Kommandos:
+The frontend only gets clearly limited commands:
 
 ```text
 list_scanners
@@ -356,173 +358,173 @@ open_source_file
 get_app_info
 ```
 
-Die Kommandos sind eine dünne Schicht über `inspector-core`. Für den MVP gibt es keine Kommandos zum Ändern oder Löschen von Agentenkonfigurationen. Die Tauri-Capabilities werden auf die notwendigen lokalen Funktionen beschränkt; externe Netzwerkzugriffe sind nicht erforderlich.
+The commands are a thin layer over `inspector-core`. The MVP has no commands to change or delete agent configuration. Tauri capabilities are restricted to the necessary local functions; no external network access is needed.
 
-## 12. Benutzeroberfläche
+## 12. User interface
 
-### 12.1 Hauptansicht
+### 12.1 Main view
 
-- erkannte Agenten,
-- Zeitpunkt des letzten Scans,
-- Anzahl der Findings,
-- Anzahl der Warnungen,
-- Schaltfläche „Erneut scannen“.
+- detected agents,
+- time of the last scan,
+- number of findings,
+- number of warnings,
+- "Scan again" button.
 
-### 12.2 Ergebnisansicht
+### 12.2 Results view
 
-Die Ergebnisliste zeigt:
+The results list shows:
 
-- Agent bzw. MCP-Server,
-- Ordner bzw. Regel,
-- Wirkung,
-- Status,
-- Zugriffstyp,
-- Geltungsbereich,
-- Vertrauensniveau,
-- Warnungen.
+- agent or MCP server,
+- folder or rule,
+- effect,
+- status,
+- access kind,
+- scope,
+- confidence,
+- warnings.
 
-Filter:
+Filters:
 
-- Agent,
-- Status,
-- Wirkung,
-- Zugriffstyp,
-- Geltungsbereich,
-- nur Warnungen,
-- nur existierende Pfade.
+- agent,
+- status,
+- effect,
+- access kind,
+- scope,
+- warnings only,
+- existing paths only.
 
-### 12.3 Detailansicht
+### 12.3 Detail view
 
-Zu jedem Finding:
+For each finding:
 
-- normalisierter Pfad,
-- ursprünglicher Wert bzw. Regelmuster,
-- Konfigurationsquelle und deren Einstufung (dokumentiert/heuristisch),
-- genaue Position in der Quelle,
-- Erklärung,
-- Vertrauensniveau,
-- Existenz und Pfadtyp,
-- Symlink-Informationen,
-- übergeordnete oder untergeordnete Findings,
-- einschränkende oder widersprechende Regeln,
-- mögliche Sicherheitsrelevanz.
+- normalised path,
+- original value or rule pattern,
+- configuration source and its classification (documented/heuristic),
+- exact position in the source,
+- explanation,
+- confidence,
+- existence and path kind,
+- symlink information,
+- parent or child findings,
+- restricting or conflicting rules,
+- possible security relevance.
 
-Aktionen:
+Actions:
 
-- Ordner im Dateimanager öffnen,
-- Konfigurationsdatei öffnen,
-- Pfad kopieren,
-- Finding als JSON kopieren.
+- open folder in file manager,
+- open configuration file,
+- copy path,
+- copy finding as JSON.
 
-### 12.4 Zustände
+### 12.4 States
 
-Definierte Darstellungen für:
+Defined presentations for:
 
-- kein Agent gefunden,
-- Claude Code gefunden, aber keine relevanten Konfigurationen,
-- Scan läuft,
-- Scan teilweise erfolgreich,
-- Konfiguration nicht lesbar,
-- ungültige Konfiguration,
-- Scan abgeschlossen,
-- unerwarteter interner Fehler.
+- no agent found,
+- Claude Code found but no relevant configuration,
+- scan running,
+- scan partially successful,
+- configuration unreadable,
+- invalid configuration,
+- scan completed,
+- unexpected internal error.
 
-Die Bedienung ist barrierearm (Tastaturbedienung, Screenreader-taugliche Beschriftungen, ausreichende Kontraste).
+The interface is accessible (keyboard operation, screen-reader-friendly labels, sufficient contrast).
 
 ## 13. Export
 
-Der MVP unterstützt JSON und Markdown.
+The MVP supports JSON and Markdown.
 
-Der Export enthält standardmäßig die vollständigen Pfade. Vor dem Export wird eine Option angeboten:
+By default the export contains full paths. Before exporting, the user can choose:
 
-- vollständige Pfade,
-- Home-Verzeichnis als `~` darstellen,
-- Benutzernamen anonymisieren.
+- full paths,
+- show the home directory as `~`,
+- anonymise user names.
 
-Spätere Versionen können CSV und einen maschinenlesbaren Sicherheitsreport ergänzen.
+Later versions may add CSV and a machine-readable security report.
 
-## 14. Datenschutz und Sicherheit
+## 14. Privacy and security
 
-Verbindliche Eigenschaften:
+Binding properties:
 
-- keine Telemetrie im MVP,
-- keine Cloud-Anbindung,
-- keine automatische Übermittlung von Fehlermeldungen,
-- keine Erfassung von Dateiinhalten außerhalb notwendiger Konfigurationsdateien,
-- keine Speicherung vollständiger Konfigurationsdateien,
-- keine Anzeige von Tokens, API-Schlüsseln oder Umgebungsgeheimnissen (betrifft insbesondere `env`-Einträge von MCP-Servern),
-- sensible Werte werden beim Erzeugen von Findings und Diagnosen redigiert,
-- Exporte erfolgen ausschließlich auf ausdrückliche Benutzeraktion.
+- no telemetry in the MVP,
+- no cloud connection,
+- no automatic transmission of error reports,
+- no collection of file contents beyond necessary configuration files,
+- no storage of complete configuration files,
+- no display of tokens, API keys or environment secrets (especially `env` entries of MCP servers),
+- sensitive values are redacted when findings and diagnostics are produced,
+- exports happen only on explicit user action.
 
-Das Repository enthält `docs/privacy.md` und `SECURITY.md`.
+The repository contains `docs/privacy.md` and `SECURITY.md`.
 
-## 15. Teststrategie
+## 15. Test strategy
 
-### 15.1 Unit-Tests
+### 15.1 Unit tests
 
-- Pfadnormalisierung
-- Home-Auflösung und Umgebungsvariablen
-- relative Pfade
-- Windows-Laufwerkspfade
-- UNC-Pfade
-- Symlinks
-- verschachtelte Verzeichnisse
-- Regelmuster und Ableitung des Basispfads
-- Deduplizierung
-- Risikoklassifizierung
-- Redigieren sensibler Werte
+- path normalisation
+- home resolution and environment variables
+- relative paths
+- Windows drive paths
+- UNC paths
+- symlinks
+- nested directories
+- rule patterns and base path derivation
+- deduplication
+- risk classification
+- redaction of sensitive values
 
-### 15.2 Scanner-Tests
+### 15.2 Scanner tests
 
-Fixtures (ohne persönliche Daten) für:
+Fixtures (without personal data) for:
 
 - macOS, Linux, Windows
-- mehrere Projekte
-- Managed-, globale, projektbezogene und lokale Einstellungen
-- widersprüchliche Regeln
-- MCP-Server mit Pfadargumenten
-- Sandbox aktiv/inaktiv
-- nicht vorhandene Ordner
-- ungültiges JSON
-- unbekannte Konfigurationsfelder
-- veraltete oder unbekannte Konfigurationsschlüssel (erzeugen Diagnosen, keinen Abbruch)
+- multiple projects
+- managed, user, project and local settings
+- conflicting rules
+- MCP servers with path arguments
+- sandbox enabled/disabled
+- missing folders
+- invalid JSON
+- unknown configuration fields
+- outdated or unknown configuration keys (produce diagnostics, no abort)
 
-### 15.3 Frontend-Tests
+### 15.3 Frontend tests
 
-- Darstellung von Findings
-- Filter
-- Detailansicht
-- leere Zustände
-- Warnungen
-- Exportdialog
-- teilweise fehlgeschlagener Scan
+- rendering findings
+- filters
+- detail view
+- empty states
+- warnings
+- export dialog
+- partially failed scan
 
-### 15.4 Manuelle Plattformtests
+### 15.4 Manual platform tests
 
-Vor dem ersten stabilen Release:
+Before the first stable release:
 
-- macOS auf Apple Silicon
+- macOS on Apple Silicon
 - Windows 11
 - Ubuntu LTS
-- Pfade mit Leerzeichen
-- Pfade mit Umlauten und Unicode
-- sehr lange Pfade
-- Netzlaufwerke beziehungsweise gemountete Volumes
+- paths with spaces
+- paths with umlauts and Unicode
+- very long paths
+- network drives or mounted volumes
 
-## 16. Continuous Integration
+## 16. Continuous integration
 
-Bei jedem Pull Request führt `ci.yml` aus:
+On every pull request `ci.yml` runs:
 
-- Rust-Formatprüfung
+- Rust format check
 - Clippy
-- Rust-Tests
-- TypeScript-Typprüfung (ab Phase 5)
-- ESLint (ab Phase 5)
-- Frontend-Tests (ab Phase 5)
-- Produktionsbuild
-- Abhängigkeits- und Sicherheitsprüfung (z. B. `cargo audit`/`cargo deny`, `pnpm audit`)
+- Rust tests
+- TypeScript type check (from phase 5)
+- ESLint (from phase 5)
+- frontend tests (from phase 5)
+- production build
+- dependency and security audit (e.g. `cargo audit`/`cargo deny`, `pnpm audit`)
 
-Betriebssystemmatrix:
+Operating system matrix:
 
 ```yaml
 matrix:
@@ -532,204 +534,204 @@ matrix:
     - ubuntu-latest
 ```
 
-Rust-Tests und Builds laufen auf allen drei Systemen. Frontend-Tests müssen nicht dreimal laufen.
+Rust tests and builds run on all three systems. Frontend tests need not run three times.
 
 ## 17. GitHub Releases
 
-### 17.1 Auslöser
+### 17.1 Trigger
 
-Ein Release wird durch einen Git-Tag ausgelöst (`v0.1.0`, `v0.2.0`, …, `v1.0.0`).
+A release is triggered by a Git tag (`v0.1.0`, `v0.2.0`, …, `v1.0.0`).
 
-### 17.2 Artefakte
+### 17.2 Artifacts
 
-Ab `v0.1.0`: CLI-Binaries für macOS, Windows und Linux.
+From `v0.1.0`: CLI binaries for macOS, Windows and Linux.
 
-Ab Einführung der GUI:
+Once the GUI exists:
 
 - macOS Apple Silicon
-- macOS Intel, solange sinnvoll
+- macOS Intel, as long as sensible
 - Windows x64
-- optional Windows ARM64
+- optionally Windows ARM64
 - Linux x64 AppImage
 - Linux x64 `.deb`
 
 ### 17.3 Workflow (`release.yml`)
 
-1. Repository auschecken
-2. Rust installieren
-3. Node.js und pnpm installieren (ab GUI)
-4. plattformabhängige Abhängigkeiten installieren
-5. Tests ausführen
-6. CLI bzw. Tauri-Anwendung bauen
-7. Installer erzeugen
-8. Prüfsummen erzeugen
-9. GitHub Release anlegen
-10. Artefakte hochladen
-11. Release Notes aus Changelog oder Git-Historie erzeugen
+1. check out the repository
+2. install Rust
+3. install Node.js and pnpm (once the GUI exists)
+4. install platform-specific dependencies
+5. run tests
+6. build the CLI or Tauri application
+7. create installers
+8. create checksums
+9. create the GitHub release
+10. upload artifacts
+11. generate release notes from the changelog or Git history
 
-### 17.4 Signierung
+### 17.4 Signing
 
-Die erste Entwicklungsphase darf unsignierte Builds erzeugen. Vor einem stabilen öffentlichen Release:
+The first development phase may produce unsigned builds. Before a stable public release:
 
-- macOS-Code-Signing einrichten,
-- macOS-Anwendung notarisiert veröffentlichen,
-- Windows-Code-Signing-Zertifikat einrichten,
-- Zertifikate ausschließlich als GitHub-Secrets hinterlegen,
-- keine privaten Schlüssel im Repository speichern.
+- set up macOS code signing,
+- publish the macOS application notarised,
+- set up a Windows code signing certificate,
+- store certificates only as GitHub secrets,
+- never store private keys in the repository.
 
-## 18. Versionen
+## 18. Versions
 
-| Version | Inhalt |
+| Version | Content |
 |---|---|
-| `0.1.0` | CLI-Kern und Claude-Code-Scanner |
-| `0.2.0` | erste Tauri-Oberfläche |
-| `0.3.0` | Exporte und verbesserte Pfadanalyse |
-| `0.4.0` | plattformübergreifende GitHub-Releases der GUI |
-| `0.5.0` | Claude-Desktop-Scanner |
-| `0.6.0` | Codex-/ChatGPT-Scanner |
-| `0.7.0` | Cursor-Scanner |
-| `1.0.0` | stabile Datenstruktur, signierte Releases, dokumentierte Erweiterungsschnittstelle |
+| `0.1.0` | CLI core and Claude Code scanner |
+| `0.2.0` | first Tauri GUI |
+| `0.3.0` | exports and improved path analysis |
+| `0.4.0` | cross-platform GitHub releases of the GUI |
+| `0.5.0` | Claude Desktop scanner |
+| `0.6.0` | Codex/ChatGPT scanner |
+| `0.7.0` | Cursor scanner |
+| `1.0.0` | stable data structure, signed releases, documented extension interface |
 
-Bis `1.0.0` dürfen Scanner-Schnittstelle und Exportformat inkompatibel geändert werden.
+Until `1.0.0` the scanner interface and export format may change incompatibly.
 
-## 19. Phasen
+## 19. Phases
 
-Jede Phase endet mit einer Abnahme. Erst danach wird die nächste Phase im Detail geplant.
+Every phase ends with an acceptance check. Only then is the next phase planned in detail.
 
-### Phase 0 – Grundlage
+### Phase 0 – Foundation
 
-- Rust-Toolchain installieren (rustup, stable), optional `gh`
-- lokalen Ordner in `ai-agent-access-inspector` umbenennen
-- Git-Repository initialisieren, GitHub-Repository `rphki/ai-agent-access-inspector` anlegen
-- Cargo-Workspace mit `inspector-core` und `inspector-cli`
+- install the Rust toolchain (rustup, stable), optionally `gh`
+- rename the local folder to `ai-agent-access-inspector`
+- initialise the Git repository, create the GitHub repository `rphki/ai-agent-access-inspector`
+- Cargo workspace with `inspector-core` and `inspector-cli`
 - `LICENSE` (Apache-2.0), `README.md`, `.gitignore`, `CHANGELOG.md`
-- `rustfmt`, `clippy`, erste Tests
-- CI: Format, Clippy und Tests auf macOS, Windows, Linux
+- `rustfmt`, `clippy`, first tests
+- CI: format, Clippy and tests on macOS, Windows, Linux
 
-**Abnahme:** `cargo test` läuft lokal und in der CI auf allen drei Systemen grün.
+**Acceptance:** `cargo test` passes locally and in CI on all three systems.
 
-### Phase 1 – Claude-Code-Recherche
+### Phase 1 – Claude Code research
 
-- offizielle Dokumentation zu Settings, Permissions, MCP und Sandbox auswerten
-- lokale Installation untersuchen (nur Struktur, keine Inhalte übernehmen)
-- jede Quelle als dokumentiert oder heuristisch einstufen
-- Prioritäten und Zusammenführung der Ebenen festhalten
-- Fixture-Anforderungen ableiten
+- evaluate official documentation on settings, permissions, MCP and sandbox
+- examine a local installation (structure only, no contents)
+- classify every source as documented or heuristic
+- record precedence and merging of levels
+- derive fixture requirements
 
-**Abnahme:** `docs/claude-code-scanner.md` dokumentiert jede zu lesende Datei und jeden ausgewerteten Schlüssel mit Quelle.
+**Acceptance:** `docs/claude-code-scanner.md` documents every file to read and every evaluated key with its source.
 
-### Phase 2 – Datenmodell und Scanner-Schnittstelle
+### Phase 2 – Data model and scanner interface
 
-- Finding-Typen gemäß Abschnitt 6, angepasst an die Recherche
-- `AgentScanner`-Trait, `ScanContext`, Diagnose- und Fehlermodell
-- JSON-Serialisierung
-- Fixture-Scanner und CLI-Grundgerüst (`scan --format json`)
+- finding types according to section 6, adapted to the research
+- `AgentScanner` trait, `ScanContext`, diagnostic and error model
+- JSON serialisation
+- fixture scanner and CLI skeleton (`scan --format json`)
 - `docs/findings-model.md`, `docs/architecture.md`
 
-**Abnahme:** Das CLI gibt definierte Findings eines Fixture-Scanners als JSON aus.
+**Acceptance:** the CLI prints defined findings of a fixture scanner as JSON.
 
-### Phase 3 – Pfadanalyse
+### Phase 3 – Path analysis
 
-- Auflösung von `~`, Umgebungsvariablen, relativen Pfaden
-- Ableitung von Basispfaden aus Regelmustern
-- Normalisierung, Symlinks, Existenzprüfung
-- Verschachtelung, Deduplizierung, Risikowarnungen
-- Windows-, UNC- und Groß-/Kleinschreibungsfälle
+- resolving `~`, environment variables, relative paths
+- deriving base paths from rule patterns
+- normalisation, symlinks, existence checks
+- nesting, deduplication, risk warnings
+- Windows, UNC and letter case cases
 
-**Abnahme:** Alle Pfadfälle aus Abschnitt 15.1 sind automatisiert getestet und laufen auf allen drei Systemen.
+**Acceptance:** all path cases from section 15.1 are tested automatically and pass on all three systems.
 
-### Phase 4 – Claude-Code-Scanner und CLI → `v0.1.0`
+### Phase 4 – Claude Code scanner and CLI → `v0.1.0`
 
-- Erkennung, Konfigurationsorte, Einlesen aller Ebenen
-- Permissions, zusätzliche Verzeichnisse, MCP-Server, Modi, Sandbox
-- fehlertolerantes Verhalten mit Diagnosen
-- Fixtures für macOS, Linux, Windows und fehlerhafte Fälle
-- CLI vollständig gemäß Abschnitt 10, inkl. Markdown-Ausgabe
-- Release-Workflow für CLI-Binaries
+- detection, configuration locations, reading all levels
+- permissions, additional directories, MCP servers, modes, sandbox
+- tolerant behaviour with diagnostics
+- fixtures for macOS, Linux, Windows and malformed cases
+- complete CLI according to section 10, including Markdown output
+- release workflow for CLI binaries
 
-**Abnahme:** Der Scanner liefert aus allen Fixtures reproduzierbare, erklärte Findings; ein Systemscan über das CLI funktioniert.
+**Acceptance:** the scanner produces reproducible, explained findings from all fixtures; a system scan via the CLI works.
 
-### Phase 5 – Tauri und Oberfläche → `v0.2.0`
+### Phase 5 – Tauri and GUI → `v0.2.0`
 
-- Tauri 2 mit React/TypeScript, Vite, pnpm
-- Kommandos gemäß Abschnitt 11, eingeschränkte Capabilities
-- Scan asynchron ausführen, Fortschritts- und Fehlerzustände übertragen
-- Öffnen von Ordnern und Quelldateien
-- Haupt-, Ergebnis- und Detailansicht, Filter, Zustände gemäß Abschnitt 12
-- Frontend-Tests, CI um Frontend-Prüfungen erweitern
+- Tauri 2 with React/TypeScript, Vite, pnpm
+- commands according to section 11, restricted capabilities
+- run scans asynchronously, report progress and error states
+- open folders and source files
+- main, results and detail views, filters, states according to section 12
+- frontend tests, extend CI with frontend checks
 
-**Abnahme:** Alle Informationen eines Findings sind ohne Roh-JSON verständlich.
+**Acceptance:** all information of a finding is understandable without raw JSON.
 
-### Phase 6 – Export und Datenschutz → `v0.3.0`
+### Phase 6 – Export and privacy → `v0.3.0`
 
-- JSON- und Markdown-Export mit Anonymisierungsoptionen gemäß Abschnitt 13
-- Secret-Redaction
+- JSON and Markdown export with anonymisation options according to section 13
+- secret redaction
 - `docs/privacy.md`, `SECURITY.md`
 
-**Abnahme:** Exporte enthalten keine erkannten API-Schlüssel oder Zugangsdaten.
+**Acceptance:** exports contain no detected API keys or credentials.
 
-### Phase 7 – Releases und Veröffentlichung → `v0.4.0`
+### Phase 7 – Releases and publication → `v0.4.0`
 
-- Release-Workflow für die GUI mit Plattformmatrix, Installern und Prüfsummen
+- release workflow for the GUI with platform matrix, installers and checksums
 - `docs/release-process.md`
-- README mit Screenshots, Installationshinweisen und bekannten Einschränkungen
-- `CONTRIBUTING.md`, Issue-Templates, `docs/adding-a-scanner.md`
-- erster öffentlicher Release
+- README with screenshots, installation notes and known limitations
+- `CONTRIBUTING.md`, issue templates, `docs/adding-a-scanner.md`
+- first public release
 
-**Abnahme:** Ein Git-Tag erzeugt herunterladbare Artefakte für macOS, Windows und Linux; eine außenstehende Person kann die Anwendung installieren, Findings verstehen und einen neuen Scanner vorbereiten.
+**Acceptance:** a Git tag produces downloadable artifacts for macOS, Windows and Linux; an outside person can install the application, understand findings and prepare a new scanner.
 
-### Danach
+### Afterwards
 
-Weitere Scanner (Claude Desktop, Codex/ChatGPT, Cursor) und `1.0.0` gemäß Abschnitt 18.
+More scanners (Claude Desktop, Codex/ChatGPT, Cursor) and `1.0.0` according to section 18.
 
-## 20. Definition of Done für den MVP
+## 20. Definition of done for the MVP
 
-Der MVP ist fertig, wenn:
+The MVP is done when:
 
-- Claude Code erkannt wird,
-- Managed-, globale und projektbezogene Konfigurationen untersucht werden,
-- MCP-Server mit Dateisystemzugriff erfasst werden,
-- gefundene Pfade und Regeln mit Quelle und Erklärung erscheinen,
-- konfigurierte und potenzielle Zugriffe getrennt dargestellt werden,
-- nicht vorhandene Pfade und breite Freigaben Warnungen erzeugen,
-- keine Konfiguration verändert wird,
-- JSON- und Markdown-Export funktionieren,
-- automatische Tests vorhanden sind,
-- Builds für macOS, Windows und Linux über GitHub Releases bereitstehen,
-- bekannte Grenzen gut sichtbar dokumentiert sind.
+- Claude Code is detected,
+- managed, user and project configurations are examined,
+- MCP servers with filesystem access are captured,
+- found paths and rules appear with source and explanation,
+- configured and potential access are shown separately,
+- missing paths and broad grants produce warnings,
+- no configuration is changed,
+- JSON and Markdown export work,
+- automated tests exist,
+- builds for macOS, Windows and Linux are available via GitHub Releases,
+- known limitations are clearly documented.
 
-## 21. Nicht Bestandteil des MVP
+## 21. Not part of the MVP
 
-- automatische Änderung von Permissions
-- Widerrufen von Freigaben
-- Laufzeitüberwachung laufender Agentenprozesse
-- Dateisystem-Tracing
-- Netzwerküberwachung
-- garantierter Nachweis einer echten Sandbox
-- Cloud-Dashboard
-- Benutzerkonto
-- Telemetrie
-- Auto-Update
-- Plugin-System mit dynamisch geladenem Fremdcode
-- vollständige Unterstützung aller Claude-Produkte
-- Auswertung von Plugins und Plugin-MCP-Servern
-- Auswertung von MDM-Profilen und Registry-Richtlinien (werden nur erkannt)
+- automatic changes to permissions
+- revoking grants
+- runtime monitoring of running agent processes
+- filesystem tracing
+- network monitoring
+- guaranteed proof of an actual sandbox
+- cloud dashboard
+- user account
+- telemetry
+- auto-update
+- plugin system with dynamically loaded third-party code
+- full support for all Claude products
+- evaluating plugins and plugin MCP servers
+- evaluating MDM profiles and registry policies (they are only detected)
 
-Diese Funktionen werden erst bewertet, wenn der reine, nachvollziehbare Konfigurationsscanner stabil funktioniert.
+These features are only considered once the plain, traceable configuration scanner works reliably.
 
-## 22. Offene Punkte
+## 22. Open items
 
-Derzeit keine.
+None at the moment.
 
 ## 23. Status
 
 | Phase | Status |
 |---|---|
-| 0 – Grundlage | abgeschlossen (CI grün auf macOS, Windows, Linux) |
-| 1 – Claude-Code-Recherche | abgeschlossen ([Spezifikation](claude-code-scanner.md); offene Prüfpunkte für Phase 4 in Abschnitt 14) |
-| 2 – Datenmodell | abgeschlossen (Demo-Scanner liefert JSON über das CLI) |
-| 3 – Pfadanalyse | offen |
-| 4 – Claude-Code-Scanner und CLI | offen |
-| 5 – Tauri und Oberfläche | offen |
-| 6 – Export und Datenschutz | offen |
-| 7 – Releases und Veröffentlichung | offen |
+| 0 – Foundation | completed (CI green on macOS, Windows, Linux) |
+| 1 – Claude Code research | completed ([specification](claude-code-scanner.md); open checks for phase 4 in section 14) |
+| 2 – Data model | completed (demo scanner prints JSON via the CLI) |
+| 3 – Path analysis | open |
+| 4 – Claude Code scanner and CLI | open |
+| 5 – Tauri and GUI | open |
+| 6 – Export and privacy | open |
+| 7 – Releases and publication | open |
