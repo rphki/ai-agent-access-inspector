@@ -790,7 +790,7 @@ Derzeit keine.
 
 | Phase | Status |
 |---|---|
-| 0 – Grundlage | in Arbeit: lokal fertig, GitHub-Repository und CI-Lauf ausstehend |
+| 0 – Grundlage | abgeschlossen (CI grün auf macOS, Windows, Linux) |
 | 1 – Claude-Code-Recherche | offen |
 | 2 – Datenmodell | offen |
 | 3 – Pfadanalyse | offen |
