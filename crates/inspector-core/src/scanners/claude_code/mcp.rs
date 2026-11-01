@@ -90,22 +90,22 @@ pub(crate) fn evaluate(
     }
 
     let mut user_names = BTreeSet::new();
-    if let Some(claude_json) = claude_json {
-        if let Some(value) = &claude_json.mcp_servers {
-            let origin = Origin {
-                scope: FindingScope::User,
-                file: &claude_json.path,
-                config_kind: "claude-json",
-                documentation: SourceDocumentation::Documented,
-                pointer: "/mcpServers".into(),
-                project: None,
-            };
-            let wrapped = serde_json::json!({ "mcpServers": value });
-            for (name, server) in servers(scan, &wrapped, &origin) {
-                if policy.allows(scan, &name, &server, origin.file) {
-                    user_names.insert(name.clone());
-                    evaluate_server(scan, &name, &server, &origin, false, &mut counts);
-                }
+    if let Some(claude_json) = claude_json
+        && let Some(value) = &claude_json.mcp_servers
+    {
+        let origin = Origin {
+            scope: FindingScope::User,
+            file: &claude_json.path,
+            config_kind: "claude-json",
+            documentation: SourceDocumentation::Documented,
+            pointer: "/mcpServers".into(),
+            project: None,
+        };
+        let wrapped = serde_json::json!({ "mcpServers": value });
+        for (name, server) in servers(scan, &wrapped, &origin) {
+            if policy.allows(scan, &name, &server, origin.file) {
+                user_names.insert(name.clone());
+                evaluate_server(scan, &name, &server, &origin, false, &mut counts);
             }
         }
     }
@@ -116,26 +116,26 @@ pub(crate) fn evaluate(
         let disabled_by_toggle = string_set(entry.and_then(|e| e.get("disabledMcpServers")));
         let mut local_names = BTreeSet::new();
 
-        if let (Some(claude_json), Some(entry)) = (claude_json, entry) {
-            if let Some(value) = entry.get("mcpServers") {
-                let key = project.key.clone().unwrap_or_default();
-                let origin = Origin {
-                    scope: FindingScope::ProjectLocal,
-                    file: &claude_json.path,
-                    config_kind: "claude-json",
-                    documentation: SourceDocumentation::Documented,
-                    pointer: format!("/projects/{}/mcpServers", pointer_key(&key)),
-                    project: Some(project),
-                };
-                let wrapped = serde_json::json!({ "mcpServers": value });
-                for (name, server) in servers(scan, &wrapped, &origin) {
-                    if disabled_by_toggle.contains(&name) {
-                        disabled(scan, &name, origin.file);
-                    } else if policy.allows(scan, &name, &server, origin.file) {
-                        shadow_check(scan, &name, &user_names, origin.file);
-                        local_names.insert(name.clone());
-                        evaluate_server(scan, &name, &server, &origin, false, &mut counts);
-                    }
+        if let (Some(claude_json), Some(entry)) = (claude_json, entry)
+            && let Some(value) = entry.get("mcpServers")
+        {
+            let key = project.key.clone().unwrap_or_default();
+            let origin = Origin {
+                scope: FindingScope::ProjectLocal,
+                file: &claude_json.path,
+                config_kind: "claude-json",
+                documentation: SourceDocumentation::Documented,
+                pointer: format!("/projects/{}/mcpServers", pointer_key(&key)),
+                project: Some(project),
+            };
+            let wrapped = serde_json::json!({ "mcpServers": value });
+            for (name, server) in servers(scan, &wrapped, &origin) {
+                if disabled_by_toggle.contains(&name) {
+                    disabled(scan, &name, origin.file);
+                } else if policy.allows(scan, &name, &server, origin.file) {
+                    shadow_check(scan, &name, &user_names, origin.file);
+                    local_names.insert(name.clone());
+                    evaluate_server(scan, &name, &server, &origin, false, &mut counts);
                 }
             }
         }

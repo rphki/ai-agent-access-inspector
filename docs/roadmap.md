@@ -364,7 +364,7 @@ open_source_file
 get_app_info
 ```
 
-The commands are a thin layer over `inspector-core`. The MVP has no commands to change or delete agent configuration. Tauri capabilities are restricted to the necessary local functions; no external network access is needed.
+`export_scan` is added in phase 6 together with anonymisation; the other commands exist from phase 5 (see [architecture](architecture.md), section 8). The commands are a thin layer over `inspector-core`. The MVP has no commands to change or delete agent configuration. Tauri capabilities are restricted to the necessary local functions; no external network access is needed.
 
 ## 12. User interface
 
@@ -694,13 +694,14 @@ Every phase ends with an acceptance check. Only then is the next phase planned i
 - main, results and detail views, filters, states according to section 12
 - internationalisation of the GUI (German, English) according to 12.5
 - frontend tests, extend CI with frontend checks
+- moved to phase 6: `export_scan` and the export dialog, so that export is built once, with anonymisation
 - **security check:** Tauri capabilities and IPC commands, content security policy, opening paths and files must not allow running arbitrary programs, `pnpm audit`
 
 **Acceptance:** all information of a finding is understandable without raw JSON.
 
 ### Phase 6 – Export and privacy → `v0.3.0`
 
-- JSON and Markdown export with anonymisation options according to section 13
+- JSON and Markdown export with anonymisation options according to section 13, including the Tauri command `export_scan`, the export dialog and its frontend test
 - secret redaction
 - `docs/privacy.md`
 - **security check:** redaction and anonymisation verified with targeted tests, no secrets in exports
@@ -759,7 +760,7 @@ These features are only considered once the plain, traceable configuration scann
 
 ## 22. Open items
 
-- `rust-version = "1.85"` in `Cargo.toml` is not verified in CI and is probably too low (`std::env::home_dir` is only undeprecated from Rust 1.86 on). Decide whether to drop the field or verify it with a CI job.
+- `rust-version` in `Cargo.toml` was raised to `1.88` in phase 5, because the lower value kept `cargo update` from picking security fixes (see [security checks](security-checks.md)). It is still not verified in CI. Decide whether to drop the field or verify it with a CI job.
 
 ## 23. Status
 
@@ -771,6 +772,12 @@ These features are only considered once the plain, traceable configuration scann
 | 3 – Path analysis | completed (target paths, resolution, disk checks, warnings, deduplication, relations) |
 | 3.5 – Message keys and security groundwork | completed (message catalog, cargo deny, weekly CI, Dependabot, SECURITY.md) |
 | 4 – Claude Code scanner and CLI | completed: [`v0.1.0`](https://github.com/rphki/ai-agent-access-inspector/releases/tag/v0.1.0) released 2026-11-01 ([security check](security-checks.md)) |
-| 5 – Tauri and GUI | open |
+| 5 – Tauri and GUI | accepted by the maintainer 2026-11-01 ([security check](security-checks.md)); open: first CI run of the new jobs, release `v0.2.0` |
+| 5.1 Scaffold (Vite, React, Tauri 2, CI, `cargo deny`) | done |
+| 5.2 Tauri commands with path validation | done |
+| 5.3 Internationalisation (catalog sync, German) | done |
+| 5.4 Main, results and detail views, states | done |
+| 5.5 Frontend tests | done |
+| 5.6 Security check, documentation, acceptance | done |
 | 6 – Export and privacy | open |
 | 7 – Releases and publication | open |

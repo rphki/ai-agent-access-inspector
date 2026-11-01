@@ -101,10 +101,10 @@ pub fn first_json_line<T: DeserializeOwned>(
         if reader.read_until(b'\n', &mut line).ok()? == 0 {
             return None;
         }
-        if let Ok(value) = serde_json::from_slice::<T>(&line) {
-            if accept(&value) {
-                return Some(value);
-            }
+        if let Ok(value) = serde_json::from_slice::<T>(&line)
+            && accept(&value)
+        {
+            return Some(value);
         }
     }
 }

@@ -4,6 +4,17 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ## [Unreleased]
 
+### Added
+
+- Desktop application (Tauri 2, React, TypeScript): main view with detected agents, last scan, counts and configuration summary; results list with filters (agent, status, effect, access, scope, warnings only, existing paths only); detail view with path, rule, source and position, explanation, confidence, path state, warnings and related findings; actions to show a folder, open a configuration file, copy the path and copy the finding as JSON
+- German and English GUI, following the system language and switchable; the English texts are generated from the core catalog
+- Tauri commands `list_scanners`, `run_scan`, `get_scan_details`, `get_app_info`, `open_path_in_file_manager`, `open_source_file`; paths are only opened if the last scan reported them, and only JSON and Markdown files are handed to their default application
+- Frontend checks in CI (type check, ESLint, Vitest, build, `pnpm audit`); Dependabot for npm
+
+### Changed
+
+- Minimum Rust version raised to 1.88, so that dependency updates with security fixes can be used
+
 ## [0.1.0] - 2026-11-01
 
 First release: a command line tool that shows which folders Claude Code can access according to its configuration. Pre-release; builds are not signed yet.

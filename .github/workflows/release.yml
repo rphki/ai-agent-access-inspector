@@ -38,8 +38,9 @@ jobs:
       - name: Install musl tools
         if: contains(matrix.target, 'musl')
         run: sudo apt-get update && sudo apt-get install -y musl-tools
+      # The GUI is released from phase 7 on; this workflow only ships the CLI.
       - name: Test
-        run: cargo test --workspace --locked
+        run: cargo test --workspace --exclude inspector-gui --locked
       - name: Build
         run: cargo build --release --locked -p inspector-cli --target ${{ matrix.target }}
       - name: Package

@@ -1,0 +1,4 @@
+# pnpm settings (no workspace packages).
+overrides:
+  # GHSA-g3hv-75wg-m249 in minimatch < 11.0.1, pulled in by ESLint (dev only).
+  "minimatch@<11.0.1": "11.0.3"

@@ -112,16 +112,16 @@ fn check_on_disk(finding: &mut Finding, path: &TargetPath, context: &ScanContext
             Message::new("warning.missingPath"),
         ));
     }
-    if let (Some(target), Some(parent)) = (&symlink_target, path.parent()) {
-        if !target.starts_with(&parent) {
-            finding.warnings.push(Warning::new(
-                WarningKind::SymlinkElsewhere,
-                Severity::Medium,
-                Message::new("warning.symlinkElsewhere")
-                    .arg("target", target)
-                    .arg("parent", parent),
-            ));
-        }
+    if let (Some(target), Some(parent)) = (&symlink_target, path.parent())
+        && !target.starts_with(&parent)
+    {
+        finding.warnings.push(Warning::new(
+            WarningKind::SymlinkElsewhere,
+            Severity::Medium,
+            Message::new("warning.symlinkElsewhere")
+                .arg("target", target)
+                .arg("parent", parent),
+        ));
     }
 }
 

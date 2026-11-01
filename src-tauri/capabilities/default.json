@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The main window may only call the inspector's own read-only commands.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "allow-list-scanners",
+    "allow-run-scan",
+    "allow-get-scan-details",
+    "allow-get-app-info",
+    "allow-open-path-in-file-manager",
+    "allow-open-source-file"
+  ]
+}

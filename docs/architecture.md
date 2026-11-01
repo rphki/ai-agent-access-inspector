@@ -4,7 +4,7 @@
 
 ```text
 ┌──────────────────┐   ┌──────────────────┐
-│  inspector-cli   │   │  src-tauri (GUI) │   from phase 5
+│  inspector-cli   │   │  src-tauri (GUI) │   inspector-gui + src/ (React)
 └────────┬─────────┘   └────────┬─────────┘
          │                      │
          └──────────┬───────────┘
@@ -119,7 +119,7 @@ The core emits every user-facing text as a `Message`: a stable key, named parame
 - Only the GUI is translated (German and English, from phase 5). It uses the keys and treats the English catalog as the source for its translation files. The CLI is English only and prints `text`.
 - Errors that only ever reach the CLI, such as an invalid fixture or an unknown scanner name, are plain English strings.
 
-To add a text: add a `(key, template)` pair to `CATALOG` at its sorted position and use `Message::new(key)` with the matching `.arg(...)` calls.
+To add a text: add a `(key, template)` pair to `CATALOG` at its sorted position and use `Message::new(key)` with the matching `.arg(...)` calls. Then regenerate the GUI's English file (`UPDATE_EXPECT=1 cargo test -p inspector-core gui_catalog`) and add the German text to `src/locales/de.json` (section 8.3).
 
 ## 7. CLI
 
@@ -133,11 +133,50 @@ ai-agent-access-inspector list-scanners
 
 Exit codes: `0` success (also with diagnostics), `1` error (e.g. unknown scanner, invalid fixture), `2` invalid arguments.
 
-## 8. Dependencies
+## 8. GUI
+
+The desktop application consists of the crate `inspector-gui` (`src-tauri/`) and a React/TypeScript frontend (`src/`). It only ever scans the real system with the default scanners; fixtures and overrides remain CLI features.
+
+### 8.1 Commands
+
+`src-tauri/src/commands/` holds the only interface between frontend and core (roadmap, section 11). `build.rs` declares the commands, so Tauri generates one permission per command; `capabilities/default.json` grants exactly these to the main window and nothing else (no core or plugin permissions).
+
+| Command | Does |
+|---|---|
+| `list_scanners` | metadata of all scanners and whether they run by default |
+| `run_scan` | `ScanContext::from_system()` and `run_scan` on a blocking thread; stores the report with its end time and returns both |
+| `get_scan_details` | the stored report, e.g. after a reload of the frontend |
+| `get_app_info` | name, version, operating system |
+| `open_path_in_file_manager` | shows a path in the file manager |
+| `open_source_file` | opens a configuration file with its default application |
+
+`export_scan` follows in phase 6 together with anonymisation.
+
+Errors reach the frontend as `{ kind, detail }`; the frontend translates `kind`, `detail` is a technical value (path, OS message).
+
+### 8.2 Opening paths
+
+The frontend is treated as untrusted. `commands/open.rs` only accepts paths that the stored report contains, compared exactly, without normalisation:
+
+- `open_path_in_file_manager`: any location of the report (detection evidence, target base paths, symlink targets, source files). It only reveals; nothing is opened or run.
+- `open_source_file`: only source files of findings and diagnostics. After resolving symlinks the target must be a regular file ending in `.json` or `.md`; anything else is only revealed. A source therefore cannot make the GUI start a program.
+
+### 8.3 Frontend
+
+- `src/api.ts` wraps `invoke`; `src/types/report.ts` mirrors the JSON format of [findings-model.md](findings-model.md) by hand.
+- `src/report.ts` and `src/filters.ts` derive states (roadmap 12.4) and filter results without UI code.
+- `src/pages/` holds the main view (`Overview`), the results list (`Results`) and the detail view (`Detail`).
+- Translation (`src/i18n.tsx`): core messages are translated by key with their parameters inserted verbatim, falling back to the English text the core sent. `src/locales/en.json` is generated from `CATALOG` (test `gui_catalog_is_in_sync`); `de.json` and the GUI texts `ui.*.json` are maintained by hand. The language follows the system language and can be switched; the choice is kept in `localStorage`.
+- The content security policy in `tauri.conf.json` allows only the app's own scripts and the IPC channel; there are no remote sources.
+
+## 9. Dependencies
 
 | Crate | Dependencies |
 |---|---|
 | `inspector-core` | `serde`, `serde_json` |
 | `inspector-cli` | `inspector-core`, `clap`, `serde_json` |
+| `inspector-gui` | `inspector-core`, `tauri`, `tauri-plugin-opener`, `serde`, `serde_json` |
+
+The frontend uses React, `@tauri-apps/api` and, for development only, Vite, TypeScript, ESLint, Vitest and React Testing Library (exact versions in `package.json`).
 
 New dependencies in the core are added sparingly, because the core is embedded in both CLI and GUI and works locally with user data.

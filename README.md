@@ -6,7 +6,7 @@ The first supported agent is **Claude Code**. More agents will follow as indepen
 
 The application works entirely locally, never changes agent configuration and transmits no data.
 
-> **Status:** early development. The command line tool scans the configuration of Claude Code; a desktop GUI follows.
+> **Status:** early development. The command line tool scans the configuration of Claude Code; a desktop GUI (German, English) is in development and can be started from source with `pnpm install && pnpm tauri dev`.
 
 ## Usage
 
@@ -38,6 +38,7 @@ cargo run -p inspector-cli -- --version
 |---|---|
 | `crates/inspector-core` | data model, path analysis, scanners (without Tauri) |
 | `crates/inspector-cli` | command line program `ai-agent-access-inspector` |
+| `src-tauri/`, `src/` | desktop GUI (Tauri, React) |
 | `docs/` | roadmap and documentation |
 
 New to the project? [docs/onboarding.md](docs/onboarding.md) explains the build setup, tests and CI.

@@ -372,6 +372,27 @@ mod tests {
         }
     }
 
+    /// The GUI translates by key; its English file is generated from the
+    /// catalog. Regenerate with
+    /// `UPDATE_EXPECT=1 cargo test -p inspector-core gui_catalog`.
+    #[test]
+    fn gui_catalog_is_in_sync() {
+        let path =
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../src/locales/en.json");
+        let catalog: BTreeMap<&str, &str> = CATALOG.iter().copied().collect();
+        let actual = serde_json::to_string_pretty(&catalog).unwrap() + "\n";
+        if std::env::var_os("UPDATE_EXPECT").is_some() {
+            std::fs::write(&path, &actual).unwrap();
+            return;
+        }
+        let expected = std::fs::read_to_string(&path).unwrap_or_default();
+        assert!(
+            expected.replace("\r\n", "\n") == actual,
+            "src/locales/en.json differs from CATALOG. Run \
+             `UPDATE_EXPECT=1 cargo test -p inspector-core gui_catalog`."
+        );
+    }
+
     #[test]
     fn renders_parameters() {
         let message = Message::new("warning.symlinkElsewhere")

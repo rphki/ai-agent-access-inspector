@@ -7,6 +7,18 @@ all-features = true
 # Known vulnerabilities and unmaintained or yanked crates (RustSec database).
 [advisories]
 yanked = "deny"
+# Unmaintained crates in the GUI's Linux dependency tree without a safe
+# upgrade. None has a known vulnerability; re-check when Tauri updates them.
+ignore = [
+    # proc-macro-error: build-time macro of the GTK 3 bindings (gtk3-macros,
+    # glib-macros) that Tauri uses on Linux.
+    { id = "RUSTSEC-2024-0370", reason = "build-time only, GTK 3 bindings of Tauri on Linux" },
+    # zvariant, zvariant_derive, zbus_names: merged into zbus 6;
+    # tauri-plugin-opener still uses zbus 5 for D-Bus on Linux.
+    { id = "RUSTSEC-2026-0370", reason = "merged into zbus 6, no vulnerability; via tauri-plugin-opener on Linux" },
+    { id = "RUSTSEC-2026-0371", reason = "merged into zbus 6, no vulnerability; via tauri-plugin-opener on Linux" },
+    { id = "RUSTSEC-2026-0372", reason = "merged into zbus 6, no vulnerability; via tauri-plugin-opener on Linux" },
+]
 
 # Only permissive licenses compatible with Apache-2.0.
 [licenses]
@@ -14,6 +26,15 @@ allow = [
     "Apache-2.0",
     "MIT",
     "Unicode-3.0",
+    # From phase 5, required by the Tauri dependency tree of the GUI:
+    # permissive licenses (brotli, alloc-stdlib, foldhash, target-lexicon) ...
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-3-Clause",
+    "Zlib",
+    # ... and MPL-2.0, a file-level copyleft that only applies to changes in
+    # these crates' own files (Servo's cssparser, selectors and dtoa-short,
+    # used by tauri-utils). We use them unmodified.
+    "MPL-2.0",
 ]
 confidence-threshold = 0.9
 

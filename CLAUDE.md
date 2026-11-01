@@ -24,7 +24,8 @@ AI Agent Access Inspector: a local, cross-platform tool that shows which folders
 |---|---|
 | `crates/inspector-core` | data model, scan context, scanners, path analysis; no Tauri dependency |
 | `crates/inspector-cli` | CLI binary `ai-agent-access-inspector` |
-| `src-tauri/`, `src/` | GUI, from phase 5 |
+| `src-tauri/` | GUI crate `inspector-gui`: Tauri commands and configuration |
+| `src/` | GUI frontend (React, TypeScript); `src/locales/en.json` is generated from the core catalog |
 | `fixtures/` | test fixtures with invented paths and values only |
 
 ## Commands
@@ -34,9 +35,11 @@ cargo fmt --all
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --locked
 cargo run -p inspector-cli -- scan --agent demo
+pnpm typecheck && pnpm lint && pnpm test
+pnpm tauri dev
 ```
 
-All three checks must pass before a commit. CI runs them on macOS, Windows and Linux. Platform-specific code (`#[cfg(...)]`) should also be checked with `--target x86_64-pc-windows-gnu` and `--target x86_64-unknown-linux-gnu` (see `docs/onboarding.md`, section 5).
+The Cargo checks and the frontend checks must pass before a commit. CI runs them on macOS, Windows and Linux. Platform-specific code (`#[cfg(...)]`) should also be checked with `--target x86_64-pc-windows-gnu` and `--target x86_64-unknown-linux-gnu` and `--exclude inspector-gui` (see `docs/onboarding.md`, section 5).
 
 ## Rules
 
@@ -47,7 +50,8 @@ All three checks must pass before a commit. CI runs them on macOS, Windows and L
 - **Fixtures:** `fixtures/claude-code/*/expected.json` are reviewed expectations. After an intended scanner change, regenerate with `UPDATE_EXPECT=1 cargo test -p inspector-core --test claude_code_fixtures` and review the diff before committing.
 - **Undocumented sources** are marked `heuristic` and get at most medium confidence.
 - **Dependencies in `inspector-core`** are added sparingly.
-- **Security:** run `cargo deny check` when changing dependencies; each phase has a security check in `docs/roadmap.md` that must be done before the phase is accepted.
+- **GUI texts:** after changing the core catalog, regenerate `src/locales/en.json` with `UPDATE_EXPECT=1 cargo test -p inspector-core gui_catalog` and add the German text to `src/locales/de.json`.
+- **Security:** run `cargo deny check` (Cargo) or `pnpm audit` (npm) when changing dependencies; each phase has a security check in `docs/roadmap.md` that must be done before the phase is accepted.
 - Keep `docs/roadmap.md` (status table) and `CHANGELOG.md` (`Unreleased`) up to date when a phase or feature is done.
 
 ## Working style

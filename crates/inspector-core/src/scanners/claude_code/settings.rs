@@ -313,23 +313,22 @@ fn check_keys(scan: &mut Scan, file: &SettingsFile) {
             }
         }
     }
-    if file.level.is_project() {
-        if let Some(mode @ ("auto" | "bypassPermissions")) = file
+    if file.level.is_project()
+        && let Some(mode @ ("auto" | "bypassPermissions")) = file
             .pointer("/permissions/defaultMode")
             .and_then(Value::as_str)
-        {
-            scan.diagnostic(
-                Diagnostic::new(
-                    DiagnosticLevel::Warning,
-                    DiagnosticCode::IgnoredSetting,
-                    Message::new("diagnostic.scopeNotAllowed")
-                        .arg("key", "permissions.defaultMode")
-                        .arg("value", mode),
-                )
-                .file(file.path.to_path_buf())
-                .pointer("/permissions/defaultMode"),
-            );
-        }
+    {
+        scan.diagnostic(
+            Diagnostic::new(
+                DiagnosticLevel::Warning,
+                DiagnosticCode::IgnoredSetting,
+                Message::new("diagnostic.scopeNotAllowed")
+                    .arg("key", "permissions.defaultMode")
+                    .arg("value", mode),
+            )
+            .file(file.path.to_path_buf())
+            .pointer("/permissions/defaultMode"),
+        );
     }
 }
 

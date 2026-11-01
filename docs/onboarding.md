@@ -10,10 +10,12 @@ This guide is for anyone who checks out the repository and wants to understand h
 | Git | version control | system package manager |
 | [GitHub CLI](https://cli.github.com/) (`gh`) | optional: CI results in the terminal | e.g. `brew install gh` |
 | [cargo-deny](https://embarkstudios.github.io/cargo-deny/) | optional: dependency audit before pushing | `brew install cargo-deny` or `cargo install --locked cargo-deny` |
+| [Node.js](https://nodejs.org/) 24 and [pnpm](https://pnpm.io/) | GUI frontend (`src/`) | e.g. `brew install node pnpm`; the pnpm version is pinned in `package.json` (`packageManager`) |
+| WebKitGTK and friends (Linux only) | building the GUI crate | `sudo apt-get install libwebkit2gtk-4.1-dev libxdo-dev libayatana-appindicator3-dev librsvg2-dev` (see [Tauri prerequisites](https://tauri.app/start/prerequisites/)) |
 
 You do **not** need to pick a Rust version. The repository pins it (see 3.1); rustup installs the right toolchain on the first `cargo` call inside the repository. If your rustup version does not do that automatically, run `rustup show` once in the repository.
 
-Node.js and pnpm will be needed from phase 5 (GUI) on; they are not used yet.
+macOS needs the Xcode command line tools, Windows the WebView2 runtime (preinstalled on Windows 11).
 
 ## 2. First steps
 
@@ -23,9 +25,11 @@ cd ai-agent-access-inspector
 cargo build
 cargo test
 cargo run -p inspector-cli -- scan --agent demo
+pnpm install
+pnpm tauri dev
 ```
 
-The last command prints a JSON report with example findings from the demo scanner. If all three commands succeed, your setup is complete.
+`cargo run` prints a JSON report with example findings from the demo scanner. `pnpm tauri dev` starts the Vite dev server and opens the GUI, which scans your real configuration (read-only). If all commands succeed, your setup is complete.
 
 ## 3. How the build is set up
 
@@ -39,7 +43,7 @@ components = ["rustfmt", "clippy"]
 
 rustup reads this file whenever you run `cargo` in the repository. It selects the current stable Rust and makes sure the formatter (`rustfmt`) and the linter (`clippy`) are installed. CI uses the same file, so local builds and CI builds use the same toolchain configuration.
 
-`rust-version` in `Cargo.toml` declares the oldest Rust version the code is meant to compile with. It is not verified in CI; CI always uses the current stable release.
+`rust-version` in `Cargo.toml` declares the oldest Rust version the code is meant to compile with. It is not verified in CI; CI always uses the current stable release. It also caps the dependency versions `cargo update` picks, so it must not be lower than security fixes require (raised to 1.88 for this reason in phase 5).
 
 ### 3.2 Workspace: `Cargo.toml`
 
@@ -49,6 +53,7 @@ The repository is a Cargo **workspace**: one root `Cargo.toml` that ties several
 |---|---|---|---|
 | `inspector-core` | `crates/inspector-core` | library | data model, scan context, scanners, path analysis |
 | `inspector-cli` | `crates/inspector-cli` | binary | the program `ai-agent-access-inspector` |
+| `inspector-gui` | `src-tauri` | binary and library | the desktop application (Tauri); its frontend lives in `src/` |
 
 The root `Cargo.toml` defines for all crates:
 
@@ -56,7 +61,7 @@ The root `Cargo.toml` defines for all crates:
 - **`[workspace.dependencies]`**: the internal dependency on `inspector-core`.
 - **`[workspace.lints]`**: compiler and Clippy rules (see 3.5).
 
-`inspector-cli` depends on `inspector-core`; the core has no dependency on the CLI or (later) on Tauri. The GUI in `src-tauri/` will be added as a third crate in phase 5.
+`inspector-cli` and `inspector-gui` depend on `inspector-core`; the core has no dependency on either of them or on Tauri.
 
 ### 3.3 Dependencies: `Cargo.lock`
 
@@ -66,14 +71,14 @@ The root `Cargo.toml` defines for all crates:
 - `cargo update` moves to newer compatible versions; commit the changed `Cargo.lock`.
 - `--locked` (used in CI) makes Cargo fail instead of silently updating `Cargo.lock` if it does not match `Cargo.toml`. If CI fails with a message about the lock file, run `cargo build` locally and commit the updated `Cargo.lock`.
 
-Current external dependencies: `serde` and `serde_json` (core), `clap` and `serde_json` (CLI). New dependencies in the core are added sparingly.
+Current external dependencies: `serde` and `serde_json` (core), `clap` and `serde_json` (CLI), `tauri`, `tauri-plugin-opener`, `serde` and `serde_json` (GUI). New dependencies in the core are added sparingly.
 
 ### 3.4 Dependency audit: `deny.toml`
 
 `cargo deny check` checks all dependencies against `deny.toml`:
 
-- **advisories:** known vulnerabilities and yanked crates from the [RustSec](https://rustsec.org/) database,
-- **licenses:** only Apache-2.0, MIT and Unicode-3.0 are allowed; a dependency with another license fails the check and has to be discussed before it is added,
+- **advisories:** known vulnerabilities and yanked crates from the [RustSec](https://rustsec.org/) database; the few ignored advisories (unmaintained crates in Tauri's Linux tree without a safe upgrade) are listed with a reason,
+- **licenses:** only the permissive licenses listed in `deny.toml` and MPL-2.0 (required by Tauri, see the comments there) are allowed; a dependency with another license fails the check and has to be discussed before it is added,
 - **bans:** duplicate versions of a crate produce a warning, wildcard version requirements an error,
 - **sources:** crates may only come from crates.io.
 
@@ -104,6 +109,19 @@ Everything Cargo produces goes to `target/` (ignored by Git):
 
 On Windows the binary has the suffix `.exe`.
 
+### 3.7 Frontend: `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`
+
+The GUI frontend (`src/`) is React with TypeScript, built by Vite into `dist/`, which `src-tauri/tauri.conf.json` embeds. `package.json` pins exact versions; `pnpm-lock.yaml` pins the whole tree and is used with `--frozen-lockfile` in CI. `pnpm-workspace.yaml` only holds pnpm settings, currently an `overrides` entry that lifts a vulnerable transitive dev dependency. pnpm refuses packages younger than its minimum release age; pick an older version rather than adding an exclusion.
+
+| Command | Does |
+|---|---|
+| `pnpm dev` | Vite dev server on port 1420 (used by `pnpm tauri dev`) |
+| `pnpm build` | type check and production build into `dist/` |
+| `pnpm typecheck`, `pnpm lint`, `pnpm test` | TypeScript, ESLint, Vitest |
+| `pnpm tauri dev` | GUI with hot reload of the frontend; Rust changes rebuild the app |
+
+The GUI translates core messages by key. `src/locales/en.json` is generated from the core catalog (`model/message.rs`); the test `gui_catalog_is_in_sync` fails when they differ. After adding a catalog entry, run `UPDATE_EXPECT=1 cargo test -p inspector-core gui_catalog` and add the German text to `src/locales/de.json` (a frontend test checks that German covers every key). GUI-only texts live in `src/locales/ui.en.json` and `ui.de.json`.
+
 ## 4. Tests
 
 ```bash
@@ -111,6 +129,8 @@ cargo test --workspace                       # everything
 cargo test -p inspector-core                 # only the core
 cargo test -p inspector-core analysis::      # only tests whose name contains "analysis::"
 cargo test -p inspector-cli --test cli       # only the CLI integration tests
+cargo test -p inspector-gui                  # GUI commands (path validation)
+pnpm test                                    # frontend tests (Vitest)
 ```
 
 | Kind | Where | What it does |
@@ -118,6 +138,7 @@ cargo test -p inspector-cli --test cli       # only the CLI integration tests
 | Unit tests | `#[cfg(test)] mod tests` at the end of a source file, or a `tests.rs` next to it (e.g. `analysis/tests.rs`) | test functions of one module, with access to private items |
 | Integration tests | `crates/inspector-cli/tests/cli.rs` | start the built binary as a separate process and check its output and exit code |
 | Fixture tests | `crates/inspector-core/tests/claude_code_fixtures.rs` | scan every fixture in `fixtures/claude-code/` and compare the result with its `expected.json` |
+| Frontend tests | `src/**/*.test.ts(x)` | render the GUI with React Testing Library against a mocked backend; the reports come from the fixtures' `expected.json` |
 
 Things worth knowing:
 
@@ -143,6 +164,8 @@ cargo fmt --all
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --locked
 cargo deny check          # when dependencies changed
+pnpm typecheck && pnpm lint && pnpm test
+pnpm audit                # when frontend dependencies changed
 ```
 
 `--all-targets` makes Clippy check test code too, not only the library and binary.
@@ -159,7 +182,7 @@ cargo clippy --workspace --all-targets --locked --target x86_64-pc-windows-gnu -
 cargo clippy --workspace --all-targets --locked --target x86_64-unknown-linux-gnu -- -D warnings
 ```
 
-This only *checks* the code for the other platform; it does not run the tests there. Running tests on all platforms is what CI is for.
+This only *checks* the code for the other platform; it does not run the tests there. Running tests on all platforms is what CI is for. The GUI crate cannot be cross-checked from macOS (its build script needs the target's resource compiler or system libraries); add `--exclude inspector-gui` and rely on CI for it.
 
 ## 6. Continuous integration
 
@@ -182,7 +205,8 @@ GitHub Actions
    ├── Dependencies (cargo deny)     → Ubuntu runner
    ├── Clippy and tests (macos)      → macOS runner (Apple Silicon)
    ├── Clippy and tests (ubuntu)     → Ubuntu runner
-   └── Clippy and tests (windows)    → Windows runner
+   ├── Clippy and tests (windows)    → Windows runner
+   └── Frontend                      → Ubuntu runner
 ```
 
 The three "Clippy and tests" jobs come from one definition with a **matrix** over `macos-latest`, `windows-latest` and `ubuntu-latest`. `fail-fast: false` lets all three finish even if one fails, so you always see which platforms pass.
@@ -192,10 +216,11 @@ Steps of a "Clippy and tests" job:
 1. **`actions/checkout`** fetches the pushed commit onto the runner.
 2. **`rustup show`** installs the toolchain from `rust-toolchain.toml` (rustup is preinstalled on the runners).
 3. **`Swatinem/rust-cache`** restores downloaded crates and build artifacts from earlier runs. The cache key includes `Cargo.lock`, so changed dependencies lead to a fresh build. This mainly speeds up Windows.
-4. **Clippy** with `-D warnings` and `--locked` (see 3.3 and 3.5).
-5. **Tests** with `--locked`.
+4. **Tauri system packages** (Ubuntu only): WebKitGTK and related libraries the GUI crate links against.
+5. **Clippy** with `-D warnings` and `--locked` (see 3.3 and 3.5).
+6. **Tests** with `--locked`.
 
-The format check and the dependency audit (`EmbarkStudios/cargo-deny-action`, see 3.4) run only once, on Ubuntu, because their results do not depend on the platform.
+The format check and the dependency audit (`EmbarkStudios/cargo-deny-action`, see 3.4) run only once, on Ubuntu, because their results do not depend on the platform. So does the **Frontend** job: `pnpm install --frozen-lockfile`, type check, ESLint, Vitest, production build and `pnpm audit`.
 
 Further settings in the workflow:
 
@@ -206,7 +231,7 @@ Releases are built by a separate workflow, [`release.yml`](../.github/workflows/
 
 Runners for public repositories are free of charge.
 
-**Dependabot** ([`.github/dependabot.yml`](../.github/dependabot.yml)) is not part of CI but a GitHub service: once a week it checks Cargo dependencies and GitHub Actions for new versions and opens one grouped pull request per ecosystem. These pull requests go through CI like any other.
+**Dependabot** ([`.github/dependabot.yml`](../.github/dependabot.yml)) is not part of CI but a GitHub service: once a week it checks Cargo and npm dependencies and GitHub Actions for new versions and opens one grouped pull request per ecosystem. These pull requests go through CI like any other.
 
 ### 6.3 Why three operating systems
 
@@ -237,6 +262,8 @@ The same source code compiles and behaves differently per platform:
 | Clippy fails on one platform only | platform-specific code (see 6.3) | reproduce with `--target` (section 5), fix, push |
 | Dependencies job fails | new advisory, disallowed license or source | read the report; update the crate (`cargo update -p <crate>`) or replace it |
 | "the lock file needs to be updated" | `Cargo.lock` does not match `Cargo.toml` | `cargo build`, commit `Cargo.lock` |
+| `gui_catalog_is_in_sync` fails | core catalog changed without regenerating the GUI file | `UPDATE_EXPECT=1 cargo test -p inspector-core gui_catalog`, add the German text |
+| Frontend job: `pnpm audit` fails | new advisory in an npm package | update the package; for a transitive dev dependency, an `overrides` entry in `pnpm-workspace.yaml` |
 | Test fails on Windows only | path separators, letter case, `C:\` paths | test with Windows paths in the target path type; check `#[cfg]` usage |
 
 ## 7. Where to go next

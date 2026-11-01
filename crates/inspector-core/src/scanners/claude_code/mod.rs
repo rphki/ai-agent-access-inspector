@@ -329,12 +329,11 @@ impl Scan<'_> {
             Locations::file(&claude_dir, "settings.local.json"),
             Some(index),
         ));
-        if let Some(root) = projects::git_root(self.context, &project.path) {
-            if !root.same_path(&project.path) {
-                let local =
-                    Locations::file(&Locations::file(&root, ".claude"), "settings.local.json");
-                files.extend(self.read_settings(Level::ProjectLocal, local, Some(index)));
-            }
+        if let Some(root) = projects::git_root(self.context, &project.path)
+            && !root.same_path(&project.path)
+        {
+            let local = Locations::file(&Locations::file(&root, ".claude"), "settings.local.json");
+            files.extend(self.read_settings(Level::ProjectLocal, local, Some(index)));
         }
         files.extend(self.read_settings(
             Level::Project,
