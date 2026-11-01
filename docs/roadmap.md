@@ -211,7 +211,7 @@ pub struct ScanContext {
 }
 ```
 
-Scanners build system-wide paths (e.g. managed settings) with `context.system_path(…)`, so that fixture scans can redirect them into the fixture directory. This replaces the originally planned `PlatformConfigDirs`.
+All paths in the context are paths of the scanned system (target paths). Scanners read files through `context.host_path(…)`, which redirects them into the fixture directory in fixture scans. This replaces the originally planned `PlatformConfigDirs`.
 
 This way all platform variants can be tested with fixtures on every development machine.
 
@@ -730,7 +730,7 @@ None at the moment.
 | 0 – Foundation | completed (CI green on macOS, Windows, Linux) |
 | 1 – Claude Code research | completed ([specification](claude-code-scanner.md); open checks for phase 4 in section 14) |
 | 2 – Data model | completed (demo scanner prints JSON via the CLI) |
-| 3 – Path analysis | open |
+| 3 – Path analysis | completed (target paths, resolution, disk checks, warnings, deduplication, relations) |
 | 4 – Claude Code scanner and CLI | open |
 | 5 – Tauri and GUI | open |
 | 6 – Export and privacy | open |

@@ -22,6 +22,11 @@ impl OperatingSystem {
             Self::Linux
         }
     }
+
+    /// Whether the default filesystem ignores letter case (NTFS, APFS).
+    pub fn is_case_insensitive(self) -> bool {
+        matches!(self, Self::Windows | Self::MacOs)
+    }
 }
 
 #[cfg(test)]

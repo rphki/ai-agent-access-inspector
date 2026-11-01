@@ -23,11 +23,15 @@ pub struct Finding {
     pub status: FindingStatus,
     pub scope: FindingScope,
     pub source: FindingSource,
+    /// Further sources with the same content, merged by deduplication.
+    pub additional_sources: Vec<FindingSource>,
     /// Human readable explanation of what this finding means.
     pub explanation: String,
     pub confidence: Confidence,
     pub path_state: PathState,
     pub warnings: Vec<Warning>,
+    /// Relations to other findings of the same agent.
+    pub related: Vec<RelatedFinding>,
 }
 
 impl Finding {
@@ -50,10 +54,12 @@ impl Finding {
                 status: FindingStatus::Unknown,
                 scope,
                 source,
+                additional_sources: Vec::new(),
                 explanation: String::new(),
                 confidence: Confidence::Low,
                 path_state: PathState::default(),
                 warnings: Vec::new(),
+                related: Vec::new(),
             },
         }
     }
@@ -402,6 +408,8 @@ pub enum WarningKind {
     ConflictingRules,
     DangerousMode,
     UnsandboxedShell,
+    /// A location that typically holds credentials, e.g. `~/.ssh`.
+    SensitiveLocation,
     /// A probable mistake in the configuration, e.g. a misanchored path.
     LikelyMisconfigured,
     /// The configuration exists but does not take effect.
@@ -425,6 +433,25 @@ pub enum IneffectiveReason {
     OverriddenByHigherScope,
     /// Not supported on this operating system.
     PlatformUnsupported,
+}
+
+/// A relation from one finding to another.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RelatedFinding {
+    pub relation: Relation,
+    pub finding_id: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum Relation {
+    /// The other finding's path lies below this one.
+    Contains,
+    /// This finding's path lies below the other one.
+    ContainedIn,
+    /// A deny rule that takes precedence over this finding.
+    OverriddenBy,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]

@@ -2,6 +2,7 @@
 
 use std::panic::{self, AssertUnwindSafe};
 
+use crate::analysis;
 use crate::context::ScanContext;
 use crate::model::{
     DetectionResult, DetectionStatus, Diagnostic, DiagnosticCode, DiagnosticLevel,
@@ -23,8 +24,9 @@ pub trait AgentScanner: Send + Sync {
 
 /// Runs the given scanners and collects their results into a report.
 ///
-/// `scan` is only called for detected agents. A panicking scanner yields an
-/// internal diagnostic instead of aborting the whole run.
+/// `scan` is only called for detected agents. Each scanner's findings then
+/// go through the path analysis. A panicking scanner yields an internal
+/// diagnostic instead of aborting the whole run.
 pub fn run_scan(context: &ScanContext, scanners: &[&dyn AgentScanner]) -> ScanReport {
     ScanReport {
         format_version: REPORT_FORMAT_VERSION.into(),
@@ -69,7 +71,7 @@ fn run_one(context: &ScanContext, scanner: &dyn AgentScanner) -> ScanResult {
     ScanResult {
         scanner: metadata,
         detection,
-        findings: output.findings,
+        findings: analysis::analyze(output.findings, context),
         diagnostics: output.diagnostics,
         summary: output.summary,
     }

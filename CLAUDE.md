@@ -39,7 +39,7 @@ All three checks must pass before a commit. CI runs them on macOS, Windows and L
 ## Rules
 
 - **Never modify agent configuration.** The tool only reads.
-- **Scanners access the system only through `ScanContext`**, never `std::env` or the real home directory directly. System-wide paths go through `context.system_path(...)`.
+- **Scanners access the system only through `ScanContext`**, never `std::env` or the real home directory directly. Paths are target paths of the scanned system (`analysis::path::TargetPath`, never `std::path` logic, which follows the host); files are read via `context.host_path(...)`.
 - **Scanners never fail as a whole.** Problems become `Diagnostic`s.
 - **Privacy:** read only the keys a scanner needs; never output secrets (MCP `env`, `headers`, tokens). When inspecting the maintainer's local configuration for research, look at structure and key names only, not values.
 - **Undocumented sources** are marked `heuristic` and get at most medium confidence.

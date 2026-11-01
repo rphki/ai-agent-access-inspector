@@ -43,10 +43,12 @@ A finding is a path or rule that grants, restricts or suggests file access for a
 | `status` | `configured`, `observed`, `potential`, `blocked`, `unknown` (meaning see roadmap 4.1) |
 | `scope` | `managed`, `user`, `project`, `projectLocal`, `session`, `runtime`, `operatingSystem` |
 | `source` | origin, see 3.2 |
+| `additionalSources` | further sources with the same content, merged by deduplication (same structure as `source`) |
 | `explanation` | human-readable explanation |
 | `confidence` | `low`, `medium`, `high` |
 | `pathState` | state on disk, see 3.3 |
-| `warnings` | security-relevant remarks, see 3.4 |
+| `warnings` | security-relevant remarks, see 3.4; sorted by severity, most severe first |
+| `related` | relations to other findings of the same agent, see 3.5 |
 
 ### 3.1 Target
 
@@ -72,13 +74,13 @@ A finding is a path or rule that grants, restricts or suggests file access for a
 
 ### 3.3 PathState
 
-Filled in by the path analysis (phase 3); until then `notChecked`.
+Filled in by the path analysis. Findings without an absolute base path (e.g. `everything`) stay `notChecked`.
 
 | Field | Values |
 |---|---|
 | `existence` | `exists`, `missing`, `unknown` (check failed), `notChecked` |
 | `kind` | `file`, `directory`, `other`, `unknown` |
-| `symlinkTarget` | target, if the path is a symlink |
+| `symlinkTarget` | fully resolved target, if the path itself is a symlink; for dangling links and loops the link's immediate target |
 
 ### 3.4 Warning
 
@@ -97,6 +99,7 @@ Filled in by the path analysis (phase 3); until then `notChecked`.
 | `conflictingRules` | conflicting allow/deny rules |
 | `dangerousMode` | dangerous permission mode |
 | `unsandboxedShell` | shell commands without sandbox |
+| `sensitiveLocation` | a location that typically holds credentials, e.g. `~/.ssh` |
 | `likelyMisconfigured` | probable configuration mistake, e.g. a misanchored path |
 | `notEffective` | configuration present but not effective; reason in `reason` |
 
@@ -105,6 +108,18 @@ Reasons for `notEffective`: `trustNotAccepted`, `managedRulesOnly`, `scopeNotAll
 `severity`: `info`, `low`, `medium`, `high`.
 
 "Not effective" is deliberately a warning, not a status of its own: the finding stays `configured` because that is what the configuration says, and the warning explains why it currently does not apply.
+
+### 3.5 Related findings
+
+```json
+{ "relation": "containedIn", "findingId": "claude-code-…" }
+```
+
+| `relation` | Meaning |
+|---|---|
+| `contains` | the other finding's path lies below this one |
+| `containedIn` | this finding's path lies below the other one |
+| `overriddenBy` | a deny rule that fully covers this allow/ask finding and takes precedence |
 
 ## 4. Diagnostic
 
@@ -158,10 +173,14 @@ Output of `ai-agent-access-inspector scan --agent demo --home /home/alice` (shor
             "parserVersion": "1",
             "excerpt": null
           },
+          "additionalSources": [],
           "explanation": "Additional working directory: …",
           "confidence": "high",
-          "pathState": { "existence": "notChecked", "kind": "unknown", "symlinkTarget": null },
-          "warnings": []
+          "pathState": { "existence": "missing", "kind": "unknown", "symlinkTarget": null },
+          "warnings": [
+            { "kind": { "type": "missingPath" }, "severity": "low", "message": "The path does not exist (anymore)." }
+          ],
+          "related": []
         }
       ],
       "diagnostics": [
