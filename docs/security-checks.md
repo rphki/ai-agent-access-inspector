@@ -2,6 +2,23 @@
 
 Record of the security check that ends each phase (see [roadmap](roadmap.md), section 14). Each entry lists what was checked, how, and what remains open.
 
+## Phase 7 – Full security review before the first public release (2026-11-01)
+
+Basis: [threat-model.md](threat-model.md). All security-relevant code was reviewed again: `read.rs`, `redact.rs`, `export/anonymize.rs`, `src-tauri/src/commands/*`, capability and CSP, the frontend (rendering, clipboard, export dialog), both workflows.
+
+| Topic | Check | Result |
+|---|---|---|
+| Untrusted files | `read.rs`: regular files only, size limits, session logs capped; no path from a configuration file is executed or written | unchanged since phase 4; time-of-check/time-of-use with named pipes accepted (threat model, section 5) |
+| Output and exports | redaction pass, path privacy, id renumbering | acceptance test from phase 6 passes |
+| IPC | seven commands, each with its own permission; no core or plugin permissions for the frontend; open and export commands take no trusted path from the frontend | review of `capabilities/default.json`, `commands/` |
+| Frontend | no `dangerouslySetInnerHTML`, `eval` or remote content; strict CSP; no devtools in release builds | `grep` in `src/`, `tauri.conf.json` |
+| Release workflow permissions | default `contents: read`; only the publish job writes, only for `v*` tags; the version check covers `Cargo.toml` and `package.json` | review of `release.yml` |
+| Supply chain (changed) | **all actions pinned to commit SHAs**; **`persist-credentials: false`** on every checkout; **no dependency cache in release builds**; no third-party release action; `cargo deny` and `pnpm audit` pass | workflows |
+| Signing and secrets | builds unsigned (maintainer decision for `0.x`, macOS ad hoc); no secrets besides `GITHUB_TOKEN`; no private keys in the repository | `release.yml`, `git grep` for key material |
+| `SECURITY.md` | supported versions, unsigned builds and checksums, links to threat model and privacy | updated |
+
+Open points, carried forward: signing and notarisation (`1.0.0`), heuristic redaction, anonymisation limited to user directories, TOCTOU in `read.rs` (all in [threat-model.md](threat-model.md), section 5).
+
 ## Phase 6 – Export and privacy (2026-11-01)
 
 | Topic | Check | Result |

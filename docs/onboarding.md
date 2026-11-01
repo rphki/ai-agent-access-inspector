@@ -275,4 +275,6 @@ The same source code compiles and behaves differently per platform:
 | [findings-model.md](findings-model.md) | data model and JSON format |
 | [release-process.md](release-process.md) | how releases are built and published |
 | [claude-code-scanner.md](claude-code-scanner.md) | specification of the Claude Code scanner |
+| [adding-a-scanner.md](adding-a-scanner.md) | step-by-step guide for a scanner for a new agent |
+| [`CONTRIBUTING.md`](../CONTRIBUTING.md) | setup, checks and rules for pull requests |
 | [`CLAUDE.md`](../CLAUDE.md) | working rules (language, privacy, commits), also used by Claude Code |

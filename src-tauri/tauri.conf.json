@@ -43,6 +43,16 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "publisher": "AI Agent Access Inspector contributors",
+    "copyright": "Copyright 2026 the AI Agent Access Inspector contributors. Apache-2.0.",
+    "category": "DeveloperTool",
+    "shortDescription": "Shows which folders local AI agents can access",
+    "longDescription": "A read-only desktop tool that shows which folders local AI agents such as Claude Code can access according to their configuration. It changes nothing and sends no data.",
+    "licenseFile": "../LICENSE",
+    "macOS": {
+      "signingIdentity": "-",
+      "minimumSystemVersion": "11.0"
+    }
   }
 }

@@ -1,0 +1,64 @@
+name: Scanner request
+description: Suggest support for another AI agent.
+labels: ["scanner"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A scanner reads an agent's configuration and reports which folders the agent may access. To build one, we need to know where the agent keeps its configuration and how it controls file access. Do **not** paste real configuration files that contain tokens or private paths; describe the structure and key names instead. See `docs/adding-a-scanner.md` if you want to implement it yourself.
+  - type: input
+    id: agent
+    attributes:
+      label: Agent
+      description: Name and website of the agent.
+      placeholder: e.g. Example Agent, https://example.com/agent
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Agent version
+      description: The version you looked at.
+    validations:
+      required: true
+  - type: textarea
+    id: locations
+    attributes:
+      label: Configuration locations per operating system
+      description: Files and directories that control file access, including managed (system-wide), user and project levels and environment variables that move them.
+      placeholder: |
+        macOS:   ~/.example/settings.json, /Library/Application Support/Example/managed.json
+        Windows: %APPDATA%\Example\settings.json
+        Linux:   ~/.config/example/settings.json, /etc/example/managed.json
+        Project: <project>/.example/settings.json
+    validations:
+      required: true
+  - type: textarea
+    id: access
+    attributes:
+      label: How the agent controls file access
+      description: Relevant keys and their meaning, e.g. allowed directories, allow/deny rules, sandbox settings, MCP servers.
+  - type: textarea
+    id: docs
+    attributes:
+      label: Links to official documentation
+      description: Documentation of the configuration format and the access rules.
+    validations:
+      required: true
+  - type: dropdown
+    id: documented
+    attributes:
+      label: Are these sources documented?
+      description: Undocumented sources are marked as heuristic and get at most medium confidence.
+      options:
+        - Documented by the vendor
+        - Partly documented
+        - Undocumented (observed in installations)
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to implement this scanner myself.

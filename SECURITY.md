@@ -4,7 +4,14 @@ AI Agent Access Inspector reads configuration files of AI agents on the user's m
 
 ## Supported versions
 
-The project is in early development and has no stable release yet. Security fixes are made on the `main` branch and included in the next release. Once stable releases exist, this section will list the supported versions.
+The project is in pre-release (`0.x`). Only the latest release receives security fixes; fixes are made on `main` and published as a new release.
+
+| Version | Supported |
+|---|---|
+| latest `0.x` release | yes |
+| older releases | no |
+
+Release builds are **not signed** yet. Verify downloads against `SHA256SUMS` from the same release (see [docs/release-process.md](docs/release-process.md)) and download only from this repository's releases page.
 
 ## Reporting a vulnerability
 
@@ -42,4 +49,6 @@ Not in scope:
 ## How the project handles security
 
 - Dependencies are checked for known vulnerabilities, licenses and sources with `cargo deny` on every CI run and weekly; Dependabot proposes updates.
-- Each development phase includes a security check, and a full security review takes place before the first public release (see [`docs/roadmap.md`](docs/roadmap.md), section 14).
+- Each development phase includes a security check ([`docs/security-checks.md`](docs/security-checks.md)); a full security review took place before the first public GUI release.
+- The threat model is in [`docs/threat-model.md`](docs/threat-model.md); privacy properties in [`docs/privacy.md`](docs/privacy.md).
+- GitHub Actions are pinned to commit SHAs; the release workflow uses no secrets besides its own token.

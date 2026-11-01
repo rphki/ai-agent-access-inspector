@@ -573,7 +573,7 @@ A release is triggered by a Git tag (`v0.1.0`, `v0.2.0`, …, `v1.0.0`).
 
 From `v0.1.0`: CLI binaries for macOS, Windows and Linux.
 
-Once the GUI exists:
+From `v0.4.0` (see [release-process.md](release-process.md); Windows ARM64 is not built):
 
 - macOS Apple Silicon
 - macOS Intel, as long as sensible
@@ -775,18 +775,24 @@ These features are only considered once the plain, traceable configuration scann
 | 3 – Path analysis | completed (target paths, resolution, disk checks, warnings, deduplication, relations) |
 | 3.5 – Message keys and security groundwork | completed (message catalog, cargo deny, weekly CI, Dependabot, SECURITY.md) |
 | 4 – Claude Code scanner and CLI | completed: [`v0.1.0`](https://github.com/rphki/ai-agent-access-inspector/releases/tag/v0.1.0) released 2026-11-01 ([security check](security-checks.md)) |
-| 5 – Tauri and GUI | accepted by the maintainer 2026-11-01, CI green on all platforms ([security check](security-checks.md)); open: release `v0.2.0` |
+| 5 – Tauri and GUI | accepted by the maintainer 2026-11-01, CI green on all platforms, released with `v0.4.0` ([security check](security-checks.md)) |
 | 5.1 Scaffold (Vite, React, Tauri 2, CI, `cargo deny`) | done |
 | 5.2 Tauri commands with path validation | done |
 | 5.3 Internationalisation (catalog sync, German) | done |
 | 5.4 Main, results and detail views, states | done |
 | 5.5 Frontend tests | done |
 | 5.6 Security check, documentation, acceptance | done |
-| 6 – Export and privacy | accepted by the maintainer 2026-11-01 ([security check](security-checks.md)); open: CI run, release `v0.3.0` |
+| 6 – Export and privacy | accepted by the maintainer 2026-11-01, released with `v0.4.0` ([security check](security-checks.md)) |
 | 6.1 Redaction of all output | done |
 | 6.2 Path anonymisation | done |
 | 6.3 Markdown via catalog keys (German report) | done |
 | 6.4 CLI `--paths` | done |
 | 6.5 GUI export (`export_scan`, dialog) | done |
 | 6.6 privacy.md, security check, docs, acceptance | done |
-| 7 – Releases and publication | open |
+| 7 – Releases and publication | implemented; open: dry run of the release workflow, tag `v0.4.0`, acceptance ([full security review](security-checks.md), [threat model](threat-model.md)) |
+| 7.1 GUI release workflow (dmg, NSIS/MSI, AppImage/deb) | done |
+| 7.2 Demo mode and screenshots | done |
+| 7.3 README, release process | done |
+| 7.4 CONTRIBUTING, issue templates, adding a scanner | done |
+| 7.5 Full security review, threat model, SECURITY.md | done |
+| 7.6 Release `v0.4.0` | version and changelog prepared; tag pending |
