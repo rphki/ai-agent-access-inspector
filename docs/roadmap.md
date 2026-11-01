@@ -126,6 +126,7 @@ ai-agent-access-inspector/
 │       └── malformed/
 ├── docs/
 │   ├── roadmap.md
+│   ├── onboarding.md              # build setup, tests, CI
 │   ├── plan-initial.md            # historical, German
 │   ├── architecture.md
 │   ├── findings-model.md

@@ -32,6 +32,8 @@ cargo run -p inspector-cli -- --version
 | `crates/inspector-cli` | command line program `ai-agent-access-inspector` |
 | `docs/` | roadmap and documentation |
 
+New to the project? [docs/onboarding.md](docs/onboarding.md) explains the build setup, tests and CI.
+
 Planning and status: [docs/roadmap.md](docs/roadmap.md).
 
 ## License

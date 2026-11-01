@@ -15,6 +15,7 @@ AI Agent Access Inspector: a local, cross-platform tool that shows which folders
 - Claude Code scanner specification: `docs/claude-code-scanner.md`
 - Data model and JSON format: `docs/findings-model.md`
 - Architecture: `docs/architecture.md`
+- Build setup, tests and CI: `docs/onboarding.md` (keep it current when the build or CI changes)
 
 ## Layout
 
@@ -34,7 +35,7 @@ cargo test --workspace --locked
 cargo run -p inspector-cli -- scan --agent demo
 ```
 
-All three checks must pass before a commit. CI runs them on macOS, Windows and Linux.
+All three checks must pass before a commit. CI runs them on macOS, Windows and Linux. Platform-specific code (`#[cfg(...)]`) should also be checked with `--target x86_64-pc-windows-gnu` and `--target x86_64-unknown-linux-gnu` (see `docs/onboarding.md`, section 5).
 
 ## Rules
 
