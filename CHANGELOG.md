@@ -4,22 +4,22 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-01
+
+First release: a command line tool that shows which folders Claude Code can access according to its configuration. Pre-release; builds are not signed yet.
+
 ### Added
 
-- Cargo workspace with `inspector-core` and `inspector-cli`
-- CLI skeleton with `--version` and `--help`
-- Data model for findings, diagnostics and scan reports with JSON serialization
-- Scanner interface, scan context with system and fixture mode
-- Demo scanner with fixed example findings
-- Path analysis: target paths for Unix, Windows drives and UNC shares, `~` and `${VAR}` resolution, pattern base paths, existence and symlink checks, warnings for broad and sensitive grants, deduplication, containment and deny-rule conflicts
-- CLI commands `scan` (JSON output, `--agent`, `--home`, `--cwd`, `--fixture`) and `list-scanners`
-- CI with format check, Clippy and tests on macOS, Windows and Linux
-- Message keys with an English catalog for all user-facing texts of the core, as groundwork for a translated GUI
-- Dependency audit with `cargo deny` in CI, weekly CI run, Dependabot for Cargo and GitHub Actions
-- `SECURITY.md` with the reporting process
 - Claude Code scanner: managed settings (including drop-ins), user, project and local settings; permission rules with all four path anchors; additional directories; permission modes; sandbox; MCP servers on all levels with approvals and allow/deny policies; known projects from `.claude.json` and session logs; summary per agent
+- Path analysis: target paths for Unix, Windows drives and UNC shares, `~` and `${VAR}` resolution, pattern base paths, existence and symlink checks, warnings for broad and sensitive grants, deduplication, containment and deny-rule conflicts
+- CLI `ai-agent-access-inspector` with `scan` (JSON and Markdown output, `--agent`, `--home`, `--cwd`, `--fixture`, `--verbose`) and `list-scanners`
+- Data model for findings, diagnostics and scan reports with JSON serialization; message keys with an English catalog as groundwork for a translated GUI
 - Safe file reading (regular files only, size limits) and redaction of secret-looking values
-- Markdown output (`--format markdown`, `--verbose`)
+- Demo scanner with fixed example findings
 - Fixtures for macOS, Linux, Windows and malformed input with expected results
-- Release workflow for CLI binaries (macOS, Linux, Windows) with checksums
-- Onboarding guide for the build setup, tests and CI (`docs/onboarding.md`)
+- CI on macOS, Windows and Linux with format check, Clippy, tests and `cargo deny`; weekly run; Dependabot
+- Release workflow for CLI archives (macOS, Linux, Windows) with checksums
+- Documentation: roadmap, architecture, data model, Claude Code scanner specification, onboarding, release process, security checks, `SECURITY.md`
+
+[Unreleased]: https://github.com/rphki/ai-agent-access-inspector/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/rphki/ai-agent-access-inspector/releases/tag/v0.1.0
