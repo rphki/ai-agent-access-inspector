@@ -306,7 +306,9 @@ Vor der Implementierung werden die aktuellen Konfigurationsorte und -ebenen aus 
 
 Unterstützt wird nur das aktuell dokumentierte Konfigurationsformat. Schlüssel oder Dateien aus älteren Formaten werden nicht gezielt interpretiert; sie erscheinen als Diagnose (z. B. „unbekannter Schlüssel“) oder als Finding mit Status `Unknown`. Ändert Claude Code sein Format, wird die Spezifikation aktualisiert.
 
-Undokumentierte Dateien werden ausdrücklich als heuristische Quelle gekennzeichnet. Alle folgenden Quellen gelten als unbestätigt, bis sie dort mit Beleg aufgeführt sind.
+Undokumentierte Dateien werden ausdrücklich als heuristische Quelle gekennzeichnet.
+
+Die Spezifikation liegt in [`claude-code-scanner.md`](claude-code-scanner.md) vor (Stand 2026-11-01). Sie ist für den Scanner maßgeblich; die Abschnitte 8.2 bis 8.4 sind nur eine Übersicht.
 
 ### 8.2 Zu untersuchende Quellen
 
@@ -779,6 +781,8 @@ Der MVP ist fertig, wenn:
 - Auto-Update
 - Plugin-System mit dynamisch geladenem Fremdcode
 - vollständige Unterstützung aller Claude-Produkte
+- Auswertung von Plugins und Plugin-MCP-Servern
+- Auswertung von MDM-Profilen und Registry-Richtlinien (werden nur erkannt)
 
 Diese Funktionen werden erst bewertet, wenn der reine, nachvollziehbare Konfigurationsscanner stabil funktioniert.
 
@@ -791,7 +795,7 @@ Derzeit keine.
 | Phase | Status |
 |---|---|
 | 0 – Grundlage | abgeschlossen (CI grün auf macOS, Windows, Linux) |
-| 1 – Claude-Code-Recherche | offen |
+| 1 – Claude-Code-Recherche | abgeschlossen ([Spezifikation](claude-code-scanner.md); offene Prüfpunkte für Phase 4 in Abschnitt 14) |
 | 2 – Datenmodell | offen |
 | 3 – Pfadanalyse | offen |
 | 4 – Claude-Code-Scanner und CLI | offen |
