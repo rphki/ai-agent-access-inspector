@@ -6,8 +6,11 @@
 
 pub mod analysis;
 pub mod context;
+pub mod export;
 pub mod model;
 pub mod platform;
+pub mod read;
+pub mod redact;
 pub mod scanner;
 pub mod scanners;
 

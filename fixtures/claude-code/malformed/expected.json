@@ -1,0 +1,404 @@
+{
+  "scanner": {
+    "id": "claude-code",
+    "name": "Claude Code",
+    "description": "Settings, permission rules, sandbox and MCP servers of Claude Code",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/home/alice/.claude",
+      "/home/alice/.claude.json",
+      "/etc/claude-code/managed-settings.json"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "claude-code-82109f3dda6ade2f",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/home/alice/app",
+        "patternKind": "directory",
+        "basePath": "/home/alice/app",
+        "displayPath": "/home/alice/app"
+      },
+      "effect": "notApplicable",
+      "access": "read",
+      "status": "observed",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/.claude.json",
+        "configKind": "claude-code/claude-json",
+        "documentation": "heuristic",
+        "pointer": "/projects/~1home~1alice~1app",
+        "rawValue": "/home/alice/app",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.knownProject",
+        "args": {},
+        "text": "Known project: Claude Code has been used here. It can read files in this directory without a prompt; writing depends on the permission mode."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-efef73d434b59b97",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(~/y/**)",
+        "patternKind": "directory",
+        "basePath": "/home/alice/y",
+        "displayPath": "/home/alice/y"
+      },
+      "effect": "deny",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/deny/1",
+        "rawValue": "Read(~/y/**)",
+        "anchor": {
+          "kind": "home"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.read.deny",
+        "args": {},
+        "text": "Deny rule: Claude Code's file tools may not read these paths. Shell commands that name these paths are blocked as well, other programs are not."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-672cc88d87173cef",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Bash",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "Bash"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "claude-code/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.unsandboxedShell",
+        "args": {},
+        "text": "Shell commands run without a sandbox and can reach everything the user can."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "unsandboxedShell"
+          },
+          "severity": "high",
+          "message": {
+            "key": "warning.unsandboxedShell",
+            "args": {},
+            "text": "No sandbox is configured; shell commands run with the user's rights."
+          }
+        }
+      ],
+      "related": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "level": "warning",
+      "code": "unreadableFile",
+      "message": {
+        "key": "diagnostic.notARegularFile",
+        "args": {},
+        "text": "Not a regular file; it was not read."
+      },
+      "file": "/etc/claude-code/managed-settings.json",
+      "pointer": null
+    },
+    {
+      "level": "error",
+      "code": "invalidJson",
+      "message": {
+        "key": "diagnostic.invalidJson",
+        "args": {
+          "error": "EOF while parsing a list at line 1 column 38"
+        },
+        "text": "The file is not valid JSON: EOF while parsing a list at line 1 column 38"
+      },
+      "file": "/home/alice/app/.claude/settings.json",
+      "pointer": null
+    },
+    {
+      "level": "info",
+      "code": "unknownKey",
+      "message": {
+        "key": "diagnostic.unknownKey",
+        "args": {
+          "key": "permissions.allowAll"
+        },
+        "text": "Unknown setting permissions.allowAll; it was not evaluated."
+      },
+      "file": "/home/alice/.claude/settings.json",
+      "pointer": "/permissions/allowAll"
+    },
+    {
+      "level": "warning",
+      "code": "unexpectedType",
+      "message": {
+        "key": "diagnostic.unexpectedType",
+        "args": {
+          "expected": "an object",
+          "pointer": "/sandbox"
+        },
+        "text": "Unexpected value at /sandbox: expected an object."
+      },
+      "file": "/home/alice/.claude/settings.json",
+      "pointer": "/sandbox"
+    },
+    {
+      "level": "warning",
+      "code": "ignoredSetting",
+      "message": {
+        "key": "diagnostic.managedOnlySetting",
+        "args": {
+          "key": "allowManagedHooksOnly"
+        },
+        "text": "allowManagedHooksOnly only takes effect in managed settings and is ignored here."
+      },
+      "file": "/home/alice/.claude/settings.json",
+      "pointer": "/allowManagedHooksOnly"
+    },
+    {
+      "level": "warning",
+      "code": "unexpectedType",
+      "message": {
+        "key": "diagnostic.unexpectedType",
+        "args": {
+          "expected": "an array of strings",
+          "pointer": "/permissions/allow"
+        },
+        "text": "Unexpected value at /permissions/allow: expected an array of strings."
+      },
+      "file": "/home/alice/.claude/settings.json",
+      "pointer": "/permissions/allow"
+    },
+    {
+      "level": "warning",
+      "code": "unexpectedType",
+      "message": {
+        "key": "diagnostic.unexpectedType",
+        "args": {
+          "expected": "a string",
+          "pointer": "/permissions/deny/0"
+        },
+        "text": "Unexpected value at /permissions/deny/0: expected a string."
+      },
+      "file": "/home/alice/.claude/settings.json",
+      "pointer": "/permissions/deny/0"
+    },
+    {
+      "level": "warning",
+      "code": "unexpectedType",
+      "message": {
+        "key": "diagnostic.unexpectedType",
+        "args": {
+          "expected": "an object",
+          "pointer": "/mcpServers/broken"
+        },
+        "text": "Unexpected value at /mcpServers/broken: expected an object."
+      },
+      "file": "/home/alice/app/.mcp.json",
+      "pointer": "/mcpServers/broken"
+    },
+    {
+      "level": "warning",
+      "code": "unexpectedType",
+      "message": {
+        "key": "diagnostic.unexpectedType",
+        "args": {
+          "expected": "a string",
+          "pointer": "/mcpServers/noCommand/command"
+        },
+        "text": "Unexpected value at /mcpServers/noCommand/command: expected a string."
+      },
+      "file": "/home/alice/app/.mcp.json",
+      "pointer": "/mcpServers/noCommand/command"
+    }
+  ],
+  "summary": [
+    {
+      "key": "permissionMode",
+      "label": {
+        "key": "summary.permissionMode",
+        "args": {},
+        "text": "Permission mode"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "default"
+        },
+        "text": "default"
+      }
+    },
+    {
+      "key": "sandbox",
+      "label": {
+        "key": "summary.sandbox",
+        "args": {},
+        "text": "Sandbox"
+      },
+      "value": {
+        "key": "value.disabled",
+        "args": {},
+        "text": "disabled"
+      }
+    },
+    {
+      "key": "shell",
+      "label": {
+        "key": "summary.shell",
+        "args": {},
+        "text": "Shell commands"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "readsOutsideWorkingDirectories",
+      "label": {
+        "key": "summary.readsOutsideWorkingDirectories",
+        "args": {},
+        "text": "File tools outside working directories"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "hooks",
+      "label": {
+        "key": "summary.hooks",
+        "args": {},
+        "text": "Hooks"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSettings",
+      "label": {
+        "key": "summary.managedSettings",
+        "args": {},
+        "text": "Managed settings"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    }
+  ]
+}

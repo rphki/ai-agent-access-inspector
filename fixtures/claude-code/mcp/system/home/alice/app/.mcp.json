@@ -1,0 +1,34 @@
+{
+  "mcpServers": {
+    "approved": {
+      "command": "python",
+      "args": [
+        "server.py",
+        "--root",
+        "${DATA_DIR:-./data}"
+      ]
+    },
+    "rejected": {
+      "command": "python",
+      "args": [
+        "/srv"
+      ]
+    },
+    "pending": {
+      "command": "${TOOL_BIN}/server",
+      "args": [
+        "ghp_abcdefghijklmnopqrstuvwxyz0123456789",
+        "../shared"
+      ]
+    },
+    "toggled": {
+      "command": "x"
+    },
+    "shared": {
+      "command": "node",
+      "args": [
+        "project.js"
+      ]
+    }
+  }
+}

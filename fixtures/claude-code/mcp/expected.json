@@ -1,0 +1,758 @@
+{
+  "scanner": {
+    "id": "claude-code",
+    "name": "Claude Code",
+    "description": "Settings, permission rules, sandbox and MCP servers of Claude Code",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/home/alice/.claude",
+      "/home/alice/.claude.json"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "claude-code-82109f3dda6ade2f",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/home/alice/app",
+        "patternKind": "directory",
+        "basePath": "/home/alice/app",
+        "displayPath": "/home/alice/app"
+      },
+      "effect": "notApplicable",
+      "access": "read",
+      "status": "observed",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/.claude.json",
+        "configKind": "claude-code/claude-json",
+        "documentation": "heuristic",
+        "pointer": "/projects/~1home~1alice~1app",
+        "rawValue": "/home/alice/app",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.knownProject",
+        "args": {},
+        "text": "Known project: Claude Code has been used here. It can read files in this directory without a prompt; writing depends on the permission mode."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-672cc88d87173cef",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Bash",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "Bash"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "claude-code/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.unsandboxedShell",
+        "args": {},
+        "text": "Shell commands run without a sandbox and can reach everything the user can."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "unsandboxedShell"
+          },
+          "severity": "high",
+          "message": {
+            "key": "warning.unsandboxedShell",
+            "args": {},
+            "text": "No sandbox is configured; shell commands run with the user's rights."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-a5cb4ad952cbbb90",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "shared"
+      },
+      "target": {
+        "raw": "node /opt/mcp/shared.js --token <redacted>",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "node /opt/mcp/shared.js --token <redacted>"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude.json",
+        "configKind": "claude-code/claude-json",
+        "documentation": "documented",
+        "pointer": "/mcpServers/shared",
+        "rawValue": "node /opt/mcp/shared.js --token <redacted>",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpServer",
+        "args": {
+          "command": "node /opt/mcp/shared.js --token <redacted>",
+          "server": "shared"
+        },
+        "text": "Local MCP server 'shared' (node /opt/mcp/shared.js --token <redacted>): a separate program with your user rights. Claude Code's permission rules and sandbox do not restrict it."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-459754943f34a8e8",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "shared"
+      },
+      "target": {
+        "raw": "/opt/mcp/shared.js",
+        "patternKind": "exactPath",
+        "basePath": "/opt/mcp/shared.js",
+        "displayPath": "/opt/mcp/shared.js"
+      },
+      "effect": "allow",
+      "access": "unknown",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude.json",
+        "configKind": "claude-code/claude-json",
+        "documentation": "documented",
+        "pointer": "/mcpServers/shared/args/0",
+        "rawValue": "/opt/mcp/shared.js",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpPathArgument",
+        "args": {
+          "server": "shared"
+        },
+        "text": "Path argument of the local MCP server 'shared'."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-8cbf2f482af765a3",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "shared"
+      },
+      "target": {
+        "raw": "node ./local.js",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "node ./local.js"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "projectLocal",
+      "source": {
+        "file": "/home/alice/.claude.json",
+        "configKind": "claude-code/claude-json",
+        "documentation": "documented",
+        "pointer": "/projects/~1home~1alice~1app/mcpServers/shared",
+        "rawValue": "node ./local.js",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpServer",
+        "args": {
+          "command": "node ./local.js",
+          "server": "shared"
+        },
+        "text": "Local MCP server 'shared' (node ./local.js): a separate program with your user rights. Claude Code's permission rules and sandbox do not restrict it."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-fb82906998399da8",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "shared"
+      },
+      "target": {
+        "raw": "./local.js",
+        "patternKind": "exactPath",
+        "basePath": "/home/alice/app/local.js",
+        "displayPath": "/home/alice/app/local.js"
+      },
+      "effect": "allow",
+      "access": "unknown",
+      "status": "configured",
+      "scope": "projectLocal",
+      "source": {
+        "file": "/home/alice/.claude.json",
+        "configKind": "claude-code/claude-json",
+        "documentation": "documented",
+        "pointer": "/projects/~1home~1alice~1app/mcpServers/shared/args/0",
+        "rawValue": "./local.js",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpPathArgument",
+        "args": {
+          "server": "shared"
+        },
+        "text": "Path argument of the local MCP server 'shared'."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-3e9670d65fa8a0ba",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "approved"
+      },
+      "target": {
+        "raw": "python server.py --root ./data",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "python server.py --root ./data"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/app/.mcp.json",
+        "configKind": "claude-code/mcp-json",
+        "documentation": "documented",
+        "pointer": "/mcpServers/approved",
+        "rawValue": "python server.py --root ./data",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpServer",
+        "args": {
+          "command": "python server.py --root ./data",
+          "server": "approved"
+        },
+        "text": "Local MCP server 'approved' (python server.py --root ./data): a separate program with your user rights. Claude Code's permission rules and sandbox do not restrict it."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-1a8da39139ae1901",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "approved"
+      },
+      "target": {
+        "raw": "./data",
+        "patternKind": "exactPath",
+        "basePath": "/home/alice/app/data",
+        "displayPath": "/home/alice/app/data"
+      },
+      "effect": "allow",
+      "access": "unknown",
+      "status": "configured",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/app/.mcp.json",
+        "configKind": "claude-code/mcp-json",
+        "documentation": "documented",
+        "pointer": "/mcpServers/approved/args/2",
+        "rawValue": "./data",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpPathArgument",
+        "args": {
+          "server": "approved"
+        },
+        "text": "Path argument of the local MCP server 'approved'."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-4757d9e2818a9f13",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "pending"
+      },
+      "target": {
+        "raw": "${TOOL_BIN}/server <redacted> ../shared",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "${TOOL_BIN}/server <redacted> ../shared"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "unknown",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/app/.mcp.json",
+        "configKind": "claude-code/mcp-json",
+        "documentation": "documented",
+        "pointer": "/mcpServers/pending",
+        "rawValue": "${TOOL_BIN}/server <redacted> ../shared",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpServer",
+        "args": {
+          "command": "${TOOL_BIN}/server <redacted> ../shared",
+          "server": "pending"
+        },
+        "text": "Local MCP server 'pending' (${TOOL_BIN}/server <redacted> ../shared): a separate program with your user rights. Claude Code's permission rules and sandbox do not restrict it."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "approvalPending"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.mcpPendingApproval",
+            "args": {},
+            "text": "Claude Code asks for approval before starting this server; until then it is not active."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-b9ce188cf6f592fd",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "pending"
+      },
+      "target": {
+        "raw": "../shared",
+        "patternKind": "exactPath",
+        "basePath": "/home/alice/shared",
+        "displayPath": "/home/alice/shared"
+      },
+      "effect": "allow",
+      "access": "unknown",
+      "status": "unknown",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/app/.mcp.json",
+        "configKind": "claude-code/mcp-json",
+        "documentation": "documented",
+        "pointer": "/mcpServers/pending/args/1",
+        "rawValue": "../shared",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpPathArgument",
+        "args": {
+          "server": "pending"
+        },
+        "text": "Path argument of the local MCP server 'pending'."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        },
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "approvalPending"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.mcpPendingApproval",
+            "args": {},
+            "text": "Claude Code asks for approval before starting this server; until then it is not active."
+          }
+        }
+      ],
+      "related": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "level": "info",
+      "code": "other",
+      "message": {
+        "key": "diagnostic.mcpServerDenied",
+        "args": {
+          "server": "blocked"
+        },
+        "text": "The MCP server 'blocked' is blocked by allowedMcpServers or deniedMcpServers and is not evaluated."
+      },
+      "file": "/home/alice/.claude.json",
+      "pointer": null
+    },
+    {
+      "level": "info",
+      "code": "other",
+      "message": {
+        "key": "diagnostic.mcpServerShadowed",
+        "args": {
+          "server": "shared"
+        },
+        "text": "The MCP server 'shared' is defined on several levels; only the definition with the highest priority is evaluated."
+      },
+      "file": "/home/alice/.claude.json",
+      "pointer": null
+    },
+    {
+      "level": "info",
+      "code": "unresolvedVariable",
+      "message": {
+        "key": "diagnostic.unresolvedVariable",
+        "args": {
+          "variable": "TOOL_BIN"
+        },
+        "text": "The variable TOOL_BIN is not set; the value is shown unexpanded."
+      },
+      "file": "/home/alice/app/.mcp.json",
+      "pointer": "/mcpServers/pending/command"
+    },
+    {
+      "level": "info",
+      "code": "other",
+      "message": {
+        "key": "diagnostic.mcpServerDisabled",
+        "args": {
+          "server": "rejected"
+        },
+        "text": "The MCP server 'rejected' is disabled and is not evaluated."
+      },
+      "file": "/home/alice/app/.mcp.json",
+      "pointer": null
+    },
+    {
+      "level": "info",
+      "code": "other",
+      "message": {
+        "key": "diagnostic.mcpServerShadowed",
+        "args": {
+          "server": "shared"
+        },
+        "text": "The MCP server 'shared' is defined on several levels; only the definition with the highest priority is evaluated."
+      },
+      "file": "/home/alice/app/.mcp.json",
+      "pointer": null
+    },
+    {
+      "level": "info",
+      "code": "other",
+      "message": {
+        "key": "diagnostic.mcpServerDisabled",
+        "args": {
+          "server": "toggled"
+        },
+        "text": "The MCP server 'toggled' is disabled and is not evaluated."
+      },
+      "file": "/home/alice/app/.mcp.json",
+      "pointer": null
+    }
+  ],
+  "summary": [
+    {
+      "key": "permissionMode",
+      "label": {
+        "key": "summary.permissionMode",
+        "args": {},
+        "text": "Permission mode"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "default"
+        },
+        "text": "default"
+      }
+    },
+    {
+      "key": "sandbox",
+      "label": {
+        "key": "summary.sandbox",
+        "args": {},
+        "text": "Sandbox"
+      },
+      "value": {
+        "key": "value.disabled",
+        "args": {},
+        "text": "disabled"
+      }
+    },
+    {
+      "key": "shell",
+      "label": {
+        "key": "summary.shell",
+        "args": {},
+        "text": "Shell commands"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "readsOutsideWorkingDirectories",
+      "label": {
+        "key": "summary.readsOutsideWorkingDirectories",
+        "args": {},
+        "text": "File tools outside working directories"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "hooks",
+      "label": {
+        "key": "summary.hooks",
+        "args": {},
+        "text": "Hooks"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSettings",
+      "label": {
+        "key": "summary.managedSettings",
+        "args": {},
+        "text": "Managed settings"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "4"
+        },
+        "text": "4"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    }
+  ]
+}

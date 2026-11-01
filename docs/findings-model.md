@@ -39,7 +39,7 @@ A finding is a path or rule that grants, restricts or suggests file access for a
 | `agentId`, `agentName` | scanner that produced the finding |
 | `subject` | who holds the access: `{ "kind": "agent" }` or `{ "kind": "mcpServer", "name": "…" }` |
 | `target` | path or rule, see 3.1 |
-| `effect` | `allow`, `ask`, `deny` or `notApplicable` (not from a rule, e.g. an observed project path) |
+| `effect` | `allow`, `ask`, `deny` or `notApplicable`: not from a rule (e.g. an observed project path) or an exception inside a deny rule (e.g. a `!` negation) |
 | `access` | `read`, `write`, `execute`, `readWrite`, `unknown` |
 | `status` | `configured`, `observed`, `potential`, `blocked`, `unknown` (meaning see roadmap 4.1) |
 | `scope` | `managed`, `user`, `project`, `projectLocal`, `session`, `runtime`, `operatingSystem` |
@@ -108,7 +108,7 @@ Filled in by the path analysis. Findings without an absolute base path (e.g. `ev
 | `likelyMisconfigured` | probable configuration mistake, e.g. a misanchored path |
 | `notEffective` | configuration present but not effective; reason in `reason` |
 
-Reasons for `notEffective`: `trustNotAccepted`, `managedRulesOnly`, `scopeNotAllowed`, `ruleNeverMatches`, `overriddenByHigherScope`, `platformUnsupported`.
+Reasons for `notEffective`: `trustNotAccepted`, `managedRulesOnly`, `scopeNotAllowed`, `ruleNeverMatches`, `overriddenByHigherScope`, `platformUnsupported`, `sandboxDisabled` (a sandbox setting while the sandbox is off), `approvalPending` (e.g. an MCP server the user has not approved yet).
 
 `severity`: `info`, `low`, `medium`, `high`.
 
@@ -133,7 +133,7 @@ Diagnostics describe problems while scanning. They never abort the scan.
 | Field | Meaning |
 |---|---|
 | `level` | `info`, `warning`, `error` |
-| `code` | `unreadableFile`, `invalidJson`, `unexpectedType`, `unknownKey`, `unparsableRule`, `unresolvedVariable`, `deprecatedLocation`, `unevaluatedSource`, `internal`, `other` |
+| `code` | `unreadableFile`, `fileTooLarge`, `invalidJson`, `unexpectedType`, `unknownKey`, `unparsableRule`, `ineffectiveRule`, `ignoredSetting`, `unresolvedVariable`, `deprecatedLocation`, `unevaluatedSource`, `internal`, `other` |
 | `message` | message describing the problem |
 | `file`, `pointer` | affected file and location, if known |
 

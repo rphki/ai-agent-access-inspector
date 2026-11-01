@@ -1,0 +1,596 @@
+{
+  "scanner": {
+    "id": "claude-code",
+    "name": "Claude Code",
+    "description": "Settings, permission rules, sandbox and MCP servers of Claude Code",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/home/alice/.claude.json"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "claude-code-2bc8f56b5a8530ab",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/home/alice/repo",
+        "patternKind": "directory",
+        "basePath": "/home/alice/repo",
+        "displayPath": "/home/alice/repo"
+      },
+      "effect": "notApplicable",
+      "access": "read",
+      "status": "observed",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/.claude.json",
+        "configKind": "claude-code/claude-json",
+        "documentation": "heuristic",
+        "pointer": "/projects/~1home~1alice~1repo",
+        "rawValue": "/home/alice/repo",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.knownProject",
+        "args": {},
+        "text": "Known project: Claude Code has been used here. It can read files in this directory without a prompt; writing depends on the permission mode."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": [
+        {
+          "relation": "containedIn",
+          "findingId": "claude-code-69bb0b6eda49ca6b"
+        },
+        {
+          "relation": "contains",
+          "findingId": "claude-code-ad75b19149908814"
+        }
+      ]
+    },
+    {
+      "id": "claude-code-69bb0b6eda49ca6b",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(//**)",
+        "patternKind": "directory",
+        "basePath": "/",
+        "displayPath": "/"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "configured",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/repo/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/allow/0",
+        "rawValue": "Read(//**)",
+        "anchor": {
+          "kind": "filesystemRoot"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.read.allow",
+        "args": {},
+        "text": "Allow rule: Claude Code's file tools may read these paths without a prompt."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "filesystemRoot"
+          },
+          "severity": "high",
+          "message": {
+            "key": "warning.filesystemRoot",
+            "args": {},
+            "text": "Grants the entire filesystem."
+          }
+        },
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "trustNotAccepted"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.trustNotAccepted",
+            "args": {},
+            "text": "Takes effect only after the project's trust dialog has been accepted."
+          }
+        }
+      ],
+      "related": [
+        {
+          "relation": "contains",
+          "findingId": "claude-code-2bc8f56b5a8530ab"
+        },
+        {
+          "relation": "contains",
+          "findingId": "claude-code-ad75b19149908814"
+        },
+        {
+          "relation": "contains",
+          "findingId": "claude-code-65591bb353a114fe"
+        }
+      ]
+    },
+    {
+      "id": "claude-code-ad75b19149908814",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(./.env)",
+        "patternKind": "exactPath",
+        "basePath": "/home/alice/repo/.env",
+        "displayPath": "/home/alice/repo/.env"
+      },
+      "effect": "deny",
+      "access": "read",
+      "status": "configured",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/repo/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/deny/0",
+        "rawValue": "Read(./.env)",
+        "anchor": {
+          "kind": "workingDirectory"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.read.deny",
+        "args": {},
+        "text": "Deny rule: Claude Code's file tools may not read these paths. Shell commands that name these paths are blocked as well, other programs are not."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": [
+        {
+          "relation": "containedIn",
+          "findingId": "claude-code-2bc8f56b5a8530ab"
+        },
+        {
+          "relation": "containedIn",
+          "findingId": "claude-code-69bb0b6eda49ca6b"
+        }
+      ]
+    },
+    {
+      "id": "claude-code-65591bb353a114fe",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "../other",
+        "patternKind": "directory",
+        "basePath": "/home/alice/other",
+        "displayPath": "/home/alice/other"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "configured",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/repo/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/additionalDirectories/0",
+        "rawValue": "../other",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.additionalDirectory",
+        "args": {},
+        "text": "Additional working directory: readable without a prompt, writable depending on the permission mode."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        },
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "trustNotAccepted"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.trustNotAccepted",
+            "args": {},
+            "text": "Takes effect only after the project's trust dialog has been accepted."
+          }
+        }
+      ],
+      "related": [
+        {
+          "relation": "containedIn",
+          "findingId": "claude-code-69bb0b6eda49ca6b"
+        }
+      ]
+    },
+    {
+      "id": "claude-code-672cc88d87173cef",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Bash",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "Bash"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "claude-code/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.unsandboxedShell",
+        "args": {},
+        "text": "Shell commands run without a sandbox and can reach everything the user can."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "unsandboxedShell"
+          },
+          "severity": "high",
+          "message": {
+            "key": "warning.unsandboxedShell",
+            "args": {},
+            "text": "No sandbox is configured; shell commands run with the user's rights."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-59240b4ddadae3b3",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "tool"
+      },
+      "target": {
+        "raw": "tool /data",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "tool /data"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "unknown",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/repo/.mcp.json",
+        "configKind": "claude-code/mcp-json",
+        "documentation": "documented",
+        "pointer": "/mcpServers/tool",
+        "rawValue": "tool /data",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpServer",
+        "args": {
+          "command": "tool /data",
+          "server": "tool"
+        },
+        "text": "Local MCP server 'tool' (tool /data): a separate program with your user rights. Claude Code's permission rules and sandbox do not restrict it."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "approvalPending"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.mcpPendingApproval",
+            "args": {},
+            "text": "Claude Code asks for approval before starting this server; until then it is not active."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-d074cf855ff4756c",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "tool"
+      },
+      "target": {
+        "raw": "/data",
+        "patternKind": "exactPath",
+        "basePath": "/data",
+        "displayPath": "/data"
+      },
+      "effect": "allow",
+      "access": "unknown",
+      "status": "unknown",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/repo/.mcp.json",
+        "configKind": "claude-code/mcp-json",
+        "documentation": "documented",
+        "pointer": "/mcpServers/tool/args/0",
+        "rawValue": "/data",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpPathArgument",
+        "args": {
+          "server": "tool"
+        },
+        "text": "Path argument of the local MCP server 'tool'."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        },
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "approvalPending"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.mcpPendingApproval",
+            "args": {},
+            "text": "Claude Code asks for approval before starting this server; until then it is not active."
+          }
+        }
+      ],
+      "related": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "level": "warning",
+      "code": "ignoredSetting",
+      "message": {
+        "key": "diagnostic.scopeNotAllowed",
+        "args": {
+          "key": "permissions.defaultMode",
+          "value": "bypassPermissions"
+        },
+        "text": "permissions.defaultMode = bypassPermissions has no effect in project and local settings."
+      },
+      "file": "/home/alice/repo/.claude/settings.json",
+      "pointer": "/permissions/defaultMode"
+    }
+  ],
+  "summary": [
+    {
+      "key": "permissionMode",
+      "label": {
+        "key": "summary.permissionMode",
+        "args": {},
+        "text": "Permission mode"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "default"
+        },
+        "text": "default"
+      }
+    },
+    {
+      "key": "sandbox",
+      "label": {
+        "key": "summary.sandbox",
+        "args": {},
+        "text": "Sandbox"
+      },
+      "value": {
+        "key": "value.disabled",
+        "args": {},
+        "text": "disabled"
+      }
+    },
+    {
+      "key": "shell",
+      "label": {
+        "key": "summary.shell",
+        "args": {},
+        "text": "Shell commands"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "readsOutsideWorkingDirectories",
+      "label": {
+        "key": "summary.readsOutsideWorkingDirectories",
+        "args": {},
+        "text": "File tools outside working directories"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "hooks",
+      "label": {
+        "key": "summary.hooks",
+        "args": {},
+        "text": "Hooks"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSettings",
+      "label": {
+        "key": "summary.managedSettings",
+        "args": {},
+        "text": "Managed settings"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    }
+  ]
+}

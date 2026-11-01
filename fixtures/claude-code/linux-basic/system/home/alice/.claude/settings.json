@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(~/docs/**)"
+    ],
+    "deny": [
+      "Read(~/.ssh/**)"
+    ],
+    "additionalDirectories": [
+      "~/shared"
+    ],
+    "defaultMode": "acceptEdits"
+  }
+}

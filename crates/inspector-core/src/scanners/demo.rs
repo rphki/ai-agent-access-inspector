@@ -70,7 +70,7 @@ impl AgentScanner for DemoScanner {
         .access(AccessKind::Read)
         .status(FindingStatus::Configured)
         .confidence(Confidence::High)
-        .explanation(Message::new("finding.denyRead"))
+        .explanation(Message::new("finding.rule.read.deny"))
         .build();
 
         let shell = Finding::builder(

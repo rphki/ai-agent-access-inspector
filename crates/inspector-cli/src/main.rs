@@ -6,6 +6,7 @@ use std::process::ExitCode;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use inspector_core::context::ScanContext;
+use inspector_core::export::markdown::{self, MarkdownOptions};
 use inspector_core::scanner::{self, AgentScanner};
 use inspector_core::{APP_NAME, VERSION};
 
@@ -45,11 +46,16 @@ struct ScanArgs {
     /// Scan a fixture directory (with fixture.json) instead of the system.
     #[arg(long, value_name = "DIR")]
     fixture: Option<PathBuf>,
+
+    /// Markdown: also show informational diagnostics. JSON always contains all.
+    #[arg(long, short)]
+    verbose: bool,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
 enum Format {
     Json,
+    Markdown,
 }
 
 fn main() -> ExitCode {
@@ -85,6 +91,12 @@ fn scan(args: ScanArgs) -> Result<(), String> {
 
     let output = match args.format {
         Format::Json => serde_json::to_string_pretty(&report).map_err(|e| e.to_string())?,
+        Format::Markdown => markdown::render(
+            &report,
+            MarkdownOptions {
+                verbose: args.verbose,
+            },
+        ),
     };
     write_stdout(&output)
 }

@@ -1,0 +1,18 @@
+{
+  "userID": "should-never-be-read",
+  "mcpServers": {
+    "files": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/home/alice/shared"
+      ]
+    }
+  },
+  "projects": {
+    "/home/alice/app": {
+      "hasTrustDialogAccepted": true
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(~/notes/**)",
+      "Read(/home/alice/notes/**)",
+      "Read(secrets/**)",
+      "Bash",
+      "Write(/tmp/x)",
+      "Read(~/broken"
+    ],
+    "ask": [
+      "Edit(~/notes/**)"
+    ],
+    "deny": [
+      "Read(~/notes/**)",
+      "Read(*.env)",
+      "Read(!sample.env)",
+      "Bash(rm *)"
+    ]
+  }
+}

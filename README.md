@@ -6,11 +6,19 @@ The first supported agent is **Claude Code**. More agents will follow as indepen
 
 The application works entirely locally, never changes agent configuration and transmits no data.
 
-> **Status:** early development. The data model is in place; a scanner for Claude Code is next. So far only the demo scanner returns example data:
->
-> ```bash
-> cargo run -p inspector-cli -- scan --agent demo
-> ```
+> **Status:** early development. The command line tool scans the configuration of Claude Code; a desktop GUI follows.
+
+## Usage
+
+```bash
+cargo run -p inspector-cli -- scan                      # JSON report of this system
+cargo run -p inspector-cli -- scan --format markdown    # readable report
+cargo run -p inspector-cli -- list-scanners
+```
+
+The report lists every folder or rule that grants, restricts or suggests file access, with its source file, an explanation and warnings for broad or sensitive grants. It reads configuration files only; nothing is changed or sent anywhere.
+
+Known limitations of the Claude Code scanner (settings given only on the command line, server-managed policies, plugins and more) are listed in [docs/claude-code-scanner.md](docs/claude-code-scanner.md#11-known-limitations).
 
 ## Development
 

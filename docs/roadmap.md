@@ -131,6 +131,7 @@ ai-agent-access-inspector/
 ├── docs/
 │   ├── roadmap.md
 │   ├── onboarding.md              # build setup, tests, CI
+│   ├── security-checks.md         # record of the per-phase security checks
 │   ├── plan-initial.md            # historical, German
 │   ├── architecture.md
 │   ├── findings-model.md
@@ -769,7 +770,7 @@ These features are only considered once the plain, traceable configuration scann
 | 2 – Data model | completed (demo scanner prints JSON via the CLI) |
 | 3 – Path analysis | completed (target paths, resolution, disk checks, warnings, deduplication, relations) |
 | 3.5 – Message keys and security groundwork | completed (message catalog, cargo deny, weekly CI, Dependabot, SECURITY.md) |
-| 4 – Claude Code scanner and CLI | open |
+| 4 – Claude Code scanner and CLI | implemented (scanner, 10 fixtures, Markdown output, release workflow, [security check](security-checks.md)); release `v0.1.0` pending |
 | 5 – Tauri and GUI | open |
 | 6 – Export and privacy | open |
 | 7 – Releases and publication | open |

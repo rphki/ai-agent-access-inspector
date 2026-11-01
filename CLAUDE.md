@@ -44,6 +44,7 @@ All three checks must pass before a commit. CI runs them on macOS, Windows and L
 - **Scanners access the system only through `ScanContext`**, never `std::env` or the real home directory directly. Paths are target paths of the scanned system (`analysis::path::TargetPath`, never `std::path` logic, which follows the host); files are read via `context.host_path(...)`.
 - **Scanners never fail as a whole.** Problems become `Diagnostic`s.
 - **Privacy:** read only the keys a scanner needs; never output secrets (MCP `env`, `headers`, tokens). When inspecting the maintainer's local configuration for research, look at structure and key names only, not values.
+- **Fixtures:** `fixtures/claude-code/*/expected.json` are reviewed expectations. After an intended scanner change, regenerate with `UPDATE_EXPECT=1 cargo test -p inspector-core --test claude_code_fixtures` and review the diff before committing.
 - **Undocumented sources** are marked `heuristic` and get at most medium confidence.
 - **Dependencies in `inspector-core`** are added sparingly.
 - **Security:** run `cargo deny check` when changing dependencies; each phase has a security check in `docs/roadmap.md` that must be done before the phase is accepted.

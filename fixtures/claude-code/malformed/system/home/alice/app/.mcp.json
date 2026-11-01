@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "broken": "npx server",
+    "noCommand": {
+      "args": [
+        "/x"
+      ]
+    }
+  }
+}

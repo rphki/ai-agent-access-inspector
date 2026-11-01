@@ -1,0 +1,16 @@
+{
+  "scanner": {
+    "id": "claude-code",
+    "name": "Claude Code",
+    "description": "Settings, permission rules, sandbox and MCP servers of Claude Code",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "notDetected",
+    "evidence": [],
+    "version": null
+  },
+  "findings": [],
+  "diagnostics": [],
+  "summary": []
+}

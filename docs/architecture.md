@@ -18,7 +18,9 @@
           │  model            │   Finding, Diagnostic, ScanReport, Message
           │  platform         │   operating system
           │  analysis         │   path analysis
-          │  export           │   JSON, Markdown (phase 4/6)
+          │  read             │   safe file reading (size limit, regular files only)
+          │  redact           │   redaction of secret-looking values
+          │  export           │   Markdown report (JSON via serde)
           └───────────────────┘
 ```
 
@@ -43,7 +45,9 @@ pub trait AgentScanner: Send + Sync {
 ```
 
 - `scan` returns `ScanOutput` (findings, diagnostics, summary). `run_scan` adds metadata and detection result, so every scanner yields the same result structure.
-- Scanners are stateless static values registered in `scanners/mod.rs`: `REAL` for real agents, `EXTRA` for scanners that only run when selected explicitly (currently `demo`).
+- Scanners are stateless static values registered in `scanners/mod.rs`: `REAL` for real agents (currently `claude-code`), `EXTRA` for scanners that only run when selected explicitly (currently `demo`).
+- Scanners read files only through `read` (`read_json`, `first_json_line`, `list_dir`): regular files only, at most 16 MiB, problems become diagnostics. Values that may carry secrets go through `redact` before they are put into a finding.
+- The Claude Code scanner (`scanners/claude_code/`) is split into `mod.rs` (locations, reading, orchestration), `projects.rs` (project discovery, session logs, Git root), `settings.rs` (levels, permission rules, modes, sandbox, summary), `rules.rs` (rule syntax and anchors) and `mcp.rs` (MCP servers, approvals, policies). Its specification is [claude-code-scanner.md](claude-code-scanner.md).
 - Scanners read only through the `ScanContext`. They work with target paths and read files via `context.host_path(…)`, so that fixture scans can redirect them.
 - Scanners do not normalise paths globally, do not deduplicate across scanners, export nothing and never change configuration.
 
@@ -120,9 +124,12 @@ To add a text: add a `(key, template)` pair to `CATALOG` at its sorted position 
 ## 7. CLI
 
 ```text
-ai-agent-access-inspector scan [--agent ID]... [--format json] [--home DIR] [--cwd DIR] [--fixture DIR]
+ai-agent-access-inspector scan [--agent ID]... [--format json|markdown] [--verbose] [--home DIR] [--cwd DIR] [--fixture DIR]
 ai-agent-access-inspector list-scanners
 ```
+
+- Without `--agent`, all scanners for real agents run (currently Claude Code).
+- `--format markdown` prints an English report (`export::markdown`); informational diagnostics only with `--verbose`. JSON always contains everything.
 
 Exit codes: `0` success (also with diagnostics), `1` error (e.g. unknown scanner, invalid fixture), `2` invalid arguments.
 

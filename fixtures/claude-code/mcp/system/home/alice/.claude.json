@@ -1,0 +1,44 @@
+{
+  "mcpServers": {
+    "shared": {
+      "command": "node",
+      "args": [
+        "/opt/mcp/shared.js",
+        "--token",
+        "abc123"
+      ],
+      "env": {
+        "API_KEY": "never-shown"
+      }
+    },
+    "blocked": {
+      "command": "evil",
+      "args": [
+        "/"
+      ]
+    },
+    "remote": {
+      "type": "http",
+      "url": "https://mcp.example.com",
+      "headers": {
+        "Authorization": "Bearer never-shown"
+      }
+    }
+  },
+  "projects": {
+    "/home/alice/app": {
+      "hasTrustDialogAccepted": true,
+      "mcpServers": {
+        "shared": {
+          "command": "node",
+          "args": [
+            "./local.js"
+          ]
+        }
+      },
+      "disabledMcpServers": [
+        "toggled"
+      ]
+    }
+  }
+}

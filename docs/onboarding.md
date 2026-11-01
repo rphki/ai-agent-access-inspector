@@ -117,10 +117,19 @@ cargo test -p inspector-cli --test cli       # only the CLI integration tests
 |---|---|---|
 | Unit tests | `#[cfg(test)] mod tests` at the end of a source file, or a `tests.rs` next to it (e.g. `analysis/tests.rs`) | test functions of one module, with access to private items |
 | Integration tests | `crates/inspector-cli/tests/cli.rs` | start the built binary as a separate process and check its output and exit code |
+| Fixture tests | `crates/inspector-core/tests/claude_code_fixtures.rs` | scan every fixture in `fixtures/claude-code/` and compare the result with its `expected.json` |
 
 Things worth knowing:
 
 - **No access to your real configuration.** Tests build their own `ScanContext` or use fixtures; they never read your home directory's agent configuration.
+- **Fixtures** simulate a whole system: `fixture.json` names the operating system, home directory and environment; every file of the simulated system lives below `system/` (e.g. `system/home/alice/.claude/settings.json`, `system/C/Users/alice/...` for Windows). Fixtures contain only invented paths and values. After an intended change to the scanner, regenerate the expectations and review the diff:
+
+  ```bash
+  UPDATE_EXPECT=1 cargo test -p inspector-core --test claude_code_fixtures
+  git diff fixtures/
+  ```
+
+  Git cannot store `.git` directories or symlinks portably, so cases that need them are unit tests with temporary directories.
 - **Temporary directories.** Tests that need real files create a uniquely named directory in the system temp directory (`test_support::TempDir`) and delete it afterwards.
 - **Platform-specific tests.** Some tests only exist on some systems, e.g. symlink tests are marked `#[cfg(unix)]` because creating symlinks on Windows needs special privileges. Code used only by such tests can trigger "unused" warnings on the other systems (see 6.3).
 - **Cross-platform logic is tested everywhere.** Windows path handling, for example, is tested on Linux and macOS too, because the code uses its own target path type instead of the host's path rules (see [architecture](architecture.md), section 5).
@@ -189,7 +198,9 @@ The format check and the dependency audit (`EmbarkStudios/cargo-deny-action`, se
 Further settings in the workflow:
 
 - **`concurrency`** with `cancel-in-progress`: if you push twice in a row, the older run on the same branch is cancelled.
-- **`permissions: contents: read`**: the workflow can only read the repository. It cannot push, create releases or comment, and it uses no secrets. The release workflow (phase 4) will need write access for releases.
+- **`permissions: contents: read`**: the workflow can only read the repository. It cannot push, create releases or comment, and it uses no secrets.
+
+Releases are built by a separate workflow, [`release.yml`](../.github/workflows/release.yml), triggered by a `v*` tag; see [release-process.md](release-process.md).
 
 Runners for public repositories are free of charge.
 
@@ -233,5 +244,6 @@ The same source code compiles and behaves differently per platform:
 | [roadmap.md](roadmap.md) | goals, decisions, phases and status |
 | [architecture.md](architecture.md) | crates, scan flow, scan context, path analysis, CLI |
 | [findings-model.md](findings-model.md) | data model and JSON format |
+| [release-process.md](release-process.md) | how releases are built and published |
 | [claude-code-scanner.md](claude-code-scanner.md) | specification of the Claude Code scanner |
 | [`CLAUDE.md`](../CLAUDE.md) | working rules (language, privacy, commits), also used by Claude Code |

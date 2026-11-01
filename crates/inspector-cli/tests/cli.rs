@@ -93,3 +93,51 @@ fn missing_fixture_fails() {
     assert_eq!(output.status.code(), Some(1));
     assert!(stderr(&output).contains("invalid fixture"));
 }
+
+#[test]
+fn demo_scan_prints_markdown_report() {
+    let output = cli()
+        .args([
+            "scan",
+            "--agent",
+            "demo",
+            "--format",
+            "markdown",
+            "--verbose",
+        ])
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "{}", stderr(&output));
+    let text = stdout(&output);
+    assert!(text.starts_with("# AI Agent Access Inspector report"));
+    assert!(text.contains("## Demo"));
+    assert!(text.contains("Demo scanner: all values are examples."));
+}
+
+#[test]
+fn list_scanners_includes_claude_code_as_default() {
+    let output = cli().arg("list-scanners").output().unwrap();
+    let text = stdout(&output);
+    assert!(text.contains("claude-code"));
+    assert!(
+        !text
+            .lines()
+            .any(|l| l.starts_with("claude-code") && l.contains("only with --agent"))
+    );
+}
+
+#[test]
+fn fixture_scan_runs_the_claude_code_scanner() {
+    let fixture =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/claude-code/linux-basic");
+    let output = cli()
+        .args(["scan", "--fixture"])
+        .arg(&fixture)
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "{}", stderr(&output));
+    let report: Value = serde_json::from_str(&stdout(&output)).unwrap();
+    assert_eq!(report["operatingSystem"], "linux");
+    assert_eq!(report["results"][0]["scanner"]["id"], "claude-code");
+    assert_eq!(report["results"][0]["detection"]["status"], "configured");
+}

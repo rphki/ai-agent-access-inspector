@@ -1,0 +1,8 @@
+{
+  "allowManagedPermissionRulesOnly": true,
+  "permissions": {
+    "deny": [
+      "Read(~/Library/Keychains/**)"
+    ]
+  }
+}

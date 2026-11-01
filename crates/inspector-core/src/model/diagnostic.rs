@@ -51,10 +51,16 @@ pub enum DiagnosticLevel {
 #[serde(rename_all = "camelCase")]
 pub enum DiagnosticCode {
     UnreadableFile,
+    /// The file exceeds the size limit and was not read.
+    FileTooLarge,
     InvalidJson,
     UnexpectedType,
     UnknownKey,
     UnparsableRule,
+    /// A rule that is valid but can never match.
+    IneffectiveRule,
+    /// A setting that has no effect where it was found.
+    IgnoredSetting,
     UnresolvedVariable,
     /// A file at a location the agent no longer reads.
     DeprecatedLocation,

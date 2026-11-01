@@ -1,0 +1,7 @@
+{
+  "operatingSystem": "linux",
+  "home": "/home/alice",
+  "env": {
+    "CLAUDE_CONFIG_DIR": "/home/alice/.claude-work"
+  }
+}

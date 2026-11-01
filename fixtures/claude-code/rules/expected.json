@@ -1,0 +1,615 @@
+{
+  "scanner": {
+    "id": "claude-code",
+    "name": "Claude Code",
+    "description": "Settings, permission rules, sandbox and MCP servers of Claude Code",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/home/alice/.claude"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "claude-code-f236e68302069643",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(~/notes/**)",
+        "patternKind": "directory",
+        "basePath": "/home/alice/notes",
+        "displayPath": "/home/alice/notes"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/allow/0",
+        "rawValue": "Read(~/notes/**)",
+        "anchor": {
+          "kind": "home"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.read.allow",
+        "args": {},
+        "text": "Allow rule: Claude Code's file tools may read these paths without a prompt."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "conflictingRules"
+          },
+          "severity": "medium",
+          "message": {
+            "key": "warning.overriddenByDeny",
+            "args": {
+              "rule": "Read(~/notes/**)"
+            },
+            "text": "Overridden by deny rule Read(~/notes/**); deny takes precedence."
+          }
+        },
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": [
+        {
+          "relation": "overriddenBy",
+          "findingId": "claude-code-cd5f3e6dc3879866"
+        }
+      ]
+    },
+    {
+      "id": "claude-code-ed68694d94d2c84d",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(/home/alice/notes/**)",
+        "patternKind": "directory",
+        "basePath": "/home/alice/.claude/home/alice/notes",
+        "displayPath": "/home/alice/.claude/home/alice/notes"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/allow/1",
+        "rawValue": "Read(/home/alice/notes/**)",
+        "anchor": {
+          "kind": "directory",
+          "path": "/home/alice/.claude"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.read.allow",
+        "args": {},
+        "text": "Allow rule: Claude Code's file tools may read these paths without a prompt."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "likelyMisconfigured"
+          },
+          "severity": "medium",
+          "message": {
+            "key": "warning.likelyMisanchored",
+            "args": {
+              "anchor": "/home/alice/.claude",
+              "rule": "Read(/home/alice/notes/**)"
+            },
+            "text": "Read(/home/alice/notes/**) starts with a single slash and is relative to /home/alice/.claude, not absolute. Use two slashes for an absolute path."
+          }
+        },
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-09930961a4e2f492",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(secrets/**)",
+        "patternKind": "directory",
+        "basePath": null,
+        "displayPath": "Read(secrets/**)"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/allow/2",
+        "rawValue": "Read(secrets/**)",
+        "anchor": {
+          "kind": "workingDirectory"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.read.allow",
+        "args": {},
+        "text": "Allow rule: Claude Code's file tools may read these paths without a prompt."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-b75493a36c4a700f",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Edit(~/notes/**)",
+        "patternKind": "directory",
+        "basePath": "/home/alice/notes",
+        "displayPath": "/home/alice/notes"
+      },
+      "effect": "ask",
+      "access": "write",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/ask/0",
+        "rawValue": "Edit(~/notes/**)",
+        "anchor": {
+          "kind": "home"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.edit.ask",
+        "args": {},
+        "text": "Ask rule: Claude Code asks before editing these paths."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-cd5f3e6dc3879866",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(~/notes/**)",
+        "patternKind": "directory",
+        "basePath": "/home/alice/notes",
+        "displayPath": "/home/alice/notes"
+      },
+      "effect": "deny",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/deny/0",
+        "rawValue": "Read(~/notes/**)",
+        "anchor": {
+          "kind": "home"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.read.deny",
+        "args": {},
+        "text": "Deny rule: Claude Code's file tools may not read these paths. Shell commands that name these paths are blocked as well, other programs are not."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-843a50b34af960c9",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(*.env)",
+        "patternKind": "glob",
+        "basePath": null,
+        "displayPath": "Read(*.env)"
+      },
+      "effect": "deny",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/deny/1",
+        "rawValue": "Read(*.env)",
+        "anchor": {
+          "kind": "workingDirectory"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.read.deny",
+        "args": {},
+        "text": "Deny rule: Claude Code's file tools may not read these paths. Shell commands that name these paths are blocked as well, other programs are not."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-4cc213f72c6fe809",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(!sample.env)",
+        "patternKind": "exactPath",
+        "basePath": null,
+        "displayPath": "Read(!sample.env)"
+      },
+      "effect": "notApplicable",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/deny/2",
+        "rawValue": "Read(!sample.env)",
+        "anchor": {
+          "kind": "workingDirectory"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.negation",
+        "args": {
+          "effect": "deny"
+        },
+        "text": "Exception: paths matching this pattern are excluded from the preceding deny rules."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-672cc88d87173cef",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Bash",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "Bash"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "claude-code/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.unsandboxedShell",
+        "args": {},
+        "text": "Shell commands run without a sandbox and can reach everything the user can."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "unsandboxedShell"
+          },
+          "severity": "high",
+          "message": {
+            "key": "warning.unsandboxedShell",
+            "args": {},
+            "text": "No sandbox is configured; shell commands run with the user's rights."
+          }
+        },
+        {
+          "kind": {
+            "type": "dangerousMode"
+          },
+          "severity": "medium",
+          "message": {
+            "key": "warning.shellAllowedWithoutPrompt",
+            "args": {
+              "rule": "Bash"
+            },
+            "text": "The allow rule Bash lets Claude Code run any shell command without a prompt."
+          }
+        }
+      ],
+      "related": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "level": "warning",
+      "code": "ineffectiveRule",
+      "message": {
+        "key": "diagnostic.ineffectiveRule",
+        "args": {
+          "rule": "Write(/tmp/x)",
+          "tool": "Write"
+        },
+        "text": "The rule Write(/tmp/x) never matches: Claude Code does not evaluate path rules for Write. Use Read(...) or Edit(...) instead."
+      },
+      "file": "/home/alice/.claude/settings.json",
+      "pointer": "/permissions/allow/4"
+    },
+    {
+      "level": "warning",
+      "code": "unparsableRule",
+      "message": {
+        "key": "diagnostic.unparsableRule",
+        "args": {
+          "rule": "Read(~/broken"
+        },
+        "text": "The rule Read(~/broken could not be interpreted."
+      },
+      "file": "/home/alice/.claude/settings.json",
+      "pointer": "/permissions/allow/5"
+    }
+  ],
+  "summary": [
+    {
+      "key": "permissionMode",
+      "label": {
+        "key": "summary.permissionMode",
+        "args": {},
+        "text": "Permission mode"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "default"
+        },
+        "text": "default"
+      }
+    },
+    {
+      "key": "sandbox",
+      "label": {
+        "key": "summary.sandbox",
+        "args": {},
+        "text": "Sandbox"
+      },
+      "value": {
+        "key": "value.disabled",
+        "args": {},
+        "text": "disabled"
+      }
+    },
+    {
+      "key": "shell",
+      "label": {
+        "key": "summary.shell",
+        "args": {},
+        "text": "Shell commands"
+      },
+      "value": {
+        "key": "value.allowedWithoutPrompt",
+        "args": {},
+        "text": "allowed without prompt"
+      }
+    },
+    {
+      "key": "readsOutsideWorkingDirectories",
+      "label": {
+        "key": "summary.readsOutsideWorkingDirectories",
+        "args": {},
+        "text": "File tools outside working directories"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "hooks",
+      "label": {
+        "key": "summary.hooks",
+        "args": {},
+        "text": "Hooks"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSettings",
+      "label": {
+        "key": "summary.managedSettings",
+        "args": {},
+        "text": "Managed settings"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "0"
+        },
+        "text": "0"
+      }
+    }
+  ]
+}

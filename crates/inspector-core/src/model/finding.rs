@@ -434,6 +434,10 @@ pub enum IneffectiveReason {
     OverriddenByHigherScope,
     /// Not supported on this operating system.
     PlatformUnsupported,
+    /// A sandbox setting while the sandbox is not enabled.
+    SandboxDisabled,
+    /// The agent asks for approval before this takes effect.
+    ApprovalPending,
 }
 
 /// A relation from one finding to another.

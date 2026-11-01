@@ -10,6 +10,7 @@ Result of phase 1 of the [roadmap](roadmap.md). This document defines which file
 | Documentation checked | refers to Claude Code up to v2.1.311 |
 | Local installation examined | Claude Code 2.1.309 (macOS, via the Claude desktop app) |
 | Supported format | only the currently documented one (see roadmap, section 2) |
+| Implementation | `crates/inspector-core/src/scanners/claude_code/` (phase 4); open checks resolved, see section 14 |
 
 Sources (official documentation):
 
@@ -26,7 +27,7 @@ Sources (official documentation):
 
 - **Documented:** file and key are described in the official documentation.
 - **Heuristic:** file or key is not documented, or only in passing, but was observed in a local installation. Findings from it get at most `Confidence::Medium`.
-- **Unconfirmed:** the statement comes from a summarised rather than verbatim reading of the documentation. It must be checked against the documentation or an installation in phase 4 before it is implemented. Such statements are marked *(unconfirmed)* below.
+- **Unconfirmed:** the statement could not be confirmed verbatim in the documentation. Section 14 records how each such point was handled in the implementation.
 
 ## 2. How Claude Code controls file access
 
@@ -58,7 +59,6 @@ Consequences for the scanner:
 | Managed | `C:\Program Files\ClaudeCode\managed-settings.json` | Windows | documented |
 | Managed (drop-ins) | `managed-settings.d/*.json` in the same directory, merged alphabetically after `managed-settings.json`; hidden files and other extensions are ignored | all | documented |
 | User | `~/.claude/settings.json` or `$CLAUDE_CONFIG_DIR/settings.json` (Windows: `%USERPROFILE%\.claude\settings.json`) | all | documented |
-| User, local | `~/.claude/settings.local.json`, only effective for sessions in the home directory | all | *(unconfirmed)* |
 | Project | `<project>/.claude/settings.json` | all | documented |
 | Project, local | `<project>/.claude/settings.local.json` (in Git repositories at the repository root, in worktrees in the main checkout) | all | documented |
 
@@ -71,14 +71,16 @@ Notes:
 
 | Source | Location | Handling in the MVP |
 |---|---|---|
-| MDM, macOS | managed preferences domain `com.anthropic.claudecode` | detect and report as diagnostic "managed source present, not evaluated" |
-| Registry, Windows | `HKLM\SOFTWARE\Policies\ClaudeCode`, value `Settings` | like MDM |
-| Registry, Windows (user) | `HKCU\SOFTWARE\Policies\ClaudeCode`, value `Settings` | like MDM |
+| MDM, macOS | managed preferences domain `com.anthropic.claudecode` | detected by the file `/Library/Managed Preferences/com.anthropic.claudecode.plist` and reported as diagnostic "managed source present, not evaluated" |
+| Registry, Windows | `HKLM\SOFTWARE\Policies\ClaudeCode`, value `Settings` | not detected in the MVP (reading the registry needs a platform API); known limitation |
+| Registry, Windows (user) | `HKCU\SOFTWARE\Policies\ClaudeCode`, value `Settings` | not detected in the MVP; known limitation |
 | Server-managed | admin console or gateway, loaded at startup | not visible locally; known limitation |
 | Policy helper | key `policyHelper` (external program) | never executed; presence reported as diagnostic |
 | SDK host | option `managedSettings` of an embedding app | not visible; known limitation |
 
-Precedence of managed sources (documented): server-managed, then MDM/HKLM registry, then managed files, then HKCU. The default is `managedSourcesBehavior: "first-wins"`; with `"merge"` they are combined. Because the scanner cannot always see higher sources, findings from managed files carry a note that a higher, invisible source may override them.
+Precedence of managed sources (documented): server-managed, then MDM/HKLM registry, then managed files, then HKCU. The default is `managedSourcesBehavior: "first-wins"`; with `"merge"` they are combined. Because the scanner cannot always see higher sources, a higher, invisible source may override findings from managed files; this is listed as a known limitation.
+
+The Windows managed directory is taken from the environment variable `ProgramFiles` (default `C:\Program Files`).
 
 ### 3.3 `~/.claude.json`
 
@@ -166,14 +168,14 @@ Rules for `Write(…)`, `NotebookEdit(…)`, `Glob(…)` and `MultiEdit(…)` ne
 | `sandbox.filesystem.allowWrite` | additional writable paths | Potential, effect Allow, access Write |
 | `sandbox.filesystem.denyWrite` | blocked write paths | Configured, effect Deny, access Write |
 | `sandbox.filesystem.denyRead` | blocked read paths (not for the Read tool) | Configured, effect Deny, access Read |
-| `sandbox.filesystem.allowRead` | re-open reading inside `denyRead` | Configured, effect Allow, access Read |
+| `sandbox.filesystem.allowRead` | re-open reading inside `denyRead` | Configured, effect NotApplicable (an exception inside a deny region, not a grant), access Read |
 | `sandbox.filesystem.disabled` | filesystem isolation off (user and managed level, `--settings` only) | sandbox counts as off for the filesystem; warning |
 | `sandbox.excludedCommands` | commands outside the sandbox | warning per entry |
 | `sandbox.allowUnsandboxedCommands` | retry without sandbox allowed (default `true`) | note on the sandbox finding |
 | `sandbox.autoAllowBashIfSandboxed` | sandboxed commands without prompt (default `true`) | note on the sandbox finding |
 | `sandbox.failIfUnavailable` | abort startup if no sandbox is possible | note |
 
-The path syntax of sandbox keys differs from permission rules: `/` is absolute, `~/` relative to home, `./` or no prefix relative to the project (project settings) or to `~/.claude` (user settings) *(unconfirmed)*.
+The path syntax of sandbox keys differs from permission rules (documented): `/` is absolute, `~/` relative to home, `.` relative to the project (project settings) or to `~/.claude` (user settings). The scanner treats `./` and paths without a prefix like `.`, and `//` like `/` *(unconfirmed)*. Relative paths in managed settings are not resolved.
 
 On native Windows the scanner reports `sandbox.enabled: true` with the warning "no effect on this system".
 
@@ -195,8 +197,8 @@ Approval state of a `.mcp.json` server: approved, rejected or **pending** (Claud
 
 | Key | Handling |
 |---|---|
-| `hooks`, `disableAllHooks`, `allowManagedHooksOnly` | hooks run commands outside the sandbox → warning "hooks configured" with count; contents are not output |
-| `env` | not read (may contain secrets); exception: `CLAUDE_CONFIG_DIR` from user and managed settings |
+| `hooks` | hooks run commands outside the sandbox → number of hook commands in the summary; contents are not output |
+| `env` | not read (may contain secrets). `CLAUDE_CONFIG_DIR` is only taken from the process environment, not from a settings `env` block (known limitation) |
 | `autoMemoryDirectory`, `plansDirectory` | not evaluated for now; check in phase 4 |
 
 All other keys are ignored. Unknown keys inside `permissions` and `sandbox` produce a diagnostic.
@@ -282,7 +284,8 @@ The installation itself (program file) is not searched for in the MVP and `claud
 
 - From `~/.claude.json` only `mcpServers` and `projects` (see 3.3).
 - From session logs only `cwd` and `version`, stopping after the first hit.
-- MCP: `env`, `headers`, `headersHelper` and `oauth` are never output. In `args`, values that look like secrets are redacted (token prefixes, long random strings, values after `--token`, `--api-key` and similar).
+- MCP: `env`, `headers`, `headersHelper`, `oauth` and `url` are never output. In `command` and `args`, values that look like secrets are redacted: token prefixes, long random strings, values after `--token`, `--api-key` and similar, assignments such as `GITHUB_TOKEN=…`, URLs with secret query parameters.
+- Files are only read if they are regular files no larger than 16 MiB; session logs only up to their first 4 MiB.
 - The settings key `env` is not read.
 - Excerpts contain only the evaluated value, never the surrounding file.
 
@@ -305,7 +308,9 @@ These points are documented visibly in the application and the README:
 
 - **Session-only settings** (`--add-dir`, `/add-dir`, `--settings`, `--allowedTools`, `--permission-mode`) are not stored and invisible to the scanner.
 - **Server-managed settings**, policy helpers and SDK host settings are not visible locally.
-- **MDM profiles and registry values** are only detected in the MVP, not evaluated.
+- **MDM profiles** (macOS) are only detected, not evaluated; **registry policies** (Windows) are not detected at all.
+- **`CLAUDE_CONFIG_DIR`** is only recognised from the environment of the scan, not from a settings `env` block.
+- **Higher managed sources** (server-managed settings, device policy) may override managed files without the scanner noticing.
 - **Bash rules** are not a security boundary; actual reachability depends on the sandbox.
 - **Read deny rules** do not prevent access by arbitrary subprocesses.
 - **MCP servers** can access everything the user can reach, regardless of their arguments.
@@ -343,12 +348,14 @@ Fixtures contain only invented paths and values.
 - `AccessKind` is sufficient; `additionalDirectories` additionally depends on the mode, which is recorded in the explanation.
 - A **scan summary** per agent (mode, sandbox on/off, number of MCP servers, unevaluated managed sources) complements the list of findings.
 
-## 14. Open checks for phase 4
+## 14. Resolved checks (phase 4)
 
-To be verified against documentation or an installation before implementation:
+Checked against the documentation on 2026-11-01:
 
-- `~/.claude/settings.local.json` and its validity *(unconfirmed)*
-- path syntax of sandbox keys *(unconfirmed)*
-- location of `.claude.json` when `CLAUDE_CONFIG_DIR` is set
-- exact types of `enabledMcpjsonServers` / `disabledMcpjsonServers` (presumably a list of server names)
-- complete list of keys that only work in managed settings
+| Point | Result | Implementation |
+|---|---|---|
+| `~/.claude/settings.local.json` | not documented; only `.claude/settings.local.json` in projects is a documented scope | not read |
+| Path syntax of sandbox keys | `/` absolute, `~/` home, `.` relative to project or `~/.claude` (documented); `//` and unprefixed paths only in a summary | as in section 4.2 |
+| `.claude.json` with `CLAUDE_CONFIG_DIR` | not documented | heuristic: first `$CLAUDE_CONFIG_DIR/.claude.json`, then `~/.claude.json` |
+| Types of `enabledMcpjsonServers`/`disabledMcpjsonServers` | not documented; observed locally as arrays of server names | arrays of strings; other types are ignored |
+| Managed-only keys | listed in the settings reference | relevant ones (`allowManagedPermissionRulesOnly`, `allowManagedHooksOnly`, `allowManagedMcpServersOnly`, `managedMcpServers`, `sandbox.bwrapPath`, `sandbox.socatPath`, `sandbox.filesystem.allowManagedReadPathsOnly`, `sandbox.network.allowManagedDomainsOnly`) produce a diagnostic when found outside managed settings |

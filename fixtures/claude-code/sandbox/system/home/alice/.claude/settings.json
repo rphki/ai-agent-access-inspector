@@ -1,0 +1,25 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "excludedCommands": [
+      "docker *"
+    ],
+    "filesystem": {
+      "allowWrite": [
+        "~/.kube",
+        "/tmp/build",
+        "cache"
+      ],
+      "denyRead": [
+        "~/.aws"
+      ],
+      "denyWrite": [
+        "//etc"
+      ],
+      "allowRead": [
+        "~/.aws/config"
+      ],
+      "watch": true
+    }
+  }
+}

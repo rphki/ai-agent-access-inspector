@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "tool": {
+      "command": "tool",
+      "args": [
+        "/data"
+      ]
+    }
+  }
+}

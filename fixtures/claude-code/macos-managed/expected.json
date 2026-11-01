@@ -1,0 +1,326 @@
+{
+  "scanner": {
+    "id": "claude-code",
+    "name": "Claude Code",
+    "description": "Settings, permission rules, sandbox and MCP servers of Claude Code",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/Users/alice/.claude",
+      "/Library/Application Support/ClaudeCode/managed-settings.json"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "claude-code-a7a0791a1cf94d40",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(~/Library/Keychains/**)",
+        "patternKind": "directory",
+        "basePath": "/Users/alice/Library/Keychains",
+        "displayPath": "/Users/alice/Library/Keychains"
+      },
+      "effect": "deny",
+      "access": "read",
+      "status": "configured",
+      "scope": "managed",
+      "source": {
+        "file": "/Library/Application Support/ClaudeCode/managed-settings.json",
+        "configKind": "claude-code/managed-settings",
+        "documentation": "documented",
+        "pointer": "/permissions/deny/0",
+        "rawValue": "Read(~/Library/Keychains/**)",
+        "anchor": {
+          "kind": "home"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.read.deny",
+        "args": {},
+        "text": "Deny rule: Claude Code's file tools may not read these paths. Shell commands that name these paths are blocked as well, other programs are not."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-151d24ad9a78e1cf",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Read(~/Documents/**)",
+        "patternKind": "directory",
+        "basePath": "/Users/alice/Documents",
+        "displayPath": "/Users/alice/Documents"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/Users/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/permissions/allow/0",
+        "rawValue": "Read(~/Documents/**)",
+        "anchor": {
+          "kind": "home"
+        },
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.rule.read.allow",
+        "args": {},
+        "text": "Allow rule: Claude Code's file tools may read these paths without a prompt."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "broadPath"
+          },
+          "severity": "medium",
+          "message": {
+            "key": "warning.personalFolder",
+            "args": {
+              "folder": "/Users/alice/Documents"
+            },
+            "text": "Grants the personal folder /Users/alice/Documents."
+          }
+        },
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "managedRulesOnly"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.managedRulesOnly",
+            "args": {},
+            "text": "Ignored: only permission rules from managed settings apply (allowManagedPermissionRulesOnly)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-672cc88d87173cef",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Bash",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "Bash"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "claude-code/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.sandboxedShell",
+        "args": {},
+        "text": "Shell commands run in a sandbox: they can read almost the whole computer, but write only to the working directory, the temporary directory and allowed paths."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "unsandboxedShell"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.unsandboxedRetry",
+            "args": {},
+            "text": "Failed commands may be retried outside the sandbox (sandbox.allowUnsandboxedCommands)."
+          }
+        }
+      ],
+      "related": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "level": "info",
+      "code": "unevaluatedSource",
+      "message": {
+        "key": "diagnostic.mdmProfileDetected",
+        "args": {
+          "path": "/Library/Managed Preferences/com.anthropic.claudecode.plist"
+        },
+        "text": "A managed configuration profile exists (/Library/Managed Preferences/com.anthropic.claudecode.plist); it is not evaluated."
+      },
+      "file": "/Library/Managed Preferences/com.anthropic.claudecode.plist",
+      "pointer": null
+    }
+  ],
+  "summary": [
+    {
+      "key": "permissionMode",
+      "label": {
+        "key": "summary.permissionMode",
+        "args": {},
+        "text": "Permission mode"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "default"
+        },
+        "text": "default"
+      }
+    },
+    {
+      "key": "sandbox",
+      "label": {
+        "key": "summary.sandbox",
+        "args": {},
+        "text": "Sandbox"
+      },
+      "value": {
+        "key": "value.enabled",
+        "args": {},
+        "text": "enabled"
+      }
+    },
+    {
+      "key": "shell",
+      "label": {
+        "key": "summary.shell",
+        "args": {},
+        "text": "Shell commands"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "readsOutsideWorkingDirectories",
+      "label": {
+        "key": "summary.readsOutsideWorkingDirectories",
+        "args": {},
+        "text": "File tools outside working directories"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "hooks",
+      "label": {
+        "key": "summary.hooks",
+        "args": {},
+        "text": "Hooks"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSettings",
+      "label": {
+        "key": "summary.managedSettings",
+        "args": {},
+        "text": "Managed settings"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "3"
+        },
+        "text": "3"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "0"
+        },
+        "text": "0"
+      }
+    }
+  ]
+}

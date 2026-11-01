@@ -1,0 +1,631 @@
+{
+  "scanner": {
+    "id": "claude-code",
+    "name": "Claude Code",
+    "description": "Settings, permission rules, sandbox and MCP servers of Claude Code",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/home/alice/.claude",
+      "/home/alice/.claude.json"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "claude-code-82109f3dda6ade2f",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/home/alice/app",
+        "patternKind": "directory",
+        "basePath": "/home/alice/app",
+        "displayPath": "/home/alice/app"
+      },
+      "effect": "notApplicable",
+      "access": "read",
+      "status": "observed",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/.claude.json",
+        "configKind": "claude-code/claude-json",
+        "documentation": "heuristic",
+        "pointer": "/projects/~1home~1alice~1app",
+        "rawValue": "/home/alice/app",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.knownProject",
+        "args": {},
+        "text": "Known project: Claude Code has been used here. It can read files in this directory without a prompt; writing depends on the permission mode."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-5770dfcb25333605",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "~/.kube",
+        "patternKind": "directory",
+        "basePath": "/home/alice/.kube",
+        "displayPath": "/home/alice/.kube"
+      },
+      "effect": "allow",
+      "access": "write",
+      "status": "potential",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/sandbox/filesystem/allowWrite/0",
+        "rawValue": "~/.kube",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.sandbox.allowWrite",
+        "args": {},
+        "text": "Sandbox: shell commands may additionally write here."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "sensitiveLocation"
+          },
+          "severity": "high",
+          "message": {
+            "key": "warning.sensitiveLocation",
+            "args": {
+              "location": "/home/alice/.kube"
+            },
+            "text": "/home/alice/.kube typically holds credentials."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-b892209d53cdf525",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/tmp/build",
+        "patternKind": "directory",
+        "basePath": "/tmp/build",
+        "displayPath": "/tmp/build"
+      },
+      "effect": "allow",
+      "access": "write",
+      "status": "potential",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/sandbox/filesystem/allowWrite/1",
+        "rawValue": "/tmp/build",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.sandbox.allowWrite",
+        "args": {},
+        "text": "Sandbox: shell commands may additionally write here."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-419f358608f101a3",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "cache",
+        "patternKind": "directory",
+        "basePath": "/home/alice/.claude/cache",
+        "displayPath": "/home/alice/.claude/cache"
+      },
+      "effect": "allow",
+      "access": "write",
+      "status": "potential",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/sandbox/filesystem/allowWrite/2",
+        "rawValue": "cache",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.sandbox.allowWrite",
+        "args": {},
+        "text": "Sandbox: shell commands may additionally write here."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-c4e04dce9d214de0",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "//etc",
+        "patternKind": "directory",
+        "basePath": "/etc",
+        "displayPath": "/etc"
+      },
+      "effect": "deny",
+      "access": "write",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/sandbox/filesystem/denyWrite/0",
+        "rawValue": "//etc",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.sandbox.denyWrite",
+        "args": {},
+        "text": "Sandbox: shell commands may not write here."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "claude-code-76c0a97d5205eddb",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "~/.aws",
+        "patternKind": "directory",
+        "basePath": "/home/alice/.aws",
+        "displayPath": "/home/alice/.aws"
+      },
+      "effect": "deny",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/sandbox/filesystem/denyRead/0",
+        "rawValue": "~/.aws",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.sandbox.denyRead",
+        "args": {},
+        "text": "Sandbox: shell commands may not read here. Claude Code's Read tool is not affected."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": [
+        {
+          "relation": "contains",
+          "findingId": "claude-code-536ff4b2451b2dd5"
+        }
+      ]
+    },
+    {
+      "id": "claude-code-536ff4b2451b2dd5",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "~/.aws/config",
+        "patternKind": "directory",
+        "basePath": "/home/alice/.aws/config",
+        "displayPath": "/home/alice/.aws/config"
+      },
+      "effect": "notApplicable",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.claude/settings.json",
+        "configKind": "claude-code/settings",
+        "documentation": "documented",
+        "pointer": "/sandbox/filesystem/allowRead/0",
+        "rawValue": "~/.aws/config",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.sandbox.allowRead",
+        "args": {},
+        "text": "Sandbox: shell commands may read here again despite a denyRead setting."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": [
+        {
+          "relation": "containedIn",
+          "findingId": "claude-code-76c0a97d5205eddb"
+        }
+      ]
+    },
+    {
+      "id": "claude-code-672cc88d87173cef",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Bash",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "Bash"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "claude-code/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.sandboxedShell",
+        "args": {},
+        "text": "Shell commands run in a sandbox: they can read almost the whole computer, but write only to the working directory, the temporary directory and allowed paths."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "unsandboxedShell"
+          },
+          "severity": "medium",
+          "message": {
+            "key": "warning.sandboxExcludedCommand",
+            "args": {
+              "command": "docker *"
+            },
+            "text": "Commands matching docker * run outside the sandbox."
+          }
+        },
+        {
+          "kind": {
+            "type": "unsandboxedShell"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.unsandboxedRetry",
+            "args": {},
+            "text": "Failed commands may be retried outside the sandbox (sandbox.allowUnsandboxedCommands)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "claude-code-36bcf242b3f4c04b",
+      "agentId": "claude-code",
+      "agentName": "Claude Code",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "Bash (/home/alice/app)",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "Bash (/home/alice/app)"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "project",
+      "source": {
+        "file": null,
+        "configKind": "claude-code/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.unsandboxedShell",
+        "args": {},
+        "text": "Shell commands run without a sandbox and can reach everything the user can."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "unsandboxedShell"
+          },
+          "severity": "high",
+          "message": {
+            "key": "warning.unsandboxedShell",
+            "args": {},
+            "text": "No sandbox is configured; shell commands run with the user's rights."
+          }
+        }
+      ],
+      "related": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "level": "info",
+      "code": "unknownKey",
+      "message": {
+        "key": "diagnostic.unknownKey",
+        "args": {
+          "key": "sandbox.filesystem.watch"
+        },
+        "text": "Unknown setting sandbox.filesystem.watch; it was not evaluated."
+      },
+      "file": "/home/alice/.claude/settings.json",
+      "pointer": "/sandbox/filesystem/watch"
+    }
+  ],
+  "summary": [
+    {
+      "key": "permissionMode",
+      "label": {
+        "key": "summary.permissionMode",
+        "args": {},
+        "text": "Permission mode"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "default"
+        },
+        "text": "default"
+      }
+    },
+    {
+      "key": "sandbox",
+      "label": {
+        "key": "summary.sandbox",
+        "args": {},
+        "text": "Sandbox"
+      },
+      "value": {
+        "key": "value.enabled",
+        "args": {},
+        "text": "enabled"
+      }
+    },
+    {
+      "key": "shell",
+      "label": {
+        "key": "summary.shell",
+        "args": {},
+        "text": "Shell commands"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "readsOutsideWorkingDirectories",
+      "label": {
+        "key": "summary.readsOutsideWorkingDirectories",
+        "args": {},
+        "text": "File tools outside working directories"
+      },
+      "value": {
+        "key": "value.withPrompt",
+        "args": {},
+        "text": "with prompt"
+      }
+    },
+    {
+      "key": "hooks",
+      "label": {
+        "key": "summary.hooks",
+        "args": {},
+        "text": "Hooks"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSettings",
+      "label": {
+        "key": "summary.managedSettings",
+        "args": {},
+        "text": "Managed settings"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    }
+  ]
+}

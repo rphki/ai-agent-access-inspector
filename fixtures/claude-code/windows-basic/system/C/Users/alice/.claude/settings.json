@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/Data/**)",
+      "Read(~/Documents/**)"
+    ],
+    "additionalDirectories": [
+      "E:\\Shared"
+    ]
+  },
+  "sandbox": {
+    "enabled": true
+  }
+}
