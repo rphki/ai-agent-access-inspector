@@ -1,0 +1,19 @@
+[workspace]
+resolver = "3"
+members = ["crates/inspector-core", "crates/inspector-cli"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+repository = "https://github.com/rphki/ai-agent-access-inspector"
+
+[workspace.dependencies]
+inspector-core = { path = "crates/inspector-core" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }

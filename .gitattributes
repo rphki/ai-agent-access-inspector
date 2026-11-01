@@ -1,0 +1,3 @@
+# Einheitliche Zeilenenden auf allen Plattformen, damit rustfmt und
+# Fixture-Tests unter Windows dieselben Dateien sehen wie unter macOS/Linux.
+* text=auto eol=lf

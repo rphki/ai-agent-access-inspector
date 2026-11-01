@@ -1,0 +1,17 @@
+# Rust
+/target/
+
+# Frontend (ab Phase 5)
+node_modules/
+/dist/
+
+# Tauri (ab Phase 5)
+/src-tauri/target/
+/src-tauri/gen/
+
+# Editoren und Betriebssysteme
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
