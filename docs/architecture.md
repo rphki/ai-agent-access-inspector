@@ -98,7 +98,7 @@ Building blocks for scanners:
 
 1. normalises each finding's base path and display path,
 2. checks the path on disk (through `host_path`) and fills `pathState`,
-3. adds warnings: missing path (not for deny rules), symlink pointing outside its parent directory, and for allow/ask findings the filesystem root, whole drives or shares, the home directory, ancestors of the home directory, credential locations (`~/.ssh`, `~/.aws`, …) and personal folders (`~/Documents`, …),
+3. adds warnings: missing path (only for allow/ask findings; deny rules and observed paths that no longer exist are harmless and only shown in `pathState`), symlink pointing outside its parent directory, and for allow/ask findings the filesystem root, whole drives or shares, the home directory, ancestors of the home directory, credential locations (`~/.ssh`, `~/.aws`, …) and personal folders (`~/Documents`, …),
 4. merges findings that say the same about the same location (same agent, subject, effect, access, status and kind; globs only if written identically); the merged sources go to `additionalSources`,
 5. records containment (`contains`/`containedIn`) and marks allow/ask findings fully covered by a deny rule (`overriddenBy` plus a `conflictingRules` warning); glob denies and denies for a different access kind do not count,
 6. sorts each finding's warnings by severity.

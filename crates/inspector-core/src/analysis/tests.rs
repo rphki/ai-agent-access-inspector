@@ -127,6 +127,20 @@ fn checks_existence_through_the_fixture() {
 }
 
 #[test]
+fn missing_observed_paths_get_no_warning() {
+    let fx = Fixture::new(Linux, "/home/alice");
+    let observed = finding(
+        "/home/alice/old-project",
+        PatternKind::Directory,
+        RuleEffect::NotApplicable,
+        AccessKind::Read,
+    );
+    let result = fx.analyze(vec![observed]);
+    assert_eq!(result[0].path_state.existence, Existence::Missing);
+    assert!(result[0].warnings.is_empty());
+}
+
+#[test]
 fn findings_without_a_path_are_left_alone() {
     let fx = Fixture::new(Linux, "/home/alice");
     let shell = Finding::builder(

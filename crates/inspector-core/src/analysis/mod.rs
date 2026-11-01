@@ -102,7 +102,10 @@ fn check_on_disk(finding: &mut Finding, path: &TargetPath, context: &ScanContext
         symlink_target: symlink_target.as_ref().map(TargetPath::to_path_buf),
     };
 
-    if state.existence == Existence::Missing && finding.effect != RuleEffect::Deny {
+    // Only a grant for a path that is gone is worth a warning; a deny rule
+    // or an observed path that no longer exists is harmless.
+    let grants = matches!(finding.effect, RuleEffect::Allow | RuleEffect::Ask);
+    if state.existence == Existence::Missing && grants {
         finding.warnings.push(Warning::new(
             WarningKind::MissingPath,
             Severity::Low,

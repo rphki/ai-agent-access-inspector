@@ -99,7 +99,7 @@ Filled in by the path analysis. Findings without an absolute base path (e.g. `ev
 | `filesystemRoot` | the filesystem root is granted |
 | `wholeDrive` | a whole drive is granted |
 | `broadPath` | another particularly broad path |
-| `missingPath` | the path does not exist |
+| `missingPath` | an allow or ask finding for a path that does not exist (missing denied or observed paths only show in `pathState`) |
 | `symlinkElsewhere` | a symlink points to another area |
 | `conflictingRules` | conflicting allow/deny rules |
 | `dangerousMode` | dangerous permission mode |

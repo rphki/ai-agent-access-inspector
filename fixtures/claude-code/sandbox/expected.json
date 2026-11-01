@@ -348,19 +348,7 @@
         "kind": "unknown",
         "symlinkTarget": null
       },
-      "warnings": [
-        {
-          "kind": {
-            "type": "missingPath"
-          },
-          "severity": "low",
-          "message": {
-            "key": "warning.missingPath",
-            "args": {},
-            "text": "The path does not exist (anymore)."
-          }
-        }
-      ],
+      "warnings": [],
       "related": [
         {
           "relation": "containedIn",

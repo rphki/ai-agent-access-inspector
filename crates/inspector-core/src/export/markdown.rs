@@ -3,7 +3,8 @@
 use std::fmt::Write;
 
 use crate::model::{
-    DetectionStatus, DiagnosticLevel, Finding, FindingSubject, Message, ScanReport, ScanResult,
+    DetectionStatus, DiagnosticLevel, Existence, Finding, FindingStatus, FindingSubject, Message,
+    ScanReport, ScanResult,
 };
 
 /// Options for the Markdown report.
@@ -68,24 +69,86 @@ fn render_result(out: &mut String, result: &ScanResult, options: MarkdownOptions
         out.push('\n');
     }
 
-    let warnings: usize = result.findings.iter().map(|f| f.warnings.len()).sum();
+    // Observed paths (e.g. known projects) say "the agent has been here";
+    // they are listed compactly after the rules and grants.
+    let (observed, findings): (Vec<&Finding>, Vec<&Finding>) = result
+        .findings
+        .iter()
+        .partition(|f| f.status == FindingStatus::Observed && f.warnings.is_empty());
+
+    let warnings: usize = findings.iter().map(|f| f.warnings.len()).sum();
     let _ = writeln!(
         out,
-        "### Findings\n\n{} findings, {} warnings.\n",
-        result.findings.len(),
-        warnings
+        "### Findings\n\n{}, {}.\n",
+        count(findings.len(), "finding"),
+        count(warnings, "warning")
     );
-    if !result.findings.is_empty() {
+    if !findings.is_empty() {
         out.push_str(
             "| Path or rule | Held by | Effect | Access | Status | Scope | Explanation | Warnings |\n\
              |---|---|---|---|---|---|---|---|\n",
         );
-        for finding in &result.findings {
+        for finding in by_severity(findings) {
             render_finding(out, finding);
         }
         out.push('\n');
     }
+    render_observed(out, &observed);
     render_diagnostics(out, result, options);
+}
+
+/// `1 finding`, `2 findings`.
+fn count(n: usize, noun: &str) -> String {
+    if n == 1 {
+        format!("1 {noun}")
+    } else {
+        format!("{n} {noun}s")
+    }
+}
+
+/// Most severe warning first; findings without warnings keep their order
+/// at the end.
+fn by_severity(mut findings: Vec<&Finding>) -> Vec<&Finding> {
+    findings.sort_by_key(|f| {
+        (
+            std::cmp::Reverse(f.warnings.iter().map(|w| w.severity).max()),
+            std::cmp::Reverse(f.warnings.len()),
+        )
+    });
+    findings
+}
+
+/// Observed paths grouped by explanation, which is printed once per group.
+fn render_observed(out: &mut String, observed: &[&Finding]) {
+    if observed.is_empty() {
+        return;
+    }
+    let _ = writeln!(out, "### Observed paths ({})\n", observed.len());
+    let mut groups: Vec<(&Message, Vec<&Finding>)> = Vec::new();
+    for finding in observed {
+        match groups
+            .iter_mut()
+            .find(|(m, _)| m.key == finding.explanation.key)
+        {
+            Some((_, members)) => members.push(finding),
+            None => groups.push((&finding.explanation, vec![finding])),
+        }
+    }
+    for (explanation, members) in groups {
+        let _ = writeln!(out, "{}\n", text(explanation));
+        for finding in members {
+            let note = match finding.path_state.existence {
+                Existence::Missing => " (no longer exists)",
+                _ => "",
+            };
+            let _ = writeln!(
+                out,
+                "- `{}`{note}",
+                finding.target.display_path.replace('`', "'")
+            );
+        }
+        out.push('\n');
+    }
 }
 
 fn render_finding(out: &mut String, finding: &Finding) {
@@ -149,7 +212,8 @@ fn render_diagnostics(out: &mut String, result: &ScanResult, options: MarkdownOp
     if hidden > 0 {
         let _ = writeln!(
             out,
-            "- {hidden} informational diagnostics hidden; use `--verbose` to show them."
+            "- {} hidden; use `--verbose` to show them.",
+            count(hidden, "informational diagnostic")
         );
     }
     out.push('\n');
@@ -194,6 +258,10 @@ mod tests {
 
     use super::*;
     use crate::context::{EnvSnapshot, ScanContext};
+    use crate::model::{
+        FindingScope, FindingSource, FindingTarget, PatternKind, Severity, SourceDocumentation,
+        Warning, WarningKind,
+    };
     use crate::platform::OperatingSystem;
     use crate::scanner::{find_scanner, run_scan};
 
@@ -227,14 +295,65 @@ mod tests {
         let report = demo_report();
         let normal = render(&report, MarkdownOptions::default());
         assert!(!normal.contains("Demo scanner: all values are examples."));
-        assert!(normal.contains("1 informational diagnostics hidden"));
+        assert!(normal.contains("1 informational diagnostic hidden"));
         let verbose = render(&report, MarkdownOptions { verbose: true });
         assert!(verbose.contains("- **info:** Demo scanner: all values are examples."));
+    }
+
+    fn finding(raw: &str, status: FindingStatus, warnings: &[Severity]) -> Finding {
+        let meta = find_scanner("demo").unwrap().metadata();
+        let mut builder = Finding::builder(
+            &meta,
+            FindingScope::User,
+            FindingTarget::unresolved(raw, PatternKind::ExactPath),
+            FindingSource::new("test", SourceDocumentation::Derived, "1"),
+        )
+        .status(status)
+        .explanation(Message::new("finding.knownProject"));
+        for severity in warnings {
+            builder = builder.warning(Warning::new(
+                WarningKind::BroadPath,
+                *severity,
+                Message::new("warning.filesystemRoot"),
+            ));
+        }
+        builder.build()
+    }
+
+    #[test]
+    fn sorts_findings_by_severity() {
+        let a = finding("a", FindingStatus::Configured, &[]);
+        let b = finding("b", FindingStatus::Configured, &[Severity::Low]);
+        let c = finding("c", FindingStatus::Configured, &[Severity::High]);
+        let d = finding(
+            "d",
+            FindingStatus::Configured,
+            &[Severity::Low, Severity::Low],
+        );
+        let sorted: Vec<&str> = by_severity(vec![&a, &b, &c, &d])
+            .iter()
+            .map(|f| f.target.raw.as_str())
+            .collect();
+        assert_eq!(sorted, ["c", "d", "b", "a"]);
+    }
+
+    #[test]
+    fn lists_observed_paths_compactly() {
+        let mut gone = finding("/old", FindingStatus::Observed, &[]);
+        gone.path_state.existence = Existence::Missing;
+        let here = finding("/here", FindingStatus::Observed, &[]);
+        let mut out = String::new();
+        render_observed(&mut out, &[&gone, &here]);
+        assert_eq!(out.matches("Known project: Claude Code").count(), 1);
+        assert!(out.contains("- `/old` (no longer exists)"));
+        assert!(out.contains("- `/here`\n"));
     }
 
     #[test]
     fn escapes_table_cells() {
         assert_eq!(cell("a|b\nc"), "a\\|b c");
         assert_eq!(label("projectLocal"), "project local");
+        assert_eq!(count(1, "finding"), "1 finding");
+        assert_eq!(count(0, "warning"), "0 warnings");
     }
 }
