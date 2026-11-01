@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$CLAUDE_ENV_FILE\" ] && [ -f \"$HOME/.cargo/env\" ] && echo '. \"$HOME/.cargo/env\"' >> \"$CLAUDE_ENV_FILE\"; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

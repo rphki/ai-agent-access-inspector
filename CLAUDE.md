@@ -50,6 +50,16 @@ All three checks must pass before a commit. CI runs them on macOS, Windows and L
 - **Security:** run `cargo deny check` when changing dependencies; each phase has a security check in `docs/roadmap.md` that must be done before the phase is accepted.
 - Keep `docs/roadmap.md` (status table) and `CHANGELOG.md` (`Unreleased`) up to date when a phase or feature is done.
 
+## Working style
+
+- **Local first.** Build and test on the maintainer's Mac. If `cargo` is not on `PATH` in the shell, run `. "$HOME/.cargo/env"` first. Install missing tools only after asking.
+- **Fast inner loop:** `cargo check`, then targeted tests (`cargo test -p <crate> --test <name>` or a name filter). Run the full checks from *Commands* once at the end of a step, before a commit. Cross-target clippy only when `#[cfg]` code changed.
+- **CI is the final gate**, not part of the inner loop: do not wait for CI after every push. Full cross-platform builds run in the release workflow (tag or manual).
+- **No over-implementation:** do only the requested roadmap step; no unrequested features, frameworks, abstractions or infrastructure. Ask before taking on extra tasks.
+- **Be economical:** don't repeat checks that already passed without a reason; fix problems in a targeted way instead of rewriting; keep command output short (`-q`, `| tail`) and don't load large files or logs into context.
+- **Progress lives in files:** after each step, update status and open points in `docs/roadmap.md`, so work can continue in a fresh session.
+- **Model:** Sonnet with medium effort for routine implementation; Opus or higher effort for architecture decisions and hard problems (chosen per session in the app).
+
 ## Workflow
 
 - Work proceeds phase by phase as listed in `docs/roadmap.md`; each phase ends with its acceptance check.

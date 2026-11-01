@@ -147,6 +147,8 @@ cargo deny check          # when dependencies changed
 
 `--all-targets` makes Clippy check test code too, not only the library and binary.
 
+While iterating, `cargo check` and a targeted test (`cargo test -p inspector-core --test claude_code_fixtures`, or a test name filter) are much faster; run the full checks once at the end of a step.
+
 ### Checking other platforms locally
 
 Code behind `#[cfg(unix)]`, `#[cfg(windows)]` and similar is only compiled for the matching platform. To find platform-specific Clippy errors before pushing, check the other targets as well (one-time setup with `rustup target add`):
@@ -165,7 +167,7 @@ This only *checks* the code for the other platform; it does not run the tests th
 
 CI is a single file: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). It runs on **GitHub Actions**, i.e. on virtual machines provided by GitHub. Nothing runs on your machine.
 
-It starts on every push to `main`, on every pull request and once a week (Monday 06:00 UTC). The weekly run notices newly published vulnerabilities in dependencies even when the code has not changed. GitHub uses the workflow file from the pushed commit, so a change to the CI configuration is tested by the same push.
+It starts on every push to `main`, on every pull request and once a week (Monday 06:00 UTC). Pushes and pull requests that only change Markdown files or `docs/` are skipped (`paths-ignore`). A full run can also be started by hand under *Actions → CI → Run workflow* (`workflow_dispatch`). The weekly run notices newly published vulnerabilities in dependencies even when the code has not changed. GitHub uses the workflow file from the pushed commit, so a change to the CI configuration is tested by the same push.
 
 ### 6.2 What runs where
 

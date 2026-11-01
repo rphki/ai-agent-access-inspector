@@ -3,7 +3,12 @@ name: CI
 on:
   push:
     branches: [main]
+    # Documentation-only changes do not need the full platform matrix.
+    paths-ignore: ["**.md", "docs/**"]
   pull_request:
+    paths-ignore: ["**.md", "docs/**"]
+  # Manual full run, e.g. before tagging a release.
+  workflow_dispatch:
   # Weekly run, so that newly published advisories are noticed without a
   # code change (Mondays, 06:00 UTC).
   schedule:
