@@ -10,7 +10,8 @@ use crate::platform::OperatingSystem::{self, Linux, MacOs, Windows};
 use crate::test_support::TempDir;
 
 struct Fixture {
-    dir: TempDir,
+    /// Keeps the temporary directory alive for the test's duration.
+    _dir: TempDir,
     context: ScanContext,
 }
 
@@ -24,7 +25,7 @@ impl Fixture {
             env: EnvSnapshot::default(),
             system_root: Some(dir.path().join("system")),
         };
-        Self { dir, context }
+        Self { _dir: dir, context }
     }
 
     fn mkdir(&self, target: &str) {
@@ -372,5 +373,4 @@ fn warns_about_symlinks_pointing_elsewhere() {
         Some(PathBuf::from("/home/alice/projects/real"))
     );
     assert!(result[1].warnings.is_empty());
-    drop(fx.dir);
 }
