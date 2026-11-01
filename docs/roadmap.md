@@ -144,96 +144,23 @@ ai-agent-access-inspector/
 
 ## 6. Datenmodell
 
-Der Kern stellt ein agentenunabhängiges Modell bereit. Die folgende Skizze ist vorläufig; die endgültige Form wird in Phase 2 auf Basis der Recherche aus Phase 1 festgelegt.
+Der Kern stellt ein agentenunabhängiges Modell bereit (`crates/inspector-core/src/model/`). Die vollständige Beschreibung inklusive JSON-Format steht in [`findings-model.md`](findings-model.md).
 
-```rust
-pub struct Finding {
-    pub id: String,
-    pub agent_id: String,
-    pub agent_name: String,
-    pub subject: FindingSubject,      // Agent selbst oder z. B. ein MCP-Server
-    pub target: FindingTarget,        // Pfad bzw. Regelmuster
-    pub effect: RuleEffect,
-    pub access: AccessKind,
-    pub status: FindingStatus,
-    pub scope: FindingScope,
-    pub source: FindingSource,
-    pub explanation: String,
-    pub confidence: Confidence,
-    pub path_state: PathState,
-    pub warnings: Vec<Warning>,
-}
+Kernelemente eines Findings:
 
-pub struct FindingTarget {
-    pub raw: String,                  // ursprünglicher Wert, z. B. "Read(~/projekt/**)"
-    pub pattern_kind: PatternKind,    // exakter Pfad, Verzeichnis, Glob
-    pub base_path: Option<PathBuf>,   // normalisierter Basispfad
-    pub display_path: String,
-}
+| Feld | Inhalt |
+|---|---|
+| `subject` | Agent selbst oder ein MCP-Server |
+| `target` | Rohwert, Musterart (`exactPath`, `directory`, `glob`, `everything`, `unparsed`), Basispfad, Anzeigepfad |
+| `effect` | `allow`, `ask`, `deny`, `notApplicable` |
+| `access`, `status`, `scope`, `confidence` | siehe Abschnitt 4 |
+| `source` | Datei, Konfigurationsart, Einstufung (`documented`, `heuristic`, `derived`), JSON-Pointer, Rohwert, Anker für relative Muster, Parser-Version, Belegausschnitt |
+| `pathState` | Existenz, Pfadtyp, Symlink-Ziel (gefüllt durch die Pfadanalyse) |
+| `warnings` | Art, Schweregrad, Text; „nicht wirksam“ ist eine Warnungsart mit Grund, kein eigener Status |
 
-pub enum FindingSubject {
-    Agent,
-    McpServer { name: String },
-}
+Jedes Finding hat eine stabile `id`, die aus Agent, Subjekt, Quelle und Rohwert berechnet wird.
 
-pub enum PatternKind {
-    ExactPath,
-    Directory,
-    Glob,
-    Unparsed,
-}
-
-pub enum RuleEffect {
-    Allow,
-    Ask,
-    Deny,
-    NotApplicable,                    // z. B. Observed-Findings ohne Regel
-}
-
-pub enum AccessKind {
-    Read,
-    Write,
-    Execute,
-    ReadWrite,
-    Unknown,
-}
-
-pub enum FindingStatus {
-    Configured,
-    Observed,
-    Potential,
-    Blocked,
-    Unknown,
-}
-
-pub enum FindingScope {
-    Managed,
-    User,
-    Project,
-    ProjectLocal,
-    Session,
-    Runtime,
-    OperatingSystem,
-}
-
-pub enum Confidence {
-    High,
-    Medium,
-    Low,
-}
-```
-
-Die Quelle eines Findings (`FindingSource`) enthält:
-
-- Pfad der Konfigurationsdatei,
-- Konfigurationstyp,
-- Einstufung der Quelle als dokumentiert oder heuristisch,
-- JSON-Schlüssel beziehungsweise JSON Pointer,
-- ursprünglichen, noch nicht normalisierten Wert,
-- Parser-Version,
-- optional einen kurzen Belegausschnitt ohne sensible Inhalte.
-
-Neben Findings liefert ein Scan **Diagnosen** (z. B. ungültiges JSON, nicht lesbare Datei, unbekannter Schlüssel). Diagnosen führen nie zum Abbruch des Scans.
+Neben Findings liefert ein Scan **Diagnosen** (z. B. ungültiges JSON, nicht lesbare Datei, unbekannter Schlüssel) und eine **Zusammenfassung** pro Agent (z. B. Permission-Modus, Sandbox). Diagnosen führen nie zum Abbruch des Scans. Der Gesamtbericht (`ScanReport`) trägt eine Formatversion.
 
 ## 7. Scanner-Schnittstelle und Scan-Kontext
 
@@ -242,12 +169,14 @@ Neben Findings liefert ein Scan **Diagnosen** (z. B. ungültiges JSON, nicht les
 Jeder Agent erhält einen eigenen Scanner.
 
 ```rust
-pub trait AgentScanner {
+pub trait AgentScanner: Send + Sync {
     fn metadata(&self) -> ScannerMetadata;
     fn detect(&self, context: &ScanContext) -> DetectionResult;
-    fn scan(&self, context: &ScanContext) -> ScanResult;
+    fn scan(&self, context: &ScanContext) -> ScanOutput;
 }
 ```
+
+`scan` liefert Findings, Diagnosen und Zusammenfassung; Metadaten und Erkennungsergebnis ergänzt der Scan-Runner. Er ruft `scan` nur für erkannte Agenten auf und fängt Abstürze einzelner Scanner als Diagnose ab. Details: [`architecture.md`](architecture.md).
 
 Ein Scanner ist verantwortlich für:
 
@@ -274,11 +203,13 @@ Scanner dürfen nicht direkt auf das echte Home-Verzeichnis oder die echte Umgeb
 pub struct ScanContext {
     pub home_dir: PathBuf,
     pub current_dir: Option<PathBuf>,
-    pub config_dirs: PlatformConfigDirs,
     pub operating_system: OperatingSystem,
-    pub env: EnvSnapshot,             // z. B. CLAUDE_CONFIG_DIR, APPDATA
+    pub env: EnvSnapshot,             // nur ausgewählte Variablen, z. B. CLAUDE_CONFIG_DIR, APPDATA
+    pub system_root: Option<PathBuf>, // im Fixture-Scan Ersatz für die Dateisystemwurzel
 }
 ```
+
+Systemweite Pfade (z. B. Managed-Settings) bilden Scanner über `context.system_path(…)`, damit Fixture-Scans sie in das Fixture-Verzeichnis umlenken können. Das ersetzt die ursprünglich geplanten `PlatformConfigDirs`.
 
 Dadurch können alle Plattformvarianten auf jedem Entwicklungssystem mit Fixtures getestet werden.
 
@@ -796,7 +727,7 @@ Derzeit keine.
 |---|---|
 | 0 – Grundlage | abgeschlossen (CI grün auf macOS, Windows, Linux) |
 | 1 – Claude-Code-Recherche | abgeschlossen ([Spezifikation](claude-code-scanner.md); offene Prüfpunkte für Phase 4 in Abschnitt 14) |
-| 2 – Datenmodell | offen |
+| 2 – Datenmodell | abgeschlossen (Demo-Scanner liefert JSON über das CLI) |
 | 3 – Pfadanalyse | offen |
 | 4 – Claude-Code-Scanner und CLI | offen |
 | 5 – Tauri und Oberfläche | offen |

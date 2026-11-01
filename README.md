@@ -6,7 +6,11 @@ Der erste unterstützte Agent ist **Claude Code**. Weitere Agenten folgen als ei
 
 Die Anwendung arbeitet vollständig lokal, verändert keine Agentenkonfiguration und überträgt keine Daten.
 
-> **Status:** frühe Entwicklung (Phase 0). Es gibt noch keine Scan-Funktion.
+> **Status:** frühe Entwicklung. Das Datenmodell steht, ein Scanner für Claude Code folgt. Bisher liefert nur der Demo-Scanner Beispieldaten:
+>
+> ```bash
+> cargo run -p inspector-cli -- scan --agent demo
+> ```
 
 ## Entwicklung
 

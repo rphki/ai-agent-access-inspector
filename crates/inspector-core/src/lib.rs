@@ -4,6 +4,12 @@
 //! scanners for individual agents. This crate has no dependency on Tauri so
 //! that it can be used and tested from the CLI and on every platform.
 
+pub mod context;
+pub mod model;
+pub mod platform;
+pub mod scanner;
+pub mod scanners;
+
 /// Version of the inspector core, taken from the workspace manifest.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
