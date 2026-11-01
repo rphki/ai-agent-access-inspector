@@ -789,10 +789,10 @@ These features are only considered once the plain, traceable configuration scann
 | 6.4 CLI `--paths` | done |
 | 6.5 GUI export (`export_scan`, dialog) | done |
 | 6.6 privacy.md, security check, docs, acceptance | done |
-| 7 – Releases and publication | implemented; open: dry run of the release workflow, tag `v0.4.0`, acceptance ([full security review](security-checks.md), [threat model](threat-model.md)) |
+| 7 – Releases and publication | [`v0.4.0`](https://github.com/rphki/ai-agent-access-inspector/releases/tag/v0.4.0) released 2026-11-01 as pre-release ([full security review](security-checks.md), [threat model](threat-model.md)); open: acceptance by installing a release build, outside-person check |
 | 7.1 GUI release workflow (dmg, NSIS/MSI, AppImage/deb) | done |
 | 7.2 Demo mode and screenshots | done |
 | 7.3 README, release process | done |
 | 7.4 CONTRIBUTING, issue templates, adding a scanner | done |
 | 7.5 Full security review, threat model, SECURITY.md | done |
-| 7.6 Release `v0.4.0` | version and changelog prepared; tag pending |
+| 7.6 Release `v0.4.0` | done (first tag run failed before publishing because the frontend build ended up among the release files; fixed in the workflow, tag moved to the fix) |
