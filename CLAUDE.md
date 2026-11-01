@@ -17,6 +17,7 @@ AI Agent Access Inspector: a local, cross-platform tool that shows which folders
 - Data model and JSON format: `docs/findings-model.md`
 - Architecture: `docs/architecture.md`
 - Build setup, tests and CI: `docs/onboarding.md` (keep it current when the build or CI changes)
+- Privacy (what is read, redaction, export anonymisation): `docs/privacy.md`
 
 ## Layout
 

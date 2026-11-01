@@ -1,6 +1,6 @@
 // The only place that talks to the Tauri backend.
 import { invoke } from "@tauri-apps/api/core";
-import type { AppInfo, CommandError, StoredScan } from "./types/report";
+import type { AppInfo, CommandError, ExportFormat, PathPrivacy, StoredScan } from "./types/report";
 
 export const api = {
   runScan: () => invoke<StoredScan>("run_scan"),
@@ -8,6 +8,9 @@ export const api = {
   getAppInfo: () => invoke<AppInfo>("get_app_info"),
   openPathInFileManager: (path: string) => invoke<void>("open_path_in_file_manager", { path }),
   openSourceFile: (path: string) => invoke<void>("open_source_file", { path }),
+  /** Opens a save dialog in the backend; resolves to the written path, or null if cancelled. */
+  exportScan: (format: ExportFormat, privacy: PathPrivacy, translations: Record<string, string> | null) =>
+    invoke<string | null>("export_scan", { format, privacy, translations }),
 };
 
 export function isCommandError(value: unknown): value is CommandError {

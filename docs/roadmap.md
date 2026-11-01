@@ -346,7 +346,8 @@ Options:
 - fixture directory,
 - JSON output,
 - Markdown output,
-- verbose diagnostics.
+- verbose diagnostics,
+- path privacy for the output (`--paths full|home|anonymized`, see section 13; from phase 6).
 
 The CLI remains after the GUI is introduced and serves as a testing and diagnostic tool.
 
@@ -456,6 +457,8 @@ By default the export contains full paths. Before exporting, the user can choose
 - anonymise user names.
 
 Exports from the GUI use the GUI language for Markdown; exports from the CLI are English. JSON always contains message keys, parameters and English texts.
+
+The options are levels: `full`, `home` (`~`) and `anonymized` (`~` and user names). Except for `full`, finding ids are renumbered. Details and limits: [privacy.md](privacy.md).
 
 Later versions may add CSV and a machine-readable security report.
 
@@ -772,12 +775,18 @@ These features are only considered once the plain, traceable configuration scann
 | 3 – Path analysis | completed (target paths, resolution, disk checks, warnings, deduplication, relations) |
 | 3.5 – Message keys and security groundwork | completed (message catalog, cargo deny, weekly CI, Dependabot, SECURITY.md) |
 | 4 – Claude Code scanner and CLI | completed: [`v0.1.0`](https://github.com/rphki/ai-agent-access-inspector/releases/tag/v0.1.0) released 2026-11-01 ([security check](security-checks.md)) |
-| 5 – Tauri and GUI | accepted by the maintainer 2026-11-01 ([security check](security-checks.md)); open: first CI run of the new jobs, release `v0.2.0` |
+| 5 – Tauri and GUI | accepted by the maintainer 2026-11-01, CI green on all platforms ([security check](security-checks.md)); open: release `v0.2.0` |
 | 5.1 Scaffold (Vite, React, Tauri 2, CI, `cargo deny`) | done |
 | 5.2 Tauri commands with path validation | done |
 | 5.3 Internationalisation (catalog sync, German) | done |
 | 5.4 Main, results and detail views, states | done |
 | 5.5 Frontend tests | done |
 | 5.6 Security check, documentation, acceptance | done |
-| 6 – Export and privacy | open |
+| 6 – Export and privacy | accepted by the maintainer 2026-11-01 ([security check](security-checks.md)); open: CI run, release `v0.3.0` |
+| 6.1 Redaction of all output | done |
+| 6.2 Path anonymisation | done |
+| 6.3 Markdown via catalog keys (German report) | done |
+| 6.4 CLI `--paths` | done |
+| 6.5 GUI export (`export_scan`, dialog) | done |
+| 6.6 privacy.md, security check, docs, acceptance | done |
 | 7 – Releases and publication | open |

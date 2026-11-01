@@ -20,7 +20,7 @@
           │  analysis         │   path analysis
           │  read             │   safe file reading (size limit, regular files only)
           │  redact           │   redaction of secret-looking values
-          │  export           │   Markdown report (JSON via serde)
+          │  export           │   JSON, Markdown, path anonymisation
           └───────────────────┘
 ```
 
@@ -32,7 +32,8 @@ All logic lives in `inspector-core`. CLI and GUI are thin layers: they build a `
 2. **Select scanners.** `default_scanners()` returns all scanners for real agents, `find_scanner(id)` a specific one, including the demo scanner.
 3. **Scan.** `run_scan` calls `detect` for each scanner and `scan` only for detected agents. A crashing scanner is caught and reported as diagnostic `internal`.
 4. **Analysis.** `analysis::analyze` runs over each scanner's findings: normalisation, disk checks, warnings, deduplication and relations (see section 5).
-5. **Output.** The `ScanReport` is serialised (JSON, later Markdown) or handed to the GUI.
+5. **Redaction.** `redact::redact_result` replaces secret-looking words in all free text of the result: rule patterns, values from configuration files, message parameters and summary values. It runs last in `run_one`, so no scanner can bypass it. Paths and ids are not changed; finding ids are computed from the redacted rule.
+6. **Output.** The `ScanReport` is serialised (`export::json`, `export::markdown`) or handed to the GUI. Exports can first pass through `export::anonymize` (section 9).
 
 ## 3. Scanners
 
@@ -124,12 +125,13 @@ To add a text: add a `(key, template)` pair to `CATALOG` at its sorted position 
 ## 7. CLI
 
 ```text
-ai-agent-access-inspector scan [--agent ID]... [--format json|markdown] [--verbose] [--home DIR] [--cwd DIR] [--fixture DIR]
+ai-agent-access-inspector scan [--agent ID]... [--format json|markdown] [--paths full|home|anonymized] [--verbose] [--home DIR] [--cwd DIR] [--fixture DIR]
 ai-agent-access-inspector list-scanners
 ```
 
 - Without `--agent`, all scanners for real agents run (currently Claude Code).
 - `--format markdown` prints an English report (`export::markdown`); informational diagnostics only with `--verbose`. JSON always contains everything.
+- `--paths` applies the path privacy of section 9 to both formats (default `full`).
 
 Exit codes: `0` success (also with diagnostics), `1` error (e.g. unknown scanner, invalid fixture), `2` invalid arguments.
 
@@ -149,8 +151,9 @@ The desktop application consists of the crate `inspector-gui` (`src-tauri/`) and
 | `get_app_info` | name, version, operating system |
 | `open_path_in_file_manager` | shows a path in the file manager |
 | `open_source_file` | opens a configuration file with its default application |
+| `export_scan` | renders the stored report as JSON or Markdown with the chosen path privacy, asks for the target file in a save dialog and writes it |
 
-`export_scan` follows in phase 6 together with anonymisation.
+`export_scan` takes the format, the path privacy and, for Markdown, the GUI's texts in its language. The save dialog (`tauri-plugin-dialog`) is opened from Rust; the frontend never names a file to write. The home directory needed for anonymisation is kept in the backend state and not sent to the frontend.
 
 Errors reach the frontend as `{ kind, detail }`; the frontend translates `kind`, `detail` is a technical value (path, OS message).
 
@@ -169,13 +172,19 @@ The frontend is treated as untrusted. `commands/open.rs` only accepts paths that
 - Translation (`src/i18n.tsx`): core messages are translated by key with their parameters inserted verbatim, falling back to the English text the core sent. `src/locales/en.json` is generated from `CATALOG` (test `gui_catalog_is_in_sync`); `de.json` and the GUI texts `ui.*.json` are maintained by hand. The language follows the system language and can be switched; the choice is kept in `localStorage`.
 - The content security policy in `tauri.conf.json` allows only the app's own scripts and the IPC channel; there are no remote sources.
 
-## 9. Dependencies
+## 9. Export and path privacy
+
+- `export::json` and `export::markdown::render` produce the two formats. Markdown texts are catalog keys `report.*`; `MarkdownOptions::translations` takes a table of texts by key (the GUI passes its language), otherwise English. JSON always carries keys, parameters and English texts.
+- `export::anonymize::anonymize(report, home, privacy)` returns a copy with `PathPrivacy::Full` (unchanged), `Home` (the home directory becomes `~` where it is a whole path prefix) or `Anonymized` (additionally the name after `/Users/`, `/home/` and `\Users\` becomes `user`, other users `user2`, …). It rewrites every string of the serialised report, including message texts and JSON pointers (key by key). On Windows it ignores ASCII case and accepts both separators.
+- Except for `Full`, finding ids are renumbered (`finding-1`, …) and `related` is updated, because the regular ids are hashes over paths.
+
+## 10. Dependencies
 
 | Crate | Dependencies |
 |---|---|
 | `inspector-core` | `serde`, `serde_json` |
 | `inspector-cli` | `inspector-core`, `clap`, `serde_json` |
-| `inspector-gui` | `inspector-core`, `tauri`, `tauri-plugin-opener`, `serde`, `serde_json` |
+| `inspector-gui` | `inspector-core`, `tauri`, `tauri-plugin-dialog`, `tauri-plugin-opener`, `serde`, `serde_json` |
 
 The frontend uses React, `@tauri-apps/api` and, for development only, Vite, TypeScript, ESLint, Vitest and React Testing Library (exact versions in `package.json`).
 

@@ -150,7 +150,11 @@ export type CommandErrorKind =
   | "scanFailed"
   | "noScan"
   | "pathNotInReport"
-  | "openFailed";
+  | "openFailed"
+  | "exportFailed";
+
+export type ExportFormat = "json" | "markdown";
+export type PathPrivacy = "full" | "home" | "anonymized";
 
 export interface CommandError {
   kind: CommandErrorKind;

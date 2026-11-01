@@ -1,4 +1,5 @@
 import { Diagnostics } from "../components/Diagnostics";
+import { ExportDialog } from "../components/ExportDialog";
 import { StateBanner } from "../components/StateBanner";
 import { useI18n } from "../i18n";
 import { allDiagnostics, allFindings, reportState, warningCount } from "../report";
@@ -22,9 +23,12 @@ export function Overview({ scan, running, onScan }: Props) {
     <section aria-labelledby="overview-heading" className="overview">
       <div className="overview-head">
         <h2 id="overview-heading">{t("overview.heading")}</h2>
-        <button type="button" onClick={onScan} disabled={running}>
-          {running ? t("state.running") : t("action.scanAgain")}
-        </button>
+        <div className="actions">
+          <ExportDialog />
+          <button type="button" onClick={onScan} disabled={running}>
+            {running ? t("state.running") : t("action.scanAgain")}
+          </button>
+        </div>
       </div>
       <StateBanner state={reportState(report)} />
       <dl className="stats">

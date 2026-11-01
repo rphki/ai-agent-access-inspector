@@ -326,3 +326,35 @@ tr[aria-selected="true"] {
 .related {
   padding-left: 20px;
 }
+
+.overview-head .actions {
+  display: flex;
+  gap: 8px;
+}
+
+.export-dialog {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-width: 560px;
+}
+
+.export-dialog::backdrop {
+  background: rgb(0 0 0 / 40%);
+}
+
+.export-dialog fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.export-dialog .actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}

@@ -167,4 +167,48 @@ describe("App", () => {
     expect(screen.getByText(/Known project:/)).toBeInTheDocument();
     expect(document.documentElement.lang).toBe("en");
   });
+
+  it("exports with the chosen format and path privacy", async () => {
+    backend(LINUX_BASIC, { export_scan: "/home/alice/report.json" });
+    renderApp();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Export …" }));
+    const dialog = screen.getByRole("dialog", { name: "Export report" });
+    await user.click(within(dialog).getByLabelText(/^JSON/));
+    await user.click(within(dialog).getByLabelText("Home directory as ~ and anonymised user names"));
+    await user.click(within(dialog).getByRole("button", { name: "Save …" }));
+    expect(invokeMock).toHaveBeenCalledWith("export_scan", {
+      format: "json",
+      privacy: "anonymized",
+      translations: null,
+    });
+    expect(await within(dialog).findByText("Saved to /home/alice/report.json.")).toBeInTheDocument();
+  });
+
+  it("exports Markdown in the GUI language", async () => {
+    backend(LINUX_BASIC, { export_scan: null });
+    renderApp("de");
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Exportieren …" }));
+    const dialog = screen.getByRole("dialog", { name: "Bericht exportieren" });
+    await user.click(within(dialog).getByRole("button", { name: "Speichern …" }));
+    const call = invokeMock.mock.calls.find(([command]) => command === "export_scan")!;
+    const args = call[1] as { format: string; privacy: string; translations: Record<string, string> };
+    expect(args.format).toBe("markdown");
+    expect(args.privacy).toBe("full");
+    expect(args.translations["finding.knownProject"]).toMatch(/^Bekanntes Projekt/);
+    expect(await within(dialog).findByText("Export abgebrochen.")).toBeInTheDocument();
+  });
+
+  it("shows a failed export", async () => {
+    backend(LINUX_BASIC, { export_scan: { kind: "exportFailed", detail: "/readonly/report.md: denied" } });
+    renderApp();
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Export …" }));
+    const dialog = screen.getByRole("dialog", { name: "Export report" });
+    await user.click(within(dialog).getByRole("button", { name: "Save …" }));
+    expect(
+      await within(dialog).findByText("The export could not be written. Details: /readonly/report.md: denied"),
+    ).toBeInTheDocument();
+  });
 });

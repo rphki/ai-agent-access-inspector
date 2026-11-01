@@ -6,6 +6,8 @@ use std::process::ExitCode;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use inspector_core::context::ScanContext;
+use inspector_core::export;
+use inspector_core::export::anonymize::{self, PathPrivacy};
 use inspector_core::export::markdown::{self, MarkdownOptions};
 use inspector_core::scanner::{self, AgentScanner};
 use inspector_core::{APP_NAME, VERSION};
@@ -50,6 +52,28 @@ struct ScanArgs {
     /// Markdown: also show informational diagnostics. JSON always contains all.
     #[arg(long, short)]
     verbose: bool,
+
+    /// How paths are shown: as they are, with the home directory as `~`, or
+    /// additionally with anonymised user names.
+    #[arg(long, value_enum, default_value_t = Paths::Full)]
+    paths: Paths,
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum Paths {
+    Full,
+    Home,
+    Anonymized,
+}
+
+impl From<Paths> for PathPrivacy {
+    fn from(paths: Paths) -> Self {
+        match paths {
+            Paths::Full => PathPrivacy::Full,
+            Paths::Home => PathPrivacy::Home,
+            Paths::Anonymized => PathPrivacy::Anonymized,
+        }
+    }
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -87,18 +111,23 @@ fn scan(args: ScanArgs) -> Result<(), String> {
     }
 
     let scanners = select_scanners(&args.agents)?;
-    let report = scanner::run_scan(&context, &scanners);
+    let report = anonymize::anonymize(
+        &scanner::run_scan(&context, &scanners),
+        &context.home_dir.to_string_lossy(),
+        args.paths.into(),
+    );
 
     let output = match args.format {
-        Format::Json => serde_json::to_string_pretty(&report).map_err(|e| e.to_string())?,
+        Format::Json => export::json(&report),
         Format::Markdown => markdown::render(
             &report,
             MarkdownOptions {
                 verbose: args.verbose,
+                translations: None,
             },
         ),
     };
-    write_stdout(&output)
+    write_stdout(output.trim_end())
 }
 
 fn select_scanners(ids: &[String]) -> Result<Vec<&'static dyn AgentScanner>, String> {

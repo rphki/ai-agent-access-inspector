@@ -1,20 +1,25 @@
 //! Tauri commands, the only interface between frontend and core.
 
+mod export;
 mod open;
 
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use inspector_core::context::ScanContext;
+use inspector_core::export::anonymize::PathPrivacy;
 use inspector_core::model::{ScanReport, ScannerMetadata};
 use inspector_core::platform::OperatingSystem;
 use inspector_core::scanner;
 use inspector_core::{APP_NAME, VERSION};
 use serde::Serialize;
 use tauri::{AppHandle, State};
+use tauri_plugin_dialog::DialogExt;
 use tauri_plugin_opener::OpenerExt;
 
+use export::ExportFormat;
 use open::OpenAction;
 
 /// The result of the last scan. Paths may only be opened if this report
@@ -30,6 +35,10 @@ pub struct StoredScan {
     pub report: ScanReport,
     /// End of the scan in milliseconds since the Unix epoch.
     pub finished_at: u64,
+    /// Home directory of the scan, for anonymised exports. Not sent to the
+    /// frontend.
+    #[serde(skip)]
+    pub home: String,
 }
 
 /// Error returned to the frontend. The frontend translates `kind`; `detail`
@@ -55,6 +64,8 @@ pub enum ErrorKind {
     PathNotInReport,
     /// The operating system could not open the path.
     OpenFailed,
+    /// The export file could not be written.
+    ExportFailed,
 }
 
 impl CommandError {
@@ -104,10 +115,11 @@ pub fn list_scanners() -> Vec<ScannerInfo> {
 /// Scans the real system with all default scanners.
 #[tauri::command]
 pub async fn run_scan(state: State<'_, AppState>) -> Result<StoredScan, CommandError> {
-    let report = tauri::async_runtime::spawn_blocking(|| {
+    let (report, home) = tauri::async_runtime::spawn_blocking(|| {
         let context = ScanContext::from_system()
             .map_err(|e| CommandError::new(ErrorKind::ScanContext, e.to_string()))?;
-        Ok::<_, CommandError>(scanner::run_scan(&context, &scanner::default_scanners()))
+        let report = scanner::run_scan(&context, &scanner::default_scanners());
+        Ok::<_, CommandError>((report, context.home_dir.to_string_lossy().into_owned()))
     })
     .await
     .map_err(|e| CommandError::new(ErrorKind::ScanFailed, e.to_string()))??;
@@ -119,6 +131,7 @@ pub async fn run_scan(state: State<'_, AppState>) -> Result<StoredScan, CommandE
     let stored = StoredScan {
         report,
         finished_at,
+        home,
     };
     *lock(&state) = Some(stored.clone());
     Ok(stored)
@@ -179,6 +192,41 @@ pub fn open_source_file(
             .map_err(|e| CommandError::new(ErrorKind::OpenFailed, e.to_string())),
         OpenAction::Reveal(path) => reveal(&path),
     }
+}
+
+/// Exports the last scan. The file is chosen in a save dialog opened here,
+/// never by the frontend. `translations` holds the texts of the GUI language
+/// for Markdown; JSON always carries keys and English texts. Returns the
+/// written path, or `None` if the dialog was cancelled.
+#[tauri::command]
+pub async fn export_scan(
+    format: ExportFormat,
+    privacy: PathPrivacy,
+    translations: Option<HashMap<String, String>>,
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<Option<String>, CommandError> {
+    let stored = lock(&state)
+        .clone()
+        .ok_or(CommandError::new(ErrorKind::NoScan, None))?;
+    let content = export::render(&stored, format, privacy, translations.as_ref());
+
+    let Some(chosen) = app
+        .dialog()
+        .file()
+        .set_file_name(export::file_name(stored.finished_at, format))
+        .add_filter(format.label(), &[format.extension()])
+        .blocking_save_file()
+    else {
+        return Ok(None);
+    };
+    let path = chosen
+        .into_path()
+        .map_err(|e| CommandError::new(ErrorKind::ExportFailed, e.to_string()))?;
+    std::fs::write(&path, content).map_err(|e| {
+        CommandError::new(ErrorKind::ExportFailed, format!("{}: {e}", path.display()))
+    })?;
+    Ok(Some(path.display().to_string()))
 }
 
 fn reveal(path: &std::path::Path) -> Result<(), CommandError> {

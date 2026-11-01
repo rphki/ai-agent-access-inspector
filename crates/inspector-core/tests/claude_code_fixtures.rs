@@ -73,12 +73,73 @@ fn no_secret_from_any_fixture_appears_in_the_output() {
             "never read",
             "abc123",
             "ghp_",
+            // All invented secrets of the fixture `secrets`.
+            "fixture-",
         ] {
             assert!(
                 !output.contains(secret),
                 "{secret} leaked in {}",
                 fixture.display()
             );
+        }
+    }
+}
+
+/// Acceptance check of phase 6: no export of any fixture, in any format and
+/// with any path privacy, contains a word that looks like a secret. With
+/// `home` the home directory is gone, with `anonymized` the user name too.
+#[test]
+fn exports_contain_no_secrets_home_or_user_names() {
+    use inspector_core::export::anonymize::{PathPrivacy, anonymize};
+    use inspector_core::export::markdown::{self, MarkdownOptions};
+    use inspector_core::redact::{REDACTED, looks_like_secret};
+
+    for fixture in fixtures() {
+        let context = ScanContext::from_fixture(&fixture).unwrap();
+        let report = run_scan(&context, &[find_scanner("claude-code").unwrap()]);
+        let home = context.home_dir.to_string_lossy().into_owned();
+        let user = home.rsplit(['/', '\\']).next().unwrap().to_lowercase();
+        let name = fixture.file_name().unwrap().to_string_lossy().into_owned();
+
+        for privacy in [
+            PathPrivacy::Full,
+            PathPrivacy::Home,
+            PathPrivacy::Anonymized,
+        ] {
+            let exported = anonymize(&report, &home, privacy);
+            let markdown_options = MarkdownOptions {
+                verbose: true,
+                translations: None,
+            };
+            for output in [
+                inspector_core::export::json(&exported),
+                markdown::render(&exported, markdown_options),
+            ] {
+                let secrets: Vec<&str> = output
+                    // Words as `redact_text` sees them; paths stay one word.
+                    .split(|c: char| c.is_whitespace() || "\"'`(),;|<>[]{}".contains(c))
+                    .filter(|word| *word != REDACTED && looks_like_secret(word))
+                    .collect();
+                assert!(secrets.is_empty(), "{name} {privacy:?}: {secrets:?}");
+                let unescaped = output.replace("\\\\", "\\");
+                if privacy != PathPrivacy::Full {
+                    // As a path of its own; `~/.claude/home/alice` is a
+                    // directory below the home, not the home.
+                    let left = unescaped.match_indices(&home).any(|(i, _)| {
+                        unescaped[..i]
+                            .chars()
+                            .next_back()
+                            .is_none_or(|c| !c.is_alphanumeric() && !"._-/\\".contains(c))
+                    });
+                    assert!(!left, "{name} {privacy:?}: home left");
+                }
+                if privacy == PathPrivacy::Anonymized {
+                    assert!(
+                        !unescaped.to_lowercase().contains(&user),
+                        "{name} {privacy:?}: user name left"
+                    );
+                }
+            }
         }
     }
 }

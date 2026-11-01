@@ -132,12 +132,15 @@ fn finding_id(finding: &Finding) -> String {
         .as_ref()
         .map(|f| f.to_string_lossy().into_owned())
         .unwrap_or_default();
+    // The redacted rule, so that the id carries no trace of a secret and
+    // matches the output (see `redact::redact_result`).
+    let raw = crate::redact::redact_text(&finding.target.raw);
     let parts = [
         finding.agent_id.as_str(),
         subject,
         file.as_str(),
         finding.source.pointer.as_deref().unwrap_or(""),
-        finding.target.raw.as_str(),
+        raw.as_str(),
     ];
     format!("{}-{:016x}", finding.agent_id, fnv1a64(&parts))
 }

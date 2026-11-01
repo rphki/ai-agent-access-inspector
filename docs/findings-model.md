@@ -35,7 +35,7 @@ A finding is a path or rule that grants, restricts or suggests file access for a
 
 | Field | Meaning |
 |---|---|
-| `id` | Stable identifier: `<agentId>-<16 hex characters>`, computed from agent, subject, source file, JSON pointer and raw value. Unchanged configuration yields the same identifier on every scan. |
+| `id` | Stable identifier: `<agentId>-<16 hex characters>`, computed from agent, subject, source file, JSON pointer and the redacted raw value. Unchanged configuration yields the same identifier on every scan. Exports with path privacy other than `full` renumber ids as `finding-1`, `finding-2`, … (references in `related` follow). |
 | `agentId`, `agentName` | scanner that produced the finding |
 | `subject` | who holds the access: `{ "kind": "agent" }` or `{ "kind": "mcpServer", "name": "…" }` |
 | `target` | path or rule, see 3.1 |

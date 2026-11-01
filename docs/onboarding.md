@@ -71,7 +71,7 @@ The root `Cargo.toml` defines for all crates:
 - `cargo update` moves to newer compatible versions; commit the changed `Cargo.lock`.
 - `--locked` (used in CI) makes Cargo fail instead of silently updating `Cargo.lock` if it does not match `Cargo.toml`. If CI fails with a message about the lock file, run `cargo build` locally and commit the updated `Cargo.lock`.
 
-Current external dependencies: `serde` and `serde_json` (core), `clap` and `serde_json` (CLI), `tauri`, `tauri-plugin-opener`, `serde` and `serde_json` (GUI). New dependencies in the core are added sparingly.
+Current external dependencies: `serde` and `serde_json` (core), `clap` and `serde_json` (CLI), `tauri`, `tauri-plugin-dialog`, `tauri-plugin-opener`, `serde` and `serde_json` (GUI). New dependencies in the core are added sparingly.
 
 ### 3.4 Dependency audit: `deny.toml`
 

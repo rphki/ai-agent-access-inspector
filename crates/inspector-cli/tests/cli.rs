@@ -141,3 +141,34 @@ fn fixture_scan_runs_the_claude_code_scanner() {
     assert_eq!(report["results"][0]["scanner"]["id"], "claude-code");
     assert_eq!(report["results"][0]["detection"]["status"], "configured");
 }
+
+#[test]
+fn paths_option_hides_home_and_user_names() {
+    let fixture =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/claude-code/linux-basic");
+    let scan = |paths: &str, format: &str| {
+        let output = cli()
+            .args(["scan", "--format", format, "--paths", paths, "--fixture"])
+            .arg(&fixture)
+            .output()
+            .unwrap();
+        assert!(output.status.success(), "{}", stderr(&output));
+        stdout(&output)
+    };
+    assert!(scan("full", "json").contains("/home/alice/app"));
+    for format in ["json", "markdown"] {
+        let home = scan("home", format);
+        assert!(!home.contains("/home/alice"), "{format}");
+        assert!(home.contains("~/app"), "{format}");
+        assert!(!scan("anonymized", format).contains("alice"), "{format}");
+    }
+}
+
+#[test]
+fn unknown_paths_value_fails() {
+    let output = cli()
+        .args(["scan", "--agent", "demo", "--paths", "hidden"])
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(2));
+}

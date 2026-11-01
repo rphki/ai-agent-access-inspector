@@ -11,6 +11,7 @@
     "allow-get-scan-details",
     "allow-get-app-info",
     "allow-open-path-in-file-manager",
-    "allow-open-source-file"
+    "allow-open-source-file",
+    "allow-export-scan"
   ]
 }

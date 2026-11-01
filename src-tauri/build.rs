@@ -8,6 +8,7 @@ const COMMANDS: &[&str] = &[
     "get_app_info",
     "open_path_in_file_manager",
     "open_source_file",
+    "export_scan",
 ];
 
 fn main() {

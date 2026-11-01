@@ -2,6 +2,22 @@
 
 Record of the security check that ends each phase (see [roadmap](roadmap.md), section 14). Each entry lists what was checked, how, and what remains open.
 
+## Phase 6 – Export and privacy (2026-11-01)
+
+| Topic | Check | Result |
+|---|---|---|
+| Redaction of all output | `redact::redact_result` runs last in `scanner::run_one` over all free text (rules, raw values, message parameters, summary); covers CLI, GUI and exports. New: headers (`Authorization: Bearer …`, `X-Api-Key:`), multi-word arguments, secrets inside permission rules and diagnostics. Finding ids are hashed from the redacted rule | unit tests in `redact.rs`; fixture `secrets` with invented tokens in rules, sandbox exclusions and MCP arguments; `no_secret_from_any_fixture_appears_in_the_output` |
+| Exports without secrets | every fixture × `full`/`home`/`anonymized` × JSON/Markdown: no word that `looks_like_secret`, apart from `<redacted>` | `exports_contain_no_secrets_home_or_user_names` |
+| Path privacy | `home`: no home directory as a path of its own; `anonymized`: no own user name anywhere, including JSON pointers and Claude Code's dash-encoded project directories (found by this check); ids renumbered | same test; unit tests in `export/anonymize.rs` (macOS, Linux, Windows, case, both separators, prefix boundaries, `/dev/null` with user `dev`) |
+| Writing exports | `export_scan` opens the save dialog in Rust; the frontend cannot choose or name a file to write. Only the content of the last scan is written | code review; frontend tests for options, cancel and error |
+| Capabilities | one new command `export_scan` with its own permission; the dialog plugin gets no frontend permission | review of `capabilities/default.json` |
+| Dependencies | `tauri-plugin-dialog` (MIT/Apache-2.0); `cargo deny check` and `pnpm audit` pass | `cargo deny check`, `pnpm audit` |
+
+Open points, carried forward:
+
+- Redaction stays heuristic (see [privacy.md](privacy.md), section 4): a secret without a recognisable format passed as a plain argument is not detected. Command lines are still shown, so that users can identify a server.
+- Anonymisation covers the home directory and user directories; other personal names in paths and host names are kept (documented in privacy.md).
+
 ## Phase 5 – Tauri and GUI (2026-11-01)
 
 | Topic | Check | Result |

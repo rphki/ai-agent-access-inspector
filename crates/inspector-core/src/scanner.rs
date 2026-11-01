@@ -8,6 +8,7 @@ use crate::model::{
     DetectionResult, DetectionStatus, Diagnostic, DiagnosticCode, DiagnosticLevel, Message,
     REPORT_FORMAT_VERSION, ScanOutput, ScanReport, ScanResult, ScannerMetadata, ToolInfo,
 };
+use crate::redact;
 use crate::scanners;
 
 /// One scanner per agent.
@@ -70,13 +71,16 @@ fn run_one(context: &ScanContext, scanner: &dyn AgentScanner) -> ScanResult {
             },
         )
     });
-    ScanResult {
+    let mut result = ScanResult {
         scanner: metadata,
         detection,
         findings: analysis::analyze(output.findings, context),
         diagnostics: output.diagnostics,
         summary: output.summary,
-    }
+    };
+    // Last step, so that no scanner and no analysis can bypass it.
+    redact::redact_result(&mut result);
+    result
 }
 
 /// Scanners that run when no agent is selected explicitly.

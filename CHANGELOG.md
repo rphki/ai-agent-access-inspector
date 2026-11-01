@@ -6,6 +6,11 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ### Added
 
+- Export of reports as JSON or Markdown from the GUI (save dialog) with path privacy: full paths, home directory as `~`, or anonymised user names; Markdown in the GUI language
+- CLI option `scan --paths full|home|anonymized`
+- Redaction of secrets in all output: permission rules, values from configuration files, message parameters, HTTP authentication headers
+- `docs/privacy.md`
+
 - Desktop application (Tauri 2, React, TypeScript): main view with detected agents, last scan, counts and configuration summary; results list with filters (agent, status, effect, access, scope, warnings only, existing paths only); detail view with path, rule, source and position, explanation, confidence, path state, warnings and related findings; actions to show a folder, open a configuration file, copy the path and copy the finding as JSON
 - German and English GUI, following the system language and switchable; the English texts are generated from the core catalog
 - Tauri commands `list_scanners`, `run_scan`, `get_scan_details`, `get_app_info`, `open_path_in_file_manager`, `open_source_file`; paths are only opened if the last scan reported them, and only JSON and Markdown files are handed to their default application

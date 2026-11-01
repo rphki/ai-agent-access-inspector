@@ -11,6 +11,7 @@ use commands::AppState;
 /// Starts the application.
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .manage(AppState::default())
         .invoke_handler(tauri::generate_handler![
@@ -20,6 +21,7 @@ pub fn run() {
             commands::get_app_info,
             commands::open_path_in_file_manager,
             commands::open_source_file,
+            commands::export_scan,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the application");
