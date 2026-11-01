@@ -9,6 +9,7 @@ This guide is for anyone who checks out the repository and wants to understand h
 | [rustup](https://rustup.rs/) | Rust toolchain | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` (macOS/Linux) or `rustup-init.exe` (Windows) |
 | Git | version control | system package manager |
 | [GitHub CLI](https://cli.github.com/) (`gh`) | optional: CI results in the terminal | e.g. `brew install gh` |
+| [cargo-deny](https://embarkstudios.github.io/cargo-deny/) | optional: dependency audit before pushing | `brew install cargo-deny` or `cargo install --locked cargo-deny` |
 
 You do **not** need to pick a Rust version. The repository pins it (see 3.1); rustup installs the right toolchain on the first `cargo` call inside the repository. If your rustup version does not do that automatically, run `rustup show` once in the repository.
 
@@ -53,7 +54,7 @@ The root `Cargo.toml` defines for all crates:
 
 - **`[workspace.package]`**: version, Rust edition (2024), license and repository URL. Each crate inherits them with `version.workspace = true` and so on, so the version is changed in one place.
 - **`[workspace.dependencies]`**: the internal dependency on `inspector-core`.
-- **`[workspace.lints]`**: compiler and Clippy rules (see 3.4).
+- **`[workspace.lints]`**: compiler and Clippy rules (see 3.5).
 
 `inspector-cli` depends on `inspector-core`; the core has no dependency on the CLI or (later) on Tauri. The GUI in `src-tauri/` will be added as a third crate in phase 5.
 
@@ -67,7 +68,18 @@ The root `Cargo.toml` defines for all crates:
 
 Current external dependencies: `serde` and `serde_json` (core), `clap` and `serde_json` (CLI). New dependencies in the core are added sparingly.
 
-### 3.4 Lints and formatting
+### 3.4 Dependency audit: `deny.toml`
+
+`cargo deny check` checks all dependencies against `deny.toml`:
+
+- **advisories:** known vulnerabilities and yanked crates from the [RustSec](https://rustsec.org/) database,
+- **licenses:** only Apache-2.0, MIT and Unicode-3.0 are allowed; a dependency with another license fails the check and has to be discussed before it is added,
+- **bans:** duplicate versions of a crate produce a warning, wildcard version requirements an error,
+- **sources:** crates may only come from crates.io.
+
+Run it whenever you add or update a dependency. CI runs it on every push and weekly (see 6.2).
+
+### 3.5 Lints and formatting
 
 Defined once in the root `Cargo.toml` and enabled in every crate with `[lints] workspace = true`:
 
@@ -80,7 +92,7 @@ Formatting follows the default `rustfmt` style (no `rustfmt.toml`). `cargo fmt -
 
 `.gitattributes` forces LF line endings for all text files, so formatting checks and fixture files behave the same on Windows as on macOS and Linux.
 
-### 3.5 Build output
+### 3.6 Build output
 
 Everything Cargo produces goes to `target/` (ignored by Git):
 
@@ -121,6 +133,7 @@ These are exactly the checks CI runs:
 cargo fmt --all
 cargo clippy --workspace --all-targets --locked -- -D warnings
 cargo test --workspace --locked
+cargo deny check          # when dependencies changed
 ```
 
 `--all-targets` makes Clippy check test code too, not only the library and binary.
@@ -143,7 +156,7 @@ This only *checks* the code for the other platform; it does not run the tests th
 
 CI is a single file: [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). It runs on **GitHub Actions**, i.e. on virtual machines provided by GitHub. Nothing runs on your machine.
 
-It starts on every push to `main` and on every pull request. GitHub uses the workflow file from the pushed commit, so a change to the CI configuration is tested by the same push.
+It starts on every push to `main`, on every pull request and once a week (Monday 06:00 UTC). The weekly run notices newly published vulnerabilities in dependencies even when the code has not changed. GitHub uses the workflow file from the pushed commit, so a change to the CI configuration is tested by the same push.
 
 ### 6.2 What runs where
 
@@ -155,6 +168,7 @@ git push
    ▼
 GitHub Actions
    ├── Format                        → Ubuntu runner
+   ├── Dependencies (cargo deny)     → Ubuntu runner
    ├── Clippy and tests (macos)      → macOS runner (Apple Silicon)
    ├── Clippy and tests (ubuntu)     → Ubuntu runner
    └── Clippy and tests (windows)    → Windows runner
@@ -167,10 +181,10 @@ Steps of a "Clippy and tests" job:
 1. **`actions/checkout`** fetches the pushed commit onto the runner.
 2. **`rustup show`** installs the toolchain from `rust-toolchain.toml` (rustup is preinstalled on the runners).
 3. **`Swatinem/rust-cache`** restores downloaded crates and build artifacts from earlier runs. The cache key includes `Cargo.lock`, so changed dependencies lead to a fresh build. This mainly speeds up Windows.
-4. **Clippy** with `-D warnings` and `--locked` (see 3.3 and 3.4).
+4. **Clippy** with `-D warnings` and `--locked` (see 3.3 and 3.5).
 5. **Tests** with `--locked`.
 
-The format check runs only once, on Ubuntu, because its result does not depend on the platform.
+The format check and the dependency audit (`EmbarkStudios/cargo-deny-action`, see 3.4) run only once, on Ubuntu, because their results do not depend on the platform.
 
 Further settings in the workflow:
 
@@ -178,6 +192,8 @@ Further settings in the workflow:
 - **`permissions: contents: read`**: the workflow can only read the repository. It cannot push, create releases or comment, and it uses no secrets. The release workflow (phase 4) will need write access for releases.
 
 Runners for public repositories are free of charge.
+
+**Dependabot** ([`.github/dependabot.yml`](../.github/dependabot.yml)) is not part of CI but a GitHub service: once a week it checks Cargo dependencies and GitHub Actions for new versions and opens one grouped pull request per ecosystem. These pull requests go through CI like any other.
 
 ### 6.3 Why three operating systems
 
@@ -206,6 +222,7 @@ The same source code compiles and behaves differently per platform:
 |---|---|---|
 | Format job fails | code not formatted | `cargo fmt --all`, commit |
 | Clippy fails on one platform only | platform-specific code (see 6.3) | reproduce with `--target` (section 5), fix, push |
+| Dependencies job fails | new advisory, disallowed license or source | read the report; update the crate (`cargo update -p <crate>`) or replace it |
 | "the lock file needs to be updated" | `Cargo.lock` does not match `Cargo.toml` | `cargo build`, commit `Cargo.lock` |
 | Test fails on Windows only | path separators, letter case, `C:\` paths | test with Windows paths in the target path type; check `#[cfg]` usage |
 

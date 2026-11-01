@@ -14,8 +14,8 @@ use std::collections::HashMap;
 
 use crate::context::ScanContext;
 use crate::model::{
-    AccessKind, Existence, Finding, FindingSubject, PathState, PatternKind, RelatedFinding,
-    Relation, RuleEffect, Severity, Warning, WarningKind,
+    AccessKind, Existence, Finding, FindingSubject, Message, PathState, PatternKind,
+    RelatedFinding, Relation, RuleEffect, Severity, Warning, WarningKind,
 };
 use path::TargetPath;
 
@@ -106,7 +106,7 @@ fn check_on_disk(finding: &mut Finding, path: &TargetPath, context: &ScanContext
         finding.warnings.push(Warning::new(
             WarningKind::MissingPath,
             Severity::Low,
-            "The path does not exist (anymore).",
+            Message::new("warning.missingPath"),
         ));
     }
     if let (Some(target), Some(parent)) = (&symlink_target, path.parent()) {
@@ -114,7 +114,9 @@ fn check_on_disk(finding: &mut Finding, path: &TargetPath, context: &ScanContext
             finding.warnings.push(Warning::new(
                 WarningKind::SymlinkElsewhere,
                 Severity::Medium,
-                format!("Symlink to {target}, outside of {parent}."),
+                Message::new("warning.symlinkElsewhere")
+                    .arg("target", target)
+                    .arg("parent", parent),
             ));
         }
     }
@@ -124,7 +126,7 @@ fn add_breadth_warnings(finding: &mut Finding, path: &TargetPath, home: Option<&
     if !matches!(finding.effect, RuleEffect::Allow | RuleEffect::Ask) {
         return;
     }
-    let mut warn = |kind, severity, message: String| {
+    let mut warn = |kind, severity, message: Message| {
         finding.warnings.push(Warning::new(kind, severity, message));
     };
 
@@ -132,7 +134,7 @@ fn add_breadth_warnings(finding: &mut Finding, path: &TargetPath, home: Option<&
         warn(
             WarningKind::WholeDrive,
             Severity::High,
-            format!("Grants the whole drive {path}."),
+            Message::new("warning.wholeDrive").arg("path", path),
         );
         return;
     }
@@ -140,7 +142,7 @@ fn add_breadth_warnings(finding: &mut Finding, path: &TargetPath, home: Option<&
         warn(
             WarningKind::FilesystemRoot,
             Severity::High,
-            "Grants the entire filesystem.".into(),
+            Message::new("warning.filesystemRoot"),
         );
         return;
     }
@@ -151,19 +153,21 @@ fn add_breadth_warnings(finding: &mut Finding, path: &TargetPath, home: Option<&
         warn(
             WarningKind::HomeDirectory,
             Severity::High,
-            "Grants the entire home directory with all personal files.".into(),
+            Message::new("warning.homeDirectory"),
         );
     } else if home.starts_with(path) {
         warn(
             WarningKind::BroadPath,
             Severity::High,
-            format!("Grants {path}, which contains the home directory {home}."),
+            Message::new("warning.containsHome")
+                .arg("path", path)
+                .arg("home", home),
         );
     } else if let Some(location) = matching_location(path, home, SENSITIVE_LOCATIONS) {
         warn(
             WarningKind::SensitiveLocation,
             Severity::High,
-            format!("{location} typically holds credentials."),
+            Message::new("warning.sensitiveLocation").arg("location", location),
         );
     } else if let Some(folder) = PERSONAL_FOLDERS
         .iter()
@@ -173,7 +177,7 @@ fn add_breadth_warnings(finding: &mut Finding, path: &TargetPath, home: Option<&
         warn(
             WarningKind::BroadPath,
             Severity::Medium,
-            format!("Grants the personal folder {folder}."),
+            Message::new("warning.personalFolder").arg("folder", folder),
         );
     }
 }
@@ -272,10 +276,7 @@ fn relate(findings: &mut [(Finding, Option<TargetPath>)]) {
             finding.warnings.push(Warning::new(
                 WarningKind::ConflictingRules,
                 Severity::Medium,
-                format!(
-                    "Overridden by deny rule {}; deny takes precedence.",
-                    other.target.raw
-                ),
+                Message::new("warning.overriddenByDeny").arg("rule", &other.target.raw),
             ));
         }
     }

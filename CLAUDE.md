@@ -6,6 +6,7 @@ Guidance for Claude Code when working in this repository.
 
 - **English** for everything written into the repository: documentation, code, comments, CLI output, commit messages, PR descriptions, issues.
 - Conversation with the maintainer may be in German.
+- **Internationalisation:** only the GUI is translated (German, English); the CLI is English only. User-facing texts in `inspector-core` are never plain strings but `Message`s with a key from the English catalog (`model/message.rs`); see `docs/architecture.md`, section 6.
 
 ## Project
 
@@ -45,6 +46,7 @@ All three checks must pass before a commit. CI runs them on macOS, Windows and L
 - **Privacy:** read only the keys a scanner needs; never output secrets (MCP `env`, `headers`, tokens). When inspecting the maintainer's local configuration for research, look at structure and key names only, not values.
 - **Undocumented sources** are marked `heuristic` and get at most medium confidence.
 - **Dependencies in `inspector-core`** are added sparingly.
+- **Security:** run `cargo deny check` when changing dependencies; each phase has a security check in `docs/roadmap.md` that must be done before the phase is accepted.
 - Keep `docs/roadmap.md` (status table) and `CHANGELOG.md` (`Unreleased`) up to date when a phase or feature is done.
 
 ## Workflow

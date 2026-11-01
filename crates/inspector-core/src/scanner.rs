@@ -5,7 +5,7 @@ use std::panic::{self, AssertUnwindSafe};
 use crate::analysis;
 use crate::context::ScanContext;
 use crate::model::{
-    DetectionResult, DetectionStatus, Diagnostic, DiagnosticCode, DiagnosticLevel,
+    DetectionResult, DetectionStatus, Diagnostic, DiagnosticCode, DiagnosticLevel, Message,
     REPORT_FORMAT_VERSION, ScanOutput, ScanReport, ScanResult, ScannerMetadata, ToolInfo,
 };
 use crate::scanners;
@@ -58,7 +58,9 @@ fn run_one(context: &ScanContext, scanner: &dyn AgentScanner) -> ScanResult {
         let diagnostic = Diagnostic::new(
             DiagnosticLevel::Error,
             DiagnosticCode::Internal,
-            format!("Scanner '{}' failed unexpectedly: {reason}", metadata.id),
+            Message::new("diagnostic.internalScannerError")
+                .arg("scanner", &metadata.id)
+                .arg("reason", reason),
         );
         (
             DetectionResult::not_detected(),
@@ -168,7 +170,8 @@ mod tests {
         assert_eq!(report.results.len(), 2);
         let diagnostic = &report.results[0].diagnostics[0];
         assert_eq!(diagnostic.code, DiagnosticCode::Internal);
-        assert!(diagnostic.message.contains("boom"));
+        assert_eq!(diagnostic.message.args["reason"], "boom");
+        assert!(diagnostic.message.text.contains("boom"));
     }
 
     #[test]

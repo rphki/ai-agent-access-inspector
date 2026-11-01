@@ -15,7 +15,7 @@
           │  context          │   ScanContext: system or fixture
           │  scanner          │   AgentScanner, run_scan, registry
           │  scanners/*       │   one module per agent
-          │  model            │   Finding, Diagnostic, ScanReport
+          │  model            │   Finding, Diagnostic, ScanReport, Message
           │  platform         │   operating system
           │  analysis         │   path analysis
           │  export           │   JSON, Markdown (phase 4/6)
@@ -106,7 +106,18 @@ Limitations:
 - Case-insensitivity on macOS is assumed from the default filesystem; case-sensitive volumes are not detected.
 - Symlink tests run on macOS and Linux only; creating symlinks on Windows requires special privileges.
 
-## 6. CLI
+## 6. Messages and internationalisation
+
+The core emits every user-facing text as a `Message`: a stable key, named parameters and an English text rendered from `CATALOG` in `model/message.rs` (format: [findings-model.md](findings-model.md), section 5).
+
+- `Message::new(key)` looks the key up in the catalog; unknown keys fail a `debug_assert`, so tests catch them. `.arg(name, value)` fills `{name}` in the template.
+- The catalog is sorted by key; tests check sorting, uniqueness and placeholder syntax.
+- Only the GUI is translated (German and English, from phase 5). It uses the keys and treats the English catalog as the source for its translation files. The CLI is English only and prints `text`.
+- Errors that only ever reach the CLI, such as an invalid fixture or an unknown scanner name, are plain English strings.
+
+To add a text: add a `(key, template)` pair to `CATALOG` at its sorted position and use `Message::new(key)` with the matching `.arg(...)` calls.
+
+## 7. CLI
 
 ```text
 ai-agent-access-inspector scan [--agent ID]... [--format json] [--home DIR] [--cwd DIR] [--fixture DIR]
@@ -115,7 +126,7 @@ ai-agent-access-inspector list-scanners
 
 Exit codes: `0` success (also with diagnostics), `1` error (e.g. unknown scanner, invalid fixture), `2` invalid arguments.
 
-## 7. Dependencies
+## 8. Dependencies
 
 | Crate | Dependencies |
 |---|---|

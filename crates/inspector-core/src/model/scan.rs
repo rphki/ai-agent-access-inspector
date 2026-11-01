@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-use super::{Diagnostic, Finding};
+use super::{Diagnostic, Finding, Message};
 use crate::platform::OperatingSystem;
 
 /// Version of the JSON report format. May change incompatibly before 1.0.
@@ -63,17 +63,18 @@ pub struct ScanOutput {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SummaryEntry {
+    /// Machine readable identifier of the fact, e.g. `permissionMode`.
     pub key: String,
-    pub label: String,
-    pub value: String,
+    pub label: Message,
+    pub value: Message,
 }
 
 impl SummaryEntry {
-    pub fn new(key: impl Into<String>, label: impl Into<String>, value: impl Into<String>) -> Self {
+    pub fn new(key: impl Into<String>, label: Message, value: Message) -> Self {
         Self {
             key: key.into(),
-            label: label.into(),
-            value: value.into(),
+            label,
+            value,
         }
     }
 }

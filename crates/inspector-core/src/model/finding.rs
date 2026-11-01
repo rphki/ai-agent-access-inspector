@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+use super::message::Message;
 use super::scan::ScannerMetadata;
 
 /// One path or rule found in an agent's configuration or environment.
@@ -25,8 +26,8 @@ pub struct Finding {
     pub source: FindingSource,
     /// Further sources with the same content, merged by deduplication.
     pub additional_sources: Vec<FindingSource>,
-    /// Human readable explanation of what this finding means.
-    pub explanation: String,
+    /// Explanation of what this finding means.
+    pub explanation: Message,
     pub confidence: Confidence,
     pub path_state: PathState,
     pub warnings: Vec<Warning>,
@@ -55,7 +56,7 @@ impl Finding {
                 scope,
                 source,
                 additional_sources: Vec::new(),
-                explanation: String::new(),
+                explanation: Message::new("finding.noExplanation"),
                 confidence: Confidence::Low,
                 path_state: PathState::default(),
                 warnings: Vec::new(),
@@ -97,8 +98,8 @@ impl FindingBuilder {
         self
     }
 
-    pub fn explanation(mut self, explanation: impl Into<String>) -> Self {
-        self.finding.explanation = explanation.into();
+    pub fn explanation(mut self, explanation: Message) -> Self {
+        self.finding.explanation = explanation;
         self
     }
 
@@ -383,15 +384,15 @@ pub enum PathKind {
 pub struct Warning {
     pub kind: WarningKind,
     pub severity: Severity,
-    pub message: String,
+    pub message: Message,
 }
 
 impl Warning {
-    pub fn new(kind: WarningKind, severity: Severity, message: impl Into<String>) -> Self {
+    pub fn new(kind: WarningKind, severity: Severity, message: Message) -> Self {
         Self {
             kind,
             severity,
-            message: message.into(),
+            message,
         }
     }
 }
@@ -530,7 +531,7 @@ mod tests {
                 reason: IneffectiveReason::TrustNotAccepted,
             },
             Severity::Info,
-            "",
+            Message::new("value.raw"),
         );
         let json = serde_json::to_value(warning).unwrap();
         assert_eq!(json["kind"]["type"], "notEffective");

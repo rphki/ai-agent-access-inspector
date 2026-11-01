@@ -9,6 +9,7 @@ This document describes the agent-independent data model in `crates/inspector-co
 - Variants with data carry a discriminator field: `kind` for `subject` and `anchor`, `type` for warning kinds.
 - Missing values are written as `null`, not omitted, so every object always has the same fields.
 - Paths are strings in the format of the scanned system.
+- User-facing texts are messages (see 5), never plain strings.
 
 ## 2. Report structure
 
@@ -26,7 +27,7 @@ ScanReport
 ```
 
 - `detection.status`: `notDetected` or `configured` (configuration found; the program itself is not looked for).
-- `summary` holds key facts about an agent's configuration, e.g. permission mode or whether a sandbox is active. Each scanner defines its own keys and labels.
+- `summary` holds key facts about an agent's configuration, e.g. permission mode or whether a sandbox is active. `key` identifies the fact; `label` and `value` are messages. Each scanner defines its own keys.
 
 ## 3. Finding
 
@@ -44,7 +45,7 @@ A finding is a path or rule that grants, restricts or suggests file access for a
 | `scope` | `managed`, `user`, `project`, `projectLocal`, `session`, `runtime`, `operatingSystem` |
 | `source` | origin, see 3.2 |
 | `additionalSources` | further sources with the same content, merged by deduplication (same structure as `source`) |
-| `explanation` | human-readable explanation |
+| `explanation` | message explaining the finding |
 | `confidence` | `low`, `medium`, `high` |
 | `pathState` | state on disk, see 3.3 |
 | `warnings` | security-relevant remarks, see 3.4; sorted by severity, most severe first |
@@ -85,7 +86,11 @@ Filled in by the path analysis. Findings without an absolute base path (e.g. `ev
 ### 3.4 Warning
 
 ```json
-{ "kind": { "type": "notEffective", "reason": "trustNotAccepted" }, "severity": "info", "message": "…" }
+{
+  "kind": { "type": "notEffective", "reason": "trustNotAccepted" },
+  "severity": "info",
+  "message": { "key": "…", "args": {}, "text": "…" }
+}
 ```
 
 | `kind.type` | Meaning |
@@ -129,30 +134,66 @@ Diagnostics describe problems while scanning. They never abort the scan.
 |---|---|
 | `level` | `info`, `warning`, `error` |
 | `code` | `unreadableFile`, `invalidJson`, `unexpectedType`, `unknownKey`, `unparsableRule`, `unresolvedVariable`, `deprecatedLocation`, `unevaluatedSource`, `internal`, `other` |
-| `message` | description |
+| `message` | message describing the problem |
 | `file`, `pointer` | affected file and location, if known |
 
 A scanner that crashes unexpectedly produces a diagnostic with code `internal`; the other scanners keep running.
 
-## 5. Example
+## 5. Message
+
+Every user-facing text (finding explanations, warning and diagnostic messages, summary labels and values) is a message:
+
+```json
+{
+  "key": "warning.symlinkElsewhere",
+  "args": { "target": "/srv/secret", "parent": "/home/alice/projects" },
+  "text": "Symlink to /srv/secret, outside of /home/alice/projects."
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `key` | stable identifier of the text |
+| `args` | named parameters (paths, rule patterns, names, counts); never translated |
+| `text` | English text, rendered from the catalog in the core |
+
+The English catalog is `CATALOG` in `crates/inspector-core/src/model/message.rs`. The CLI and JSON consumers can use `text` directly; the GUI translates by `key`, fills in `args` and falls back to `text` for unknown keys. The key `value.raw` with the parameter `value` marks a technical value that is shown as is (e.g. a permission mode name).
+
+Keys may be added at any time. Changing the meaning of an existing key or removing it is a format change.
+
+## 6. Example
 
 Output of `ai-agent-access-inspector scan --agent demo --home /home/alice` (shortened):
 
 ```json
 {
   "formatVersion": "0.1",
-  "tool": { "name": "ai-agent-access-inspector", "version": "0.1.0" },
-  "operatingSystem": "macos",
+  "tool": {
+    "name": "ai-agent-access-inspector",
+    "version": "0.1.0"
+  },
+  "operatingSystem": "linux",
   "results": [
     {
-      "scanner": { "id": "demo", "name": "Demo", "description": "…", "parserVersion": "1" },
-      "detection": { "status": "configured", "evidence": [], "version": null },
+      "scanner": {
+        "id": "demo",
+        "name": "Demo",
+        "description": "…",
+        "parserVersion": "1"
+      },
+      "detection": {
+        "status": "configured",
+        "evidence": [],
+        "version": null
+      },
       "findings": [
         {
           "id": "demo-093040fc34e02283",
           "agentId": "demo",
           "agentName": "Demo",
-          "subject": { "kind": "agent" },
+          "subject": {
+            "kind": "agent"
+          },
           "target": {
             "raw": "~/projects",
             "patternKind": "directory",
@@ -174,21 +215,75 @@ Output of `ai-agent-access-inspector scan --agent demo --home /home/alice` (shor
             "excerpt": null
           },
           "additionalSources": [],
-          "explanation": "Additional working directory: …",
+          "explanation": {
+            "key": "finding.additionalDirectory",
+            "args": {},
+            "text": "Additional working directory: readable without a prompt, writable depending on the permission mode."
+          },
           "confidence": "high",
-          "pathState": { "existence": "missing", "kind": "unknown", "symlinkTarget": null },
+          "pathState": {
+            "existence": "missing",
+            "kind": "unknown",
+            "symlinkTarget": null
+          },
           "warnings": [
-            { "kind": { "type": "missingPath" }, "severity": "low", "message": "The path does not exist (anymore)." }
+            {
+              "kind": {
+                "type": "missingPath"
+              },
+              "severity": "low",
+              "message": {
+                "key": "warning.missingPath",
+                "args": {},
+                "text": "The path does not exist (anymore)."
+              }
+            }
           ],
           "related": []
         }
       ],
       "diagnostics": [
-        { "level": "info", "code": "other", "message": "Demo scanner: all values are examples.", "file": null, "pointer": null }
+        {
+          "level": "info",
+          "code": "other",
+          "message": {
+            "key": "diagnostic.demoScanner",
+            "args": {},
+            "text": "Demo scanner: all values are examples."
+          },
+          "file": null,
+          "pointer": null
+        }
       ],
       "summary": [
-        { "key": "permissionMode", "label": "Permission mode", "value": "default" },
-        { "key": "sandbox", "label": "Sandbox", "value": "off" }
+        {
+          "key": "permissionMode",
+          "label": {
+            "key": "summary.permissionMode",
+            "args": {},
+            "text": "Permission mode"
+          },
+          "value": {
+            "key": "value.raw",
+            "args": {
+              "value": "default"
+            },
+            "text": "default"
+          }
+        },
+        {
+          "key": "sandbox",
+          "label": {
+            "key": "summary.sandbox",
+            "args": {},
+            "text": "Sandbox"
+          },
+          "value": {
+            "key": "value.disabled",
+            "args": {},
+            "text": "disabled"
+          }
+        }
       ]
     }
   ]

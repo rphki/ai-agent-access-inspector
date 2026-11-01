@@ -4,23 +4,25 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+use super::message::Message;
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Diagnostic {
     pub level: DiagnosticLevel,
     pub code: DiagnosticCode,
-    pub message: String,
+    pub message: Message,
     pub file: Option<PathBuf>,
     /// JSON pointer to the affected value inside `file`.
     pub pointer: Option<String>,
 }
 
 impl Diagnostic {
-    pub fn new(level: DiagnosticLevel, code: DiagnosticCode, message: impl Into<String>) -> Self {
+    pub fn new(level: DiagnosticLevel, code: DiagnosticCode, message: Message) -> Self {
         Self {
             level,
             code,
-            message: message.into(),
+            message,
             file: None,
             pointer: None,
         }

@@ -31,6 +31,8 @@ The application:
 | MCP servers | scanned in the MVP |
 | Claude Code versions | only the currently documented configuration format is supported; older formats are not specifically evaluated but never cause an abort (see 8.1) |
 | Language | English for documentation, code and commits (see `CLAUDE.md`) |
+| Internationalisation | only the GUI is translated (German and English); the CLI is English only. The core emits user-facing texts as message keys with parameters plus an English default text (see 12.5) |
+| Security | automated dependency audit in CI from phase 3.5; a security check per phase from phase 4; a full security review before the first public release (see 14) |
 | Approach | phase by phase; acceptance check and alignment after each phase |
 
 ## 3. Technology stack
@@ -89,8 +91,10 @@ ai-agent-access-inspector/
 │   ├── workflows/
 │   │   ├── ci.yml
 │   │   └── release.yml
+│   ├── dependabot.yml
 │   └── ISSUE_TEMPLATE/
 ├── Cargo.toml                     # workspace
+├── deny.toml                      # cargo deny configuration
 ├── CLAUDE.md                      # guidance for Claude Code
 ├── crates/
 │   ├── inspector-core/            # no Tauri dependency
@@ -432,6 +436,14 @@ Defined presentations for:
 
 The interface is accessible (keyboard operation, screen-reader-friendly labels, sufficient contrast).
 
+### 12.5 Internationalisation
+
+- Only the GUI is translated: German and English, chosen from the system language, switchable in the GUI.
+- The CLI is English only.
+- The core never produces finished sentences for the GUI. Every user-facing text (finding explanations, warning and diagnostic messages, summary labels) is a **message**: a stable key, named parameters and an English default text from a catalog in the core. The JSON format carries all three.
+- The GUI translates by key and fills in the parameters; it falls back to the English text for unknown keys. The English catalog of the core is the source for the GUI's translation files.
+- Paths, rule patterns, file names and other technical values are parameters and are never translated.
+
 ## 13. Export
 
 The MVP supports JSON and Markdown.
@@ -441,6 +453,8 @@ By default the export contains full paths. Before exporting, the user can choose
 - full paths,
 - show the home directory as `~`,
 - anonymise user names.
+
+Exports from the GUI use the GUI language for Markdown; exports from the CLI are English. JSON always contains message keys, parameters and English texts.
 
 Later versions may add CSV and a machine-readable security report.
 
@@ -458,6 +472,12 @@ Binding properties:
 - exports happen only on explicit user action.
 
 The repository contains `docs/privacy.md` and `SECURITY.md`.
+
+Security work happens on three levels:
+
+1. **Automated dependency audit** (from phase 3.5): `cargo deny` checks known vulnerabilities (RustSec), licenses and crate sources in every CI run and weekly; Dependabot proposes updates for Cargo dependencies and GitHub Actions.
+2. **Security check per phase** (from phase 4): each phase lists what to check; a phase is only accepted when its check is done.
+3. **Full security review** before the first public release (phase 7): threat model, review of all security-relevant code, release pipeline and signing.
 
 ## 15. Test strategy
 
@@ -523,7 +543,9 @@ On every pull request `ci.yml` runs:
 - ESLint (from phase 5)
 - frontend tests (from phase 5)
 - production build
-- dependency and security audit (e.g. `cargo audit`/`cargo deny`, `pnpm audit`)
+- dependency and security audit: `cargo deny` (from phase 3.5), `pnpm audit` (from phase 5)
+
+CI additionally runs weekly, so that newly published advisories are noticed without a code change.
 
 Operating system matrix:
 
@@ -641,6 +663,15 @@ Every phase ends with an acceptance check. Only then is the next phase planned i
 
 **Acceptance:** all path cases from section 15.1 are tested automatically and pass on all three systems.
 
+### Phase 3.5 – Message keys and security groundwork
+
+- message model: key, parameters and English default text from a catalog in the core, used for explanations, warnings, diagnostics and summary labels (see 12.5)
+- `cargo deny` in CI, weekly CI run, Dependabot for Cargo and GitHub Actions
+- `SECURITY.md` with the reporting process
+- security checks per phase and internationalisation rules in this roadmap
+
+**Acceptance:** no user-facing text in the core is a free-form string; `cargo deny` passes in CI.
+
 ### Phase 4 – Claude Code scanner and CLI → `v0.1.0`
 
 - detection, configuration locations, reading all levels
@@ -649,6 +680,7 @@ Every phase ends with an acceptance check. Only then is the next phase planned i
 - fixtures for macOS, Linux, Windows and malformed cases
 - complete CLI according to section 10, including Markdown output
 - release workflow for CLI binaries
+- **security check:** size limits and safe handling when reading untrusted files (huge files, special files such as `/dev/zero`, symlinks), no crashes on malformed input, no secrets in output (MCP `env`/`headers`, tokens, account data from `~/.claude.json`), release workflow permissions
 
 **Acceptance:** the scanner produces reproducible, explained findings from all fixtures; a system scan via the CLI works.
 
@@ -659,7 +691,9 @@ Every phase ends with an acceptance check. Only then is the next phase planned i
 - run scans asynchronously, report progress and error states
 - open folders and source files
 - main, results and detail views, filters, states according to section 12
+- internationalisation of the GUI (German, English) according to 12.5
 - frontend tests, extend CI with frontend checks
+- **security check:** Tauri capabilities and IPC commands, content security policy, opening paths and files must not allow running arbitrary programs, `pnpm audit`
 
 **Acceptance:** all information of a finding is understandable without raw JSON.
 
@@ -667,7 +701,8 @@ Every phase ends with an acceptance check. Only then is the next phase planned i
 
 - JSON and Markdown export with anonymisation options according to section 13
 - secret redaction
-- `docs/privacy.md`, `SECURITY.md`
+- `docs/privacy.md`
+- **security check:** redaction and anonymisation verified with targeted tests, no secrets in exports
 
 **Acceptance:** exports contain no detected API keys or credentials.
 
@@ -677,6 +712,7 @@ Every phase ends with an acceptance check. Only then is the next phase planned i
 - `docs/release-process.md`
 - README with screenshots, installation notes and known limitations
 - `CONTRIBUTING.md`, issue templates, `docs/adding-a-scanner.md`
+- **full security review:** threat model, review of all security-relevant code, release workflow permissions, signing and secret handling, update of `SECURITY.md`
 - first public release
 
 **Acceptance:** a Git tag produces downloadable artifacts for macOS, Windows and Linux; an outside person can install the application, understand findings and prepare a new scanner.
@@ -722,7 +758,7 @@ These features are only considered once the plain, traceable configuration scann
 
 ## 22. Open items
 
-None at the moment.
+- `rust-version = "1.85"` in `Cargo.toml` is not verified in CI and is probably too low (`std::env::home_dir` is only undeprecated from Rust 1.86 on). Decide whether to drop the field or verify it with a CI job.
 
 ## 23. Status
 
@@ -732,6 +768,7 @@ None at the moment.
 | 1 – Claude Code research | completed ([specification](claude-code-scanner.md); open checks for phase 4 in section 14) |
 | 2 – Data model | completed (demo scanner prints JSON via the CLI) |
 | 3 – Path analysis | completed (target paths, resolution, disk checks, warnings, deduplication, relations) |
+| 3.5 – Message keys and security groundwork | completed (message catalog, cargo deny, weekly CI, Dependabot, SECURITY.md) |
 | 4 – Claude Code scanner and CLI | open |
 | 5 – Tauri and GUI | open |
 | 6 – Export and privacy | open |

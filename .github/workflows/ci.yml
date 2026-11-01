@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Weekly run, so that newly published advisories are noticed without a
+  # code change (Mondays, 06:00 UTC).
+  schedule:
+    - cron: "0 6 * * 1"
 
 permissions:
   contents: read
@@ -23,6 +27,15 @@ jobs:
       - uses: actions/checkout@v7
       - run: rustup show
       - run: cargo fmt --all --check
+
+  deps:
+    name: Dependencies (cargo deny)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check
 
   test:
     name: Clippy and tests (${{ matrix.os }})

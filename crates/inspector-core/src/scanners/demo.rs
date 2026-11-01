@@ -8,8 +8,8 @@ use crate::context::ScanContext;
 use crate::model::{
     AccessKind, Confidence, DetectionResult, DetectionStatus, Diagnostic, DiagnosticCode,
     DiagnosticLevel, Finding, FindingScope, FindingSource, FindingStatus, FindingSubject,
-    FindingTarget, PathAnchor, PatternKind, RuleEffect, ScanOutput, ScannerMetadata, Severity,
-    SourceDocumentation, SummaryEntry, Warning, WarningKind,
+    FindingTarget, Message, PathAnchor, PatternKind, RuleEffect, ScanOutput, ScannerMetadata,
+    Severity, SourceDocumentation, SummaryEntry, Warning, WarningKind,
 };
 use crate::scanner::AgentScanner;
 
@@ -57,7 +57,7 @@ impl AgentScanner for DemoScanner {
         .access(AccessKind::ReadWrite)
         .status(FindingStatus::Configured)
         .confidence(Confidence::High)
-        .explanation("Additional working directory: readable without prompt, writable depending on the permission mode.")
+        .explanation(Message::new("finding.additionalDirectory"))
         .build();
 
         let ssh = Finding::builder(
@@ -70,7 +70,7 @@ impl AgentScanner for DemoScanner {
         .access(AccessKind::Read)
         .status(FindingStatus::Configured)
         .confidence(Confidence::High)
-        .explanation("Deny rule: the agent's file tools may not read SSH keys.")
+        .explanation(Message::new("finding.denyRead"))
         .build();
 
         let shell = Finding::builder(
@@ -83,11 +83,11 @@ impl AgentScanner for DemoScanner {
         .access(AccessKind::ReadWrite)
         .status(FindingStatus::Potential)
         .confidence(Confidence::Medium)
-        .explanation("Shell commands run without a sandbox and can reach everything the user can.")
+        .explanation(Message::new("finding.unsandboxedShell"))
         .warning(Warning::new(
             WarningKind::UnsandboxedShell,
             Severity::High,
-            "No sandbox configured.",
+            Message::new("warning.unsandboxedShell"),
         ))
         .build();
 
@@ -107,7 +107,7 @@ impl AgentScanner for DemoScanner {
         .access(AccessKind::ReadWrite)
         .status(FindingStatus::Configured)
         .confidence(Confidence::Medium)
-        .explanation("Path argument of a local MCP server.")
+        .explanation(Message::new("finding.mcpPathArgument").arg("server", "files"))
         .build();
 
         ScanOutput {
@@ -115,11 +115,19 @@ impl AgentScanner for DemoScanner {
             diagnostics: vec![Diagnostic::new(
                 DiagnosticLevel::Info,
                 DiagnosticCode::Other,
-                "Demo scanner: all values are examples.",
+                Message::new("diagnostic.demoScanner"),
             )],
             summary: vec![
-                SummaryEntry::new("permissionMode", "Permission mode", "default"),
-                SummaryEntry::new("sandbox", "Sandbox", "off"),
+                SummaryEntry::new(
+                    "permissionMode",
+                    Message::new("summary.permissionMode"),
+                    Message::raw("default"),
+                ),
+                SummaryEntry::new(
+                    "sandbox",
+                    Message::new("summary.sandbox"),
+                    Message::new("value.disabled"),
+                ),
             ],
         }
     }

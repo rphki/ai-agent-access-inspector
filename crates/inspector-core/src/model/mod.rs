@@ -2,8 +2,10 @@
 
 mod diagnostic;
 mod finding;
+mod message;
 mod scan;
 
 pub use diagnostic::*;
 pub use finding::*;
+pub use message::*;
 pub use scan::*;

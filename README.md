@@ -36,6 +36,10 @@ New to the project? [docs/onboarding.md](docs/onboarding.md) explains the build 
 
 Planning and status: [docs/roadmap.md](docs/roadmap.md).
 
+## Security
+
+Please report vulnerabilities privately, see [SECURITY.md](SECURITY.md).
+
 ## License
 
 [Apache-2.0](LICENSE)
