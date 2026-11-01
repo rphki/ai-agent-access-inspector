@@ -122,20 +122,21 @@ jobs:
         shell: bash
         run: |
           version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
-          prefix="dist/${BINARY}-gui-${version}"
+          # Not `dist/`: that is Vite's output folder for the frontend.
+          prefix="installers/${BINARY}-gui-${version}"
           bundle="target/${{ matrix.target }}/release/bundle"
-          mkdir -p dist
+          mkdir -p installers
           shopt -s nullglob
           for file in "$bundle"/dmg/*.dmg; do cp "$file" "${prefix}-macos-universal.dmg"; done
           for file in "$bundle"/nsis/*-setup.exe; do cp "$file" "${prefix}-windows-x64-setup.exe"; done
           for file in "$bundle"/msi/*.msi; do cp "$file" "${prefix}-windows-x64.msi"; done
           for file in "$bundle"/appimage/*.AppImage; do cp "$file" "${prefix}-linux-x86_64.AppImage"; done
           for file in "$bundle"/deb/*.deb; do cp "$file" "${prefix}-linux-amd64.deb"; done
-          ls -l dist
+          ls -l installers
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: gui-${{ matrix.target }}
-          path: dist/*
+          path: installers/*
           if-no-files-found: error
 
   release:
@@ -165,6 +166,15 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+      - name: Check the downloaded files
+        run: |
+          # Only release files, nothing else (e.g. a frontend build).
+          if find dist -mindepth 1 -type d | grep -q .; then
+            echo "Unexpected directories in dist:" >&2
+            find dist -mindepth 1 -type d >&2
+            exit 1
+          fi
+          ls -l dist
       - name: Create checksums
         run: cd dist && sha256sum * > SHA256SUMS
       - name: Extract release notes from the changelog
