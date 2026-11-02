@@ -4,6 +4,8 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-02
+
 ### Changed
 
 - New application icon: magnifying glass over a folder labelled "AI"
@@ -60,6 +62,7 @@ First release: a command line tool that shows which folders Claude Code can acce
 - Release workflow for CLI archives (macOS, Linux, Windows) with checksums
 - Documentation: roadmap, architecture, data model, Claude Code scanner specification, onboarding, release process, security checks, `SECURITY.md`
 
-[Unreleased]: https://github.com/rphki/ai-agent-access-inspector/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/rphki/ai-agent-access-inspector/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/rphki/ai-agent-access-inspector/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/rphki/ai-agent-access-inspector/compare/v0.1.0...v0.4.0
 [0.1.0]: https://github.com/rphki/ai-agent-access-inspector/releases/tag/v0.1.0
