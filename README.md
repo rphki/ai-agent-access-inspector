@@ -112,4 +112,6 @@ Please report vulnerabilities privately, see [SECURITY.md](SECURITY.md). The thr
 
 ## License
 
-[Apache-2.0](LICENSE)
+The source code is licensed under [Apache-2.0](LICENSE).
+
+The application icon in [`src-tauri/icons/`](src-tauri/icons/) is excluded: Copyright 2026 Raphael Kirchner, all rights reserved (see [its license](src-tauri/icons/LICENSE) and [NOTICE](NOTICE)). Forks and redistributed builds must use their own icon, for example via `pnpm tauri icon path/to/your-icon.svg`.

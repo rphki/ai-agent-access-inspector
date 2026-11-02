@@ -51,7 +51,9 @@ fn macos_menu<R: tauri::Runtime>(
         version: Some(package.version.to_string()),
         // An empty string hides the build number (CFBundleVersion).
         short_version: Some(String::new()),
-        copyright: Some("Copyright 2026 Raphael Kirchner\nApache-2.0".into()),
+        copyright: Some(
+            "Copyright 2026 Raphael Kirchner\nCode: Apache-2.0, icon: all rights reserved".into(),
+        ),
         ..Default::default()
     };
     app_menu.remove_at(0)?;

@@ -44,6 +44,7 @@ Keep a pull request focused on one change. For larger changes, open an issue fir
 - **Undocumented sources** are marked `heuristic` and get at most medium confidence.
 - **Dependencies in `inspector-core`** are added sparingly.
 - **English** for code, comments, documentation, CLI output, commit messages and pull requests.
+- **The application icon is not open source.** The files in `src-tauri/icons/` are all rights reserved (see [`src-tauri/icons/LICENSE`](src-tauri/icons/LICENSE)); pull requests that change them are not accepted. Forks must replace the icon with their own.
 
 ## Commit style
 

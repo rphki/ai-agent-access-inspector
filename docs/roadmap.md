@@ -24,7 +24,7 @@ The application:
 |---|---|
 | Repository | public GitHub repository [`rphki/ai-agent-access-inspector`](https://github.com/rphki/ai-agent-access-inspector) |
 | Local folder | renamed from `agent-access-inspector` to `ai-agent-access-inspector` |
-| License | Apache-2.0 |
+| License | Apache-2.0; application icon all rights reserved (`src-tauri/icons/LICENSE`) |
 | Project structure | Cargo workspace with separate crates for core, CLI and Tauri |
 | Order | core and CLI first (`v0.1.0`), GUI afterwards (`v0.2.0`) |
 | Research | Claude Code research before the data model, because it determines the model's shape |

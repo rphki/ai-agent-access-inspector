@@ -4,6 +4,10 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ## [Unreleased]
 
+### Changed
+
+- The application icon (`src-tauri/icons/`) is excluded from the Apache-2.0 license: Copyright Raphael Kirchner, all rights reserved; forks must use their own icon. New files `NOTICE` and `src-tauri/icons/LICENSE`; copyright line in the bundle metadata and the macOS About panel updated
+
 ## [0.5.0] - 2026-11-02
 
 ### Changed

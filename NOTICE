@@ -1,0 +1,9 @@
+AI Agent Access Inspector
+Copyright 2026 Raphael Kirchner
+
+The source code is licensed under the Apache License 2.0 (see LICENSE).
+
+The application icon in src-tauri/icons/ is excluded from that license:
+Copyright 2026 Raphael Kirchner. All rights reserved.
+See src-tauri/icons/LICENSE. Forks and redistributed builds must use their
+own icon.

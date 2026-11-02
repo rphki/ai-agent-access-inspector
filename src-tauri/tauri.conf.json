@@ -45,7 +45,7 @@
       "icons/icon.ico"
     ],
     "publisher": "AI Agent Access Inspector contributors",
-    "copyright": "Copyright 2026 Raphael Kirchner, Apache-2.0",
+    "copyright": "Copyright 2026 Raphael Kirchner. Code: Apache-2.0; icon: all rights reserved",
     "category": "DeveloperTool",
     "shortDescription": "Shows which folders local AI agents can access",
     "longDescription": "A read-only desktop tool that shows which folders local AI agents such as Claude Code can access according to their configuration. It changes nothing and sends no data.",

@@ -1,0 +1,18 @@
+Copyright 2026 Raphael Kirchner. All rights reserved.
+
+The application icon of the AI Agent Access Inspector is not covered by the
+Apache License 2.0 that applies to the rest of this repository. This covers
+all files in this directory:
+
+- icon.svg (source artwork)
+- icon.png, 32x32.png, 128x128.png, 128x128@2x.png, icon.icns, icon.ico
+  (generated from icon.svg)
+
+No permission is granted to use, copy, modify or distribute the icon, in
+whole or in part, except as part of unmodified copies of this repository
+and of builds published by the copyright holder.
+
+If you fork this project or distribute your own builds, replace the icon
+with your own artwork, for example with:
+
+    pnpm tauri icon path/to/your-icon.svg
