@@ -4,6 +4,11 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ## [Unreleased]
 
+### Changed
+
+- New application icon: magnifying glass over a folder labelled "AI"
+- GUI colour scheme: orange as the highlight colour, blue only for focus, info banners and low severity; neutral greys
+
 ## [0.4.0] - 2026-11-01
 
 First release of the desktop application, for macOS, Windows and Linux. Pre-release; builds are not signed yet (see the README for how to open them). Versions 0.2.0 (GUI) and 0.3.0 (export) were not released separately; their content is part of this release.

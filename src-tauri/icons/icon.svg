@@ -1,6 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#1f4e79"/>
-  <path d="M120 160h120l32 40h120v192H120z" fill="#f2c14e"/>
-  <circle cx="300" cy="300" r="56" fill="none" stroke="#1f4e79" stroke-width="24"/>
-  <path d="M340 340l52 52" stroke="#1f4e79" stroke-width="28" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000000" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="#ffffff" filter="url(#shadow)"/>
+  <circle cx="460" cy="490" r="243" fill="none" stroke="#737373" stroke-width="52"/>
+  <path d="M642 672L772 803" stroke="#737373" stroke-width="78" stroke-linecap="round"/>
+  <rect x="304" y="356" width="130" height="61" rx="17" fill="#ff914d"/>
+  <rect x="304" y="391" width="312" height="226" rx="35" fill="#ff914d"/>
+  <path fill="#ffffff" fill-rule="evenodd" d="M379 568L421 448H451L493 568H466L457 542H415L406 568ZM423 520H449L436 480Z"/>
+  <rect x="515" y="448" width="26" height="120" fill="#ffffff"/>
 </svg>

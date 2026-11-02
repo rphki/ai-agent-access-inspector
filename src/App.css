@@ -1,19 +1,22 @@
 :root {
   --bg: #ffffff;
-  --surface: #f4f6f8;
-  --text: #1a1d21;
-  --muted: #545b64;
-  --border: #c9d0d8;
-  --accent: #1f4e79;
-  --accent-text: #ffffff;
-  --focus: #0b63c5;
-  --info-bg: #e8f1fb;
+  --surface: #f5f5f5;
+  --text: #1f1f1f;
+  --muted: #595959;
+  --border: #d4d4d4;
+  --accent: #ff914d;
+  --accent-text: #1f1f1f;
+  --link: #a84a0b;
+  --focus: #004aad;
+  --selected-bg: #ffefe4;
+  --info-bg: #eaf1fa;
   --warning-bg: #fdf3d8;
   --error-bg: #fbe4e4;
   --sev-high: #a3141c;
   --sev-medium: #8a5300;
-  --sev-low: #33597d;
-  --sev-info: #545b64;
+  --sev-low: #004aad;
+  --sev-info: #595959;
+  accent-color: var(--accent);
   color-scheme: light dark;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   font-size: 15px;
@@ -22,21 +25,23 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #16191d;
-    --surface: #20252b;
-    --text: #e8eaed;
-    --muted: #a8b0ba;
-    --border: #3a424c;
-    --accent: #7fb3e6;
-    --accent-text: #0d1b29;
-    --focus: #8cc4ff;
-    --info-bg: #1d2c3d;
+    --bg: #171717;
+    --surface: #232323;
+    --text: #ececec;
+    --muted: #ababab;
+    --border: #3d3d3d;
+    --accent: #ff914d;
+    --accent-text: #1a1a1a;
+    --link: #ffa36b;
+    --focus: #7aa7e8;
+    --selected-bg: #3a2617;
+    --info-bg: #1a2638;
     --warning-bg: #3a2f12;
     --error-bg: #3f1d1f;
     --sev-high: #ff8a8f;
     --sev-medium: #f0b45a;
-    --sev-low: #9cc3ea;
-    --sev-info: #a8b0ba;
+    --sev-low: #8fb4ea;
+    --sev-info: #ababab;
   }
 }
 
@@ -59,7 +64,7 @@ header {
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--accent);
   margin-bottom: 16px;
 }
 
@@ -103,7 +108,7 @@ button.link {
   background: none;
   border: none;
   padding: 0;
-  color: var(--accent);
+  color: var(--link);
   text-decoration: underline;
   text-align: left;
 }
@@ -302,7 +307,7 @@ th {
 }
 
 tr[aria-selected="true"] {
-  background: var(--info-bg);
+  background: var(--selected-bg);
 }
 
 .detail {
