@@ -78,7 +78,7 @@ fn no_secret_from_any_fixture_appears_in_the_output() {
         ] {
             assert!(
                 !output.contains(secret),
-                "{secret} leaked in {}",
+                "potential secret leaked in {}",
                 fixture.display()
             );
         }
