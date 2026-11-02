@@ -8,6 +8,7 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 - New application icon: magnifying glass over a folder labelled "AI"
 - GUI colour scheme: orange as the highlight colour, blue only for focus, info banners and low severity; neutral greys
+- macOS About panel: copyright "Raphael Kirchner" on two lines, version shown once
 
 ## [0.4.0] - 2026-11-01
 
