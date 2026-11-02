@@ -120,7 +120,10 @@ fn exports_contain_no_secrets_home_or_user_names() {
                     .split(|c: char| c.is_whitespace() || "\"'`(),;|<>[]{}".contains(c))
                     .filter(|word| *word != REDACTED && looks_like_secret(word))
                     .collect();
-                assert!(secrets.is_empty(), "{name} {privacy:?}: {secrets:?}");
+                assert!(
+                    secrets.is_empty(),
+                    "{name} {privacy:?}: found potential secret(s)"
+                );
                 let unescaped = output.replace("\\\\", "\\");
                 if privacy != PathPrivacy::Full {
                     // As a path of its own; `~/.claude/home/alice` is a
