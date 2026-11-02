@@ -135,7 +135,7 @@ The directory name replaces path separators with `-`. The encoding is **not reve
 
 - read line by line, stop at the first record with `cwd`,
 - keep only `cwd` and `version`, discard all other fields immediately,
-- result: finding with status `Observed`, confidence `Low` to `Medium`.
+- result: finding with status `Observed`, access ReadWrite, confidence `Low` to `Medium`.
 
 ## 4. Evaluated settings keys
 
@@ -146,8 +146,8 @@ The directory name replaces path separators with `-`. The encoding is **not reve
 | `permissions.allow` | allowed tool calls | `Read(…)` / `Edit(…)` → Configured, effect Allow |
 | `permissions.ask` | calls with prompt | `Read(…)` / `Edit(…)` → Configured, effect Ask |
 | `permissions.deny` | forbidden calls | `Read(…)` / `Edit(…)` → Configured, effect Deny |
-| `permissions.additionalDirectories` | additional working directories | Configured, effect Allow, access Read; Write depends on the mode |
-| `permissions.defaultMode` | start mode: `default` (alias `manual`), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions` | warning for `bypassPermissions` and `auto`; `acceptEdits` increases write access to working and additional directories |
+| `permissions.additionalDirectories` | additional working directories | Configured, effect Allow, access ReadWrite (writing with a prompt in the default mode) |
+| `permissions.defaultMode` | start mode: `default` (alias `manual`), `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions` | warning for `bypassPermissions` and `auto`; `acceptEdits` removes the prompt for writing in working and additional directories |
 | `permissions.disableBypassPermissionsMode` | `"disable"` locks bypass mode | defuses the bypass warning |
 | `permissions.disableAutoMode` | `"disable"` locks auto mode | defuses the auto warning |
 | `permissions.blockReadsOutsideWorkingDirectories` | `true`: file tools read nothing outside the working directories (from v2.1.257) | restricts read findings outside them; effective from any level |
@@ -261,7 +261,7 @@ Access kind:
 |---|---|
 | `Read(…)` | Read |
 | `Edit(…)` | Write (Edit rules cover all file-writing tools) |
-| `additionalDirectories` | Read, in mode `acceptEdits`/`bypassPermissions` ReadWrite |
+| `additionalDirectories` | ReadWrite: reading without a prompt, writing with or without a prompt depending on the mode |
 | `sandbox.filesystem.allowWrite` | Write |
 
 ## 7. Project discovery

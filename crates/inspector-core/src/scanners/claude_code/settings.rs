@@ -251,9 +251,8 @@ pub(crate) fn evaluate(scan: &mut Scan, files: &[SettingsFile], projects: &[Proj
             None => View::global(files),
         };
         let project = file.project.map(|i| &projects[i]);
-        let mode = view.mode().map(|(_, mode)| mode);
         rule_findings(scan, file, project, managed_rules_only);
-        directory_findings(scan, file, project, mode.as_deref());
+        directory_findings(scan, file, project);
         sandbox_path_findings(scan, file, project, view.sandbox(scan.os()));
     }
 
@@ -504,16 +503,7 @@ fn path_rule_finding(
     scan.finding(builder.build());
 }
 
-fn directory_findings(
-    scan: &mut Scan,
-    file: &SettingsFile,
-    project: Option<&Project>,
-    mode: Option<&str>,
-) {
-    let access = match mode {
-        Some("acceptEdits" | "bypassPermissions") => AccessKind::ReadWrite,
-        _ => AccessKind::Read,
-    };
+fn directory_findings(scan: &mut Scan, file: &SettingsFile, project: Option<&Project>) {
     let home = scan.locations.home.clone();
     let pointer = "/permissions/additionalDirectories";
     for (i, raw) in file.strings(scan, pointer) {
@@ -551,7 +541,7 @@ fn directory_findings(
             source,
         )
         .effect(RuleEffect::Allow)
-        .access(access)
+        .access(AccessKind::ReadWrite)
         .status(FindingStatus::Configured)
         .confidence(Confidence::High)
         .explanation(Message::new("finding.additionalDirectory"));

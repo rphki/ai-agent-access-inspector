@@ -8,11 +8,10 @@ import { Detail } from "./pages/Detail";
 import { Overview } from "./pages/Overview";
 import { Results } from "./pages/Results";
 import { allFindings } from "./report";
-import type { AppInfo, StoredScan } from "./types/report";
+import type { StoredScan } from "./types/report";
 
 export default function App() {
   const { t, language, setLanguage } = useI18n();
-  const [info, setInfo] = useState<AppInfo | null>(null);
   const [scan, setScan] = useState<StoredScan | null>(null);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -28,7 +27,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    api.getAppInfo().then(setInfo, () => setInfo(null));
     // Reuse the backend's last scan after a reload; scan on first start.
     api.getScanDetails().then(
       (stored) => (stored ? setScan(stored) : runScan()),
@@ -45,8 +43,7 @@ export default function App() {
         <div>
           <h1>{t("app.title")}</h1>
           <p className="small">
-            {t("app.readOnly")}
-            {info && <> · {t("app.version", { version: info.version })}</>}
+            {t("app.tagline")}
           </p>
         </div>
         <label>

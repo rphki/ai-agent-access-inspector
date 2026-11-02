@@ -137,7 +137,7 @@ fn known_project(scan: &Scan, path: &TargetPath, source: crate::model::FindingSo
         FindingTarget::path(path.to_string(), PatternKind::Directory, path.to_path_buf()),
         source,
     )
-    .access(AccessKind::Read)
+    .access(AccessKind::ReadWrite)
     .status(FindingStatus::Observed)
     .confidence(Confidence::Medium)
     .explanation(Message::new("finding.knownProject"))

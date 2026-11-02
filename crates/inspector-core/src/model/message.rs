@@ -173,11 +173,11 @@ pub const CATALOG: &[(&str, &str)] = &[
     ),
     (
         "finding.additionalDirectory",
-        "Additional working directory: readable without a prompt, writable depending on the permission mode.",
+        "Additional working directory: Claude Code can read and write here. Reading needs no prompt; writing needs one in the default mode, none in acceptEdits or bypassPermissions.",
     ),
     (
         "finding.knownProject",
-        "Known project: Claude Code has been used here. It can read files in this directory without a prompt; writing depends on the permission mode.",
+        "Known project: Claude Code has been used here and can read and write in this directory. Reading needs no prompt; writing needs one in the default mode, none in acceptEdits or bypassPermissions.",
     ),
     (
         "finding.mcpFilesystemPath",

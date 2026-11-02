@@ -28,7 +28,7 @@
         "displayPath": "/home/alice/work/ai-agent"
       },
       "effect": "notApplicable",
-      "access": "read",
+      "access": "readWrite",
       "status": "observed",
       "scope": "project",
       "source": {
@@ -45,7 +45,7 @@
       "explanation": {
         "key": "finding.knownProject",
         "args": {},
-        "text": "Known project: Claude Code has been used here. It can read files in this directory without a prompt; writing depends on the permission mode."
+        "text": "Known project: Claude Code has been used here and can read and write in this directory. Reading needs no prompt; writing needs one in the default mode, none in acceptEdits or bypassPermissions."
       },
       "confidence": "medium",
       "pathState": {

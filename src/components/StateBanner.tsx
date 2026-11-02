@@ -19,9 +19,6 @@ export function StateBanner({ state }: { state: ReportState }) {
   if (state.invalid.length > 0) {
     messages.push({ tone: "warning", text: t("state.invalid", { count: state.invalid.length }) });
   }
-  if (messages.length === 0) {
-    messages.push({ tone: "info", text: t("state.completed") });
-  }
   return (
     <div role="status">
       {messages.map((message) => (

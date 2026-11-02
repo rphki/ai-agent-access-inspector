@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { FilterBar } from "../components/FilterBar";
 import { subjectLabel } from "../components/labels";
-import { EMPTY_FILTERS, filterFindings } from "../filters";
+import { DEFAULT_FILTERS, filterFindings } from "../filters";
 import { useI18n } from "../i18n";
 import { maxSeverity } from "../report";
 import type { Finding } from "../types/report";
@@ -15,8 +15,12 @@ interface Props {
 /** Results view (roadmap section 12.2). */
 export function Results({ findings, selectedId, onSelect }: Props) {
   const { t } = useI18n();
-  const [filters, setFilters] = useState(EMPTY_FILTERS);
-  const shown = useMemo(() => filterFindings(findings, filters), [findings, filters]);
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const shown = useMemo(() => {
+    const filtered = filterFindings(findings, filters);
+    // Missing paths last; the sort is stable, so the order is kept otherwise.
+    return filtered.sort((a, b) => Number(isMissing(a)) - Number(isMissing(b)));
+  }, [findings, filters]);
 
   return (
     <section aria-labelledby="results-heading" className="results">
@@ -36,9 +40,7 @@ export function Results({ findings, selectedId, onSelect }: Props) {
                 <th scope="col">{t("column.target")}</th>
                 <th scope="col">{t("column.effect")}</th>
                 <th scope="col">{t("column.status")}</th>
-                <th scope="col">{t("column.access")}</th>
                 <th scope="col">{t("column.scope")}</th>
-                <th scope="col">{t("column.confidence")}</th>
                 <th scope="col">{t("column.warnings")}</th>
               </tr>
             </thead>
@@ -49,20 +51,25 @@ export function Results({ findings, selectedId, onSelect }: Props) {
                   <tr key={finding.id} aria-selected={finding.id === selectedId}>
                     <td>{subjectLabel(finding, t)}</td>
                     <td>
-                      <button
-                        type="button"
-                        className="link mono"
-                        aria-label={t("results.select", { path: finding.target.displayPath })}
-                        onClick={() => onSelect(finding.id)}
-                      >
-                        {finding.target.displayPath}
-                      </button>
+                      {isMissing(finding) ? (
+                        <span className="mono missing" title={t("results.missing")}>
+                          <GhostIcon label={t("results.missing")} />
+                          {finding.target.displayPath}
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          className="link mono"
+                          aria-label={t("results.select", { path: finding.target.displayPath })}
+                          onClick={() => onSelect(finding.id)}
+                        >
+                          {finding.target.displayPath}
+                        </button>
+                      )}
                     </td>
                     <td>{t(`effect.${finding.effect}`)}</td>
                     <td>{t(`status.${finding.status}`)}</td>
-                    <td>{t(`access.${finding.access}`)}</td>
                     <td>{t(`scope.${finding.scope}`)}</td>
-                    <td>{t(`confidence.${finding.confidence}`)}</td>
                     <td>
                       {severity && (
                         <span className={`badge severity-${severity}`}>
@@ -78,5 +85,20 @@ export function Results({ findings, selectedId, onSelect }: Props) {
         </div>
       )}
     </section>
+  );
+}
+
+function isMissing(finding: Finding): boolean {
+  return finding.pathState.existence === "missing";
+}
+
+function GhostIcon({ label }: { label: string }) {
+  return (
+    <svg className="ghost" viewBox="0 0 16 16" width="14" height="14" role="img" aria-label={label}>
+      <path
+        fill="currentColor"
+        d="M8 1a5.5 5.5 0 0 0-5.5 5.5V15l2-1.5L6.25 15 8 13.5 9.75 15l1.75-1.5L13.5 15V6.5A5.5 5.5 0 0 0 8 1Zm-2 4.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2Zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z"
+      />
+    </svg>
   );
 }

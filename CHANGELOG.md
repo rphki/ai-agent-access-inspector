@@ -9,6 +9,15 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 - New application icon: magnifying glass over a folder labelled "AI"
 - GUI colour scheme: orange as the highlight colour, blue only for focus, info banners and low severity; neutral greys
 - macOS About panel: copyright "Raphael Kirchner" on two lines, version shown once
+- Known projects and additional directories have access `readWrite` instead of `read`: Claude Code can write there, with a prompt in the default mode
+- GUI results list: access and confidence columns and the access filter removed (both values still shown in the detail view)
+- GUI filters: "Existing paths only" replaced by "Hide missing paths", on by default; findings without a checked path (shell, MCP servers) stay visible
+- GUI filters: collapsed to one line by default; when expanded, drop-downs on the first line, checkboxes and reset on the second
+- GUI results list: missing paths are listed last, marked with a ghost icon and cannot be selected
+- GUI overview: agent boxes collapsed to one line, expandable by click
+- GUI overview: no "Scan completed" banner after a successful scan; banners only for problems
+- GUI overview: "Overview" heading removed; last scan, findings and warnings in the top line next to the actions
+- GUI header: new tagline "Shows what installed AI agents may access according to their configuration."; version removed (it is in the About panel)
 
 ## [0.4.0] - 2026-11-01
 
