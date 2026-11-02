@@ -48,34 +48,40 @@ describe("App", () => {
   it("scans on start and lists the findings", async () => {
     backend(LINUX_BASIC);
     renderApp();
-    expect(await screen.findByText("10 of 10 findings")).toBeInTheDocument();
+    expect(await screen.findByText(/of 10 findings/)).toBeInTheDocument();
     expect(invokeMock).toHaveBeenCalledWith("run_scan");
     const table = screen.getByRole("table");
-    expect(within(table).getByRole("button", { name: "Show details for /etc/shadow" })).toBeInTheDocument();
+    expect(within(table).getByRole("button", { name: "Show details for /home/alice/app" })).toBeInTheDocument();
+    expect(within(table).queryByRole("button", { name: "Show details for /etc/shadow" })).not.toBeInTheDocument();
     expect(within(table).getAllByText("MCP server files").length).toBeGreaterThan(0);
-    expect(screen.getByText("Scan completed.")).toBeInTheDocument();
+    expect(screen.queryByText("Scan completed.")).not.toBeInTheDocument();
   });
 
   it("reuses a stored scan instead of scanning again", async () => {
     backend(LINUX_BASIC, { get_scan_details: LINUX_BASIC });
     renderApp();
-    await screen.findByText("10 of 10 findings");
+    await screen.findByText(/of 10 findings/);
     expect(invokeMock).not.toHaveBeenCalledWith("run_scan");
   });
 
   it("filters the results", async () => {
     backend(LINUX_BASIC);
     renderApp();
-    await screen.findByText("10 of 10 findings");
+    await screen.findByText(/of 10 findings/);
     const user = userEvent.setup();
+    await user.click(screen.getByLabelText("Hide missing paths"));
+    expect(screen.getByText("10 of 10 findings")).toBeInTheDocument();
+    const rows = within(screen.getByRole("table")).getAllByRole("row");
+    expect(within(rows[rows.length - 1]).getByRole("img", { name: /Path no longer exists/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Show details for /etc/shadow" })).not.toBeInTheDocument();
     await user.selectOptions(screen.getByLabelText("Effect"), "deny");
     expect(screen.getByText("3 of 10 findings")).toBeInTheDocument();
-    await user.click(screen.getByLabelText("Existing paths only"));
+    await user.click(screen.getByLabelText("Hide missing paths"));
     expect(screen.getByText("1 of 10 findings")).toBeInTheDocument();
     await user.click(screen.getByLabelText("Warnings only"));
     expect(screen.getByText("No findings match the filters.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Reset filters" }));
-    expect(screen.getByText("10 of 10 findings")).toBeInTheDocument();
+    expect(screen.getByLabelText("Hide missing paths")).toBeChecked();
   });
 
   it("shows all details of a finding and its actions", async () => {
@@ -153,13 +159,13 @@ describe("App", () => {
     expect(alert).toHaveTextContent("The scan failed unexpectedly. Details: thread panicked");
     backend(LINUX_BASIC);
     await userEvent.setup().click(within(alert).getByRole("button", { name: "Scan again" }));
-    expect(await screen.findByText("10 of 10 findings")).toBeInTheDocument();
+    expect(await screen.findByText(/of 10 findings/)).toBeInTheDocument();
   });
 
   it("switches the language", async () => {
     backend(LINUX_BASIC);
     renderApp("de");
-    expect(await screen.findByText("10 von 10 Befunden")).toBeInTheDocument();
+    expect(await screen.findByText(/von 10 Befunden/)).toBeInTheDocument();
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: "Details zu /home/alice/app anzeigen" }));
     expect(screen.getByText(/Bekanntes Projekt:/)).toBeInTheDocument();

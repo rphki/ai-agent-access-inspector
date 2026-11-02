@@ -191,6 +191,8 @@ select {
 
 .overview-head {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
   justify-content: space-between;
   align-items: center;
 }
@@ -199,7 +201,7 @@ select {
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
-  margin: 8px 0;
+  margin: 0;
 }
 
 .stats dt,
@@ -225,6 +227,14 @@ select {
   border-radius: 6px;
   padding: 8px 12px;
   margin-bottom: 8px;
+}
+
+.agents summary {
+  cursor: pointer;
+}
+
+.agents details[open] > summary {
+  margin-bottom: 4px;
 }
 
 .summary,
@@ -262,12 +272,27 @@ select {
 }
 
 .filters {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+
+.filters summary {
+  cursor: pointer;
+}
+
+.filter-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.filter-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 16px;
   align-items: flex-end;
-  border: 1px solid var(--border);
-  border-radius: 6px;
 }
 
 .filters label {
@@ -304,6 +329,15 @@ th {
   background: var(--surface);
   position: sticky;
   top: 0;
+}
+
+.missing {
+  color: var(--muted);
+}
+
+.ghost {
+  vertical-align: -2px;
+  margin-right: 4px;
 }
 
 tr[aria-selected="true"] {

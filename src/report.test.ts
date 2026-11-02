@@ -33,7 +33,7 @@ describe("filterFindings", () => {
   it("combines field and checkbox filters", () => {
     const denies = filterFindings(findings, { ...EMPTY_FILTERS, effect: "deny" });
     expect(denies.map((f) => f.target.displayPath)).toContain("/etc/shadow");
-    const existingDenies = filterFindings(findings, { ...EMPTY_FILTERS, effect: "deny", existingOnly: true });
+    const existingDenies = filterFindings(findings, { ...EMPTY_FILTERS, effect: "deny", hideMissing: true });
     expect(existingDenies.map((f) => f.target.displayPath)).not.toContain("/etc/shadow");
     expect(filterFindings(findings, { ...EMPTY_FILTERS, warningsOnly: true })).toHaveLength(1);
   });

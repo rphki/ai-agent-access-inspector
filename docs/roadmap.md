@@ -398,7 +398,7 @@ Filters:
 - access kind,
 - scope,
 - warnings only,
-- existing paths only.
+- hide missing paths (on by default).
 
 ### 12.3 Detail view
 
@@ -433,7 +433,7 @@ Defined presentations for:
 - scan partially successful,
 - configuration unreadable,
 - invalid configuration,
-- scan completed,
+- scan completed (no banner; the results are shown),
 - unexpected internal error.
 
 The interface is accessible (keyboard operation, screen-reader-friendly labels, sufficient contrast).
