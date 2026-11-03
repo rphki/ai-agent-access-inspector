@@ -811,7 +811,7 @@ These features are only considered once the plain, traceable configuration scann
 | 7.4 CONTRIBUTING, issue templates, adding a scanner | done |
 | 7.5 Full security review, threat model, SECURITY.md | done |
 | 7.6 Release `v0.4.0` | done (first tag run failed before publishing because the frontend build ended up among the release files; fixed in the workflow, tag moved to the fix) |
-| 8 – ChatGPT/Codex scanner | implemented 2026-11-03 ([specification](codex-scanner.md), [security check](security-checks.md)); open: acceptance by the maintainer, release `v0.6.0` |
+| 8 – ChatGPT/Codex scanner | accepted by the maintainer 2026-11-03 in the GUI on macOS ([specification](codex-scanner.md), [security check](security-checks.md)); release `v0.6.0` prepared |
 | 8.1 Research | done ([specification](codex-scanner.md); open checks for 8.3 in section 14) |
 | 8.2 Core groundwork | done (`toml` without default features, `read::read_toml`, diagnostic `invalidToml` with line number only) |
 | 8.3 Scanner `codex` | done (open checks resolved against the Codex source, unit tests; system scan on the maintainer's Mac works) |
