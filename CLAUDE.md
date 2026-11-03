@@ -14,6 +14,7 @@ AI Agent Access Inspector: a local, cross-platform tool that shows which folders
 
 - Planning and status: `docs/roadmap.md` (authoritative; `docs/plan-initial.md` is historical only)
 - Claude Code scanner specification: `docs/claude-code-scanner.md`
+- ChatGPT/Codex scanner specification: `docs/codex-scanner.md`
 - Data model and JSON format: `docs/findings-model.md`
 - Architecture: `docs/architecture.md`
 - Build setup, tests and CI: `docs/onboarding.md` (keep it current when the build or CI changes)

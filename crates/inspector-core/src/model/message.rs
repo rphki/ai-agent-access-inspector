@@ -84,6 +84,30 @@ pub(crate) fn fill(template: &str, args: &BTreeMap<String, String>) -> String {
 /// GUI's translation files.
 pub const CATALOG: &[(&str, &str)] = &[
     (
+        "diagnostic.codex.mcpServerNotAllowed",
+        "The MCP server '{server}' is not in the managed allow-list (requirements.toml) and is not evaluated.",
+    ),
+    (
+        "diagnostic.codex.profileCycle",
+        "The permission profile {profile} is part of an extends cycle; the chain is cut there.",
+    ),
+    (
+        "diagnostic.codex.profileIgnored",
+        "default_permissions is ignored because sandbox_mode is set.",
+    ),
+    (
+        "diagnostic.codex.relativePath",
+        "The path {path} must be absolute or start with ~; it was not evaluated.",
+    ),
+    (
+        "diagnostic.codex.unknownProfile",
+        "The permission profile {profile} is not defined.",
+    ),
+    (
+        "diagnostic.codex.untrustedProjectConfig",
+        "{path} is ignored: the project is not trusted.",
+    ),
+    (
         "diagnostic.demoScanner",
         "Demo scanner: all values are examples.",
     ),
@@ -106,6 +130,10 @@ pub const CATALOG: &[(&str, &str)] = &[
     (
         "diagnostic.invalidJson",
         "The file is not valid JSON: {error}",
+    ),
+    (
+        "diagnostic.invalidToml",
+        "The file is not valid TOML: {error}",
     ),
     (
         "diagnostic.legacyAllowedTools",
@@ -174,6 +202,78 @@ pub const CATALOG: &[(&str, &str)] = &[
     (
         "finding.additionalDirectory",
         "Additional working directory: Claude Code can read and write here. Reading needs no prompt; writing needs one in the default mode, none in acceptEdits or bypassPermissions.",
+    ),
+    (
+        "finding.codex.denyRead",
+        "Managed requirement: Codex's commands may not read here (permissions.filesystem.deny_read).",
+    ),
+    (
+        "finding.codex.fullAccess",
+        "Sandbox {mode}: Codex runs commands without a sandbox; they can reach everything the user can.",
+    ),
+    (
+        "finding.codex.mcpServer",
+        "Local MCP server '{server}' ({command}): a separate program with your user rights. Codex's sandbox does not restrict it.",
+    ),
+    (
+        "finding.codex.outputDirectory",
+        "Output folder of a ChatGPT chat without a project: Codex wrote files here (from the app's state).",
+    ),
+    (
+        "finding.codex.plugin",
+        "Plugin {plugin} is enabled: it lets Codex operate other applications or the browser with your user rights, beyond the sandbox. Its own permissions are not evaluated.",
+    ),
+    (
+        "finding.codex.profile.deny",
+        "Permission profile {profile}: Codex's commands may neither read nor write here.",
+    ),
+    (
+        "finding.codex.profile.read",
+        "Permission profile {profile}: Codex's commands may read here.",
+    ),
+    (
+        "finding.codex.profile.workspaceRoot",
+        "Permission profile {profile}: additional workspace root.",
+    ),
+    (
+        "finding.codex.profile.write",
+        "Permission profile {profile}: Codex's commands may read and write here.",
+    ),
+    (
+        "finding.codex.protectedPath",
+        "Protected: inside a writable folder Codex keeps {name} read-only.",
+    ),
+    (
+        "finding.codex.readEverything",
+        "Codex's sandbox allows reading files across the whole computer; it limits writing, not reading.",
+    ),
+    (
+        "finding.codex.slashTmp",
+        "/tmp: writable in sandbox mode workspace-write (sandbox_workspace_write.exclude_slash_tmp turns this off).",
+    ),
+    (
+        "finding.codex.tmpdir",
+        "Temporary directory ($TMPDIR): writable in sandbox mode workspace-write (sandbox_workspace_write.exclude_tmpdir_env_var turns this off).",
+    ),
+    (
+        "finding.codex.windowsUnsandboxed",
+        "No Windows sandbox is configured ([windows] sandbox): Codex may run commands without a sandbox, with the user's rights.",
+    ),
+    (
+        "finding.codex.workingDirectory.full",
+        "Working directory, sandbox {mode}: Codex can read and write here and everywhere else without a sandbox.",
+    ),
+    (
+        "finding.codex.workingDirectory.read",
+        "Working directory, sandbox {mode}: Codex can read here; writing is blocked by the sandbox and needs approval.",
+    ),
+    (
+        "finding.codex.workingDirectory.write",
+        "Working directory, sandbox {mode}: Codex can read and write here without asking; .git, .codex, .agents and .aws stay read-only.",
+    ),
+    (
+        "finding.codex.writableRoot",
+        "Additional writable folder (sandbox_workspace_write.writable_roots): Codex can write here without asking.",
     ),
     (
         "finding.knownProject",
@@ -323,6 +423,26 @@ pub const CATALOG: &[(&str, &str)] = &[
     ("report.status.unknown", "unknown"),
     ("report.title", "AI Agent Access Inspector report"),
     ("report.totals", "{findings}, {warnings}."),
+    ("summary.codex.approvalPolicy", "Approval policy"),
+    ("summary.codex.installation", "Installation"),
+    (
+        "summary.codex.managedSources",
+        "Managed configuration files",
+    ),
+    (
+        "summary.codex.networkAccess",
+        "Network access in the sandbox",
+    ),
+    ("summary.codex.plugins", "Enabled plugins"),
+    (
+        "summary.codex.profileFiles",
+        "Profile files (only used with --profile)",
+    ),
+    (
+        "summary.codex.sandboxMode",
+        "Sandbox mode (outside projects)",
+    ),
+    ("summary.codex.windowsSandbox", "Windows sandbox"),
     ("summary.hooks", "Hooks"),
     ("summary.localMcpServers", "Local MCP servers"),
     ("summary.managedSettings", "Managed settings"),
@@ -337,12 +457,39 @@ pub const CATALOG: &[(&str, &str)] = &[
     ("summary.shell", "Shell commands"),
     ("value.allowedWithoutPrompt", "allowed without prompt"),
     ("value.blocked", "blocked"),
+    ("value.codex.app", "ChatGPT app"),
+    ("value.codex.cli", "Codex CLI"),
+    ("value.default", "default"),
     ("value.disabled", "disabled"),
     ("value.enabled", "enabled"),
     ("value.none", "none"),
     ("value.notSupported", "not supported on this system"),
     ("value.raw", "{value}"),
     ("value.withPrompt", "with prompt"),
+    (
+        "warning.codex.denyReadUnelevated",
+        "The unelevated Windows sandbox does not enforce deny-read paths.",
+    ),
+    (
+        "warning.codex.fullAccess",
+        "Without a sandbox, commands can change or delete any file the user can.",
+    ),
+    (
+        "warning.codex.notAllowedByRequirements",
+        "{value} is not allowed by the managed requirements; Codex falls back to {fallback}.",
+    ),
+    (
+        "warning.codex.windowsUnsandboxed",
+        "Commands may run with the user's rights on Windows; set [windows] sandbox to confine them.",
+    ),
+    (
+        "warning.codex.workspaceWriteOnly",
+        "Only takes effect in sandbox mode workspace-write; the effective mode here is {mode}.",
+    ),
+    (
+        "warning.codex.writableRootsReplaced",
+        "A configuration with higher precedence sets its own writable_roots list, which replaces this one.",
+    ),
     (
         "warning.containsHome",
         "Grants {path}, which contains the home directory {home}.",

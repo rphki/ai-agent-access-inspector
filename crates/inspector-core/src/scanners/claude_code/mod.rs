@@ -2,8 +2,8 @@
 //!
 //! Specification: `docs/claude-code-scanner.md`.
 
-mod mcp;
-mod projects;
+pub(crate) mod mcp;
+pub(crate) mod projects;
 mod rules;
 mod settings;
 
@@ -17,7 +17,7 @@ use crate::model::{
     FindingSource, Message, ScanOutput, ScannerMetadata, SourceDocumentation, SummaryEntry,
 };
 use crate::platform::OperatingSystem;
-use crate::read::{self, JsonFile};
+use crate::read::{self, ParsedFile};
 use crate::scanner::AgentScanner;
 
 use projects::Project;
@@ -221,9 +221,9 @@ impl Scan<'_> {
     /// Reads a JSON file; problems become diagnostics.
     pub fn read_json(&mut self, path: &TargetPath) -> Option<Value> {
         match read::read_json(self.context, &path.to_string()) {
-            JsonFile::Missing => None,
-            JsonFile::Parsed(value) => Some(value),
-            JsonFile::Failed(diagnostic) => {
+            ParsedFile::Missing => None,
+            ParsedFile::Parsed(value) => Some(value),
+            ParsedFile::Failed(diagnostic) => {
                 self.diagnostic(diagnostic);
                 None
             }

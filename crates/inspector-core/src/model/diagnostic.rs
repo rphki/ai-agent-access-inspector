@@ -54,6 +54,7 @@ pub enum DiagnosticCode {
     /// The file exceeds the size limit and was not read.
     FileTooLarge,
     InvalidJson,
+    InvalidToml,
     UnexpectedType,
     UnknownKey,
     UnparsableRule,

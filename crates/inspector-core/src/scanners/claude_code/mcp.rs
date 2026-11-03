@@ -22,7 +22,7 @@ use crate::redact::{REDACTED, redact_args};
 
 /// Package name of the reference filesystem server; its path arguments are
 /// the directories it may read and write.
-const FILESYSTEM_SERVER: &str = "server-filesystem";
+pub(crate) const FILESYSTEM_SERVER: &str = "server-filesystem";
 
 /// Longest command line shown in a finding.
 const MAX_COMMAND_DISPLAY: usize = 200;
@@ -375,7 +375,7 @@ fn expand(scan: &mut Scan, value: &str, file: &TargetPath, pointer: &str) -> Str
     expansion.value
 }
 
-fn is_path_like(arg: &str) -> bool {
+pub(crate) fn is_path_like(arg: &str) -> bool {
     if arg.starts_with('-') {
         return false;
     }
@@ -394,7 +394,7 @@ fn is_path_like(arg: &str) -> bool {
         || arg.starts_with("\\\\")
 }
 
-fn truncate(text: &str) -> String {
+pub(crate) fn truncate(text: &str) -> String {
     if text.chars().count() <= MAX_COMMAND_DISPLAY {
         return text.to_string();
     }

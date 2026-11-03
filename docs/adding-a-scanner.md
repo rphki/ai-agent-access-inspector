@@ -53,14 +53,15 @@ The runner (`run_scan`) calls `detect` first and `scan` only if the status is `D
 | `context.env_var("APPDATA")` → `Option<&str>` | `std::env::var` |
 | `context.operating_system` | `cfg!(target_os = ...)` |
 | `TargetPath::parse(os, s)`, `path.join("a/b")` | `std::path::Path` logic (it follows the host, not the scanned system) |
-| `read::read_json(context, &path.to_string())` | `std::fs::read_to_string` |
+| `read::read_json(context, &path.to_string())`, `read::read_toml(...)` | `std::fs::read_to_string` |
 
 Only the environment variables listed in `CAPTURED_ENV_VARS` (`context.rs`) are visible. If your agent needs another one, add it there and say why in the pull request.
 
 Read files only with the helpers in `crates/inspector-core/src/read.rs`. They map the target path to the host with `context.host_path(...)`, open only regular files, enforce a size limit and return problems as diagnostics:
 
 ```rust
-pub fn read_json(context: &ScanContext, target: &str) -> JsonFile;   // Missing | Parsed(Value) | Failed(Diagnostic)
+pub fn read_json(context: &ScanContext, target: &str) -> ParsedFile; // Missing | Parsed(Value) | Failed(Diagnostic)
+pub fn read_toml(context: &ScanContext, target: &str) -> ParsedFile; // TOML parsed into the same JSON value tree
 pub fn read_text(context: &ScanContext, target: &str) -> Result<Option<String>, Box<Diagnostic>>;
 pub fn exists(context: &ScanContext, target: &str) -> bool;
 pub fn is_dir(context: &ScanContext, target: &str) -> bool;
@@ -78,7 +79,7 @@ use crate::model::{
     DiagnosticLevel, Finding, FindingScope, FindingSource, FindingStatus, FindingTarget, Message,
     PatternKind, RuleEffect, ScanOutput, ScannerMetadata, SourceDocumentation,
 };
-use crate::read::{self, JsonFile};
+use crate::read::{self, ParsedFile};
 use crate::scanner::AgentScanner;
 
 const PARSER_VERSION: &str = "1";
@@ -138,9 +139,9 @@ A finding is built with `Finding::builder(&meta, scope, target, source)` and the
             return out;
         };
         let value = match read::read_json(context, &settings.to_string()) {
-            JsonFile::Parsed(value) => value,
-            JsonFile::Missing => return out,
-            JsonFile::Failed(diagnostic) => {
+            ParsedFile::Parsed(value) => value,
+            ParsedFile::Missing => return out,
+            ParsedFile::Failed(diagnostic) => {
                 out.diagnostics.push(diagnostic);
                 return out;
             }
