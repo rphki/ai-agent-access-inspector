@@ -24,25 +24,48 @@ pub const MAX_LOG_PREFIX: u64 = 4 * 1024 * 1024;
 /// Upper bound for entries taken from one directory listing.
 pub const MAX_DIR_ENTRIES: usize = 10_000;
 
+/// A configuration file parsed into a JSON value tree. TOML files use the
+/// same tree, so scanners address values with JSON pointers in both cases.
 #[derive(Debug)]
-pub enum JsonFile {
+pub enum ParsedFile {
     Missing,
     Parsed(Value),
     Failed(Diagnostic),
 }
 
 /// Reads and parses a JSON file given as target path.
-pub fn read_json(context: &ScanContext, target: &str) -> JsonFile {
+pub fn read_json(context: &ScanContext, target: &str) -> ParsedFile {
     match read_text(context, target) {
-        Ok(None) => JsonFile::Missing,
-        Err(diagnostic) => JsonFile::Failed(*diagnostic),
+        Ok(None) => ParsedFile::Missing,
+        Err(diagnostic) => ParsedFile::Failed(*diagnostic),
         Ok(Some(text)) => match serde_json::from_str(&text) {
-            Ok(value) => JsonFile::Parsed(value),
-            Err(error) => JsonFile::Failed(
+            Ok(value) => ParsedFile::Parsed(value),
+            Err(error) => ParsedFile::Failed(
                 Diagnostic::new(
                     DiagnosticLevel::Error,
                     DiagnosticCode::InvalidJson,
                     Message::new("diagnostic.invalidJson").arg("error", error),
+                )
+                .file(target),
+            ),
+        },
+    }
+}
+
+/// Reads and parses a TOML file given as target path.
+pub fn read_toml(context: &ScanContext, target: &str) -> ParsedFile {
+    match read_text(context, target) {
+        Ok(None) => ParsedFile::Missing,
+        Err(diagnostic) => ParsedFile::Failed(*diagnostic),
+        Ok(Some(text)) => match toml::from_str(&text) {
+            Ok(value) => ParsedFile::Parsed(value),
+            Err(error) => ParsedFile::Failed(
+                Diagnostic::new(
+                    DiagnosticLevel::Error,
+                    DiagnosticCode::InvalidToml,
+                    // Only the position and the reason: the full error text
+                    // quotes the offending line, which may hold a secret.
+                    Message::new("diagnostic.invalidToml").arg("error", toml_error(&text, &error)),
                 )
                 .file(target),
             ),
@@ -139,6 +162,22 @@ pub fn modified(context: &ScanContext, target: &str) -> Option<std::time::System
         .ok()
 }
 
+fn toml_error(text: &str, error: &toml::de::Error) -> String {
+    match error.span() {
+        Some(span) => {
+            // Counted on bytes, so a span inside a character cannot panic.
+            let end = span.start.min(text.len());
+            let line = text.as_bytes()[..end]
+                .iter()
+                .filter(|&&b| b == b'\n')
+                .count()
+                + 1;
+            format!("line {line}: {}", error.message())
+        }
+        None => error.message().to_owned(),
+    }
+}
+
 fn unreadable(target: &str, error: &std::io::Error) -> Diagnostic {
     Diagnostic::new(
         DiagnosticLevel::Error,
@@ -185,11 +224,11 @@ mod tests {
         std::fs::write(dir.path().join("ok.json"), r#"{"a": 1}"#).unwrap();
         let context = system_context();
         assert!(
-            matches!(read_json(&context, &path(&dir, "ok.json")), JsonFile::Parsed(v) if v["a"] == 1)
+            matches!(read_json(&context, &path(&dir, "ok.json")), ParsedFile::Parsed(v) if v["a"] == 1)
         );
         assert!(matches!(
             read_json(&context, &path(&dir, "nope.json")),
-            JsonFile::Missing
+            ParsedFile::Missing
         ));
     }
 
@@ -201,7 +240,7 @@ mod tests {
             r#"{"permissions": {"allow": ["Read(~/x)""#,
         )
         .unwrap();
-        let JsonFile::Failed(diagnostic) = read_json(&system_context(), &path(&dir, "bad.json"))
+        let ParsedFile::Failed(diagnostic) = read_json(&system_context(), &path(&dir, "bad.json"))
         else {
             panic!("expected a diagnostic");
         };
@@ -214,9 +253,49 @@ mod tests {
     }
 
     #[test]
+    fn parses_toml_into_a_json_tree() {
+        let dir = TempDir::new("read-toml");
+        std::fs::write(
+            dir.path().join("config.toml"),
+            "sandbox_mode = \"workspace-write\"\n\n[sandbox_workspace_write]\nwritable_roots = [\"/srv/data\"]\n\n[projects.\"/srv/app\"]\ntrust_level = \"trusted\"\n",
+        )
+        .unwrap();
+        let ParsedFile::Parsed(value) = read_toml(&system_context(), &path(&dir, "config.toml"))
+        else {
+            panic!("expected a parsed file");
+        };
+        assert_eq!(
+            value.pointer("/sandbox_workspace_write/writable_roots/0"),
+            Some(&Value::from("/srv/data"))
+        );
+        assert_eq!(
+            value.pointer("/projects/~1srv~1app/trust_level"),
+            Some(&Value::from("trusted"))
+        );
+    }
+
+    #[test]
+    fn invalid_toml_becomes_a_diagnostic_without_the_line() {
+        let dir = TempDir::new("read-invalid-toml");
+        std::fs::write(
+            dir.path().join("config.toml"),
+            "[mcp_servers.x]\nenv = { TOKEN = \"secret-value\" \n",
+        )
+        .unwrap();
+        let ParsedFile::Failed(diagnostic) =
+            read_toml(&system_context(), &path(&dir, "config.toml"))
+        else {
+            panic!("expected a diagnostic");
+        };
+        assert_eq!(diagnostic.code, DiagnosticCode::InvalidToml);
+        assert!(diagnostic.message.text.contains("line 2:"));
+        assert!(!diagnostic.message.text.contains("secret-value"));
+    }
+
+    #[test]
     fn directories_are_not_read() {
         let dir = TempDir::new("read-dir");
-        let JsonFile::Failed(diagnostic) =
+        let ParsedFile::Failed(diagnostic) =
             read_json(&system_context(), &dir.path().to_string_lossy())
         else {
             panic!("expected a diagnostic");
@@ -227,7 +306,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn device_files_are_not_read() {
-        let JsonFile::Failed(diagnostic) = read_json(&system_context(), "/dev/zero") else {
+        let ParsedFile::Failed(diagnostic) = read_json(&system_context(), "/dev/zero") else {
             panic!("expected a diagnostic");
         };
         assert_eq!(diagnostic.message.key, "diagnostic.notARegularFile");
@@ -238,7 +317,7 @@ mod tests {
         let dir = TempDir::new("read-large");
         let file = std::fs::File::create(dir.path().join("big.json")).unwrap();
         file.set_len(MAX_FILE_SIZE + 1).unwrap();
-        let JsonFile::Failed(diagnostic) = read_json(&system_context(), &path(&dir, "big.json"))
+        let ParsedFile::Failed(diagnostic) = read_json(&system_context(), &path(&dir, "big.json"))
         else {
             panic!("expected a diagnostic");
         };

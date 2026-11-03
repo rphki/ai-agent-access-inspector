@@ -732,8 +732,8 @@ More scanners (Claude Desktop, Cursor) and `1.0.0` according to section 18.
 ### Phase 8 – ChatGPT/Codex scanner → `v0.6.0`
 
 - 8.1 research: official Codex configuration docs and the local installation (structure only, no values); every source classified as documented or heuristic; precedence of CLI flags, profiles, `config.toml`, project configuration and managed requirements → `docs/codex-scanner.md`
-- 8.2 core groundwork: TOML parser in `inspector-core` (`cargo deny`), source positions for TOML (key path instead of JSON pointer), new message keys
-- 8.3 scanner `codex`: detection (app bundle, CLI, `~/.codex`), all configuration levels via `ScanContext`, sandbox mode and writable roots, approval policy as effect, trusted projects, MCP servers without `env`/`headers`, plugin hints, diagnostics instead of aborts
+- 8.2 core groundwork: TOML parser in `inspector-core` (`cargo deny`), `read::read_toml` into the same JSON value tree, so source positions stay JSON pointers
+- 8.3 scanner `codex`: message keys for its explanations, warnings and summary, `CODEX_HOME` in the captured environment variables, detection (app bundle, CLI, `~/.codex`), all configuration levels via `ScanContext`, sandbox mode and writable roots, approval policy as effect, trusted projects, MCP servers without `env`/`headers`, plugin hints, diagnostics instead of aborts
 - 8.4 fixtures for macOS, Linux, Windows, profiles and malformed TOML with reviewed `expected.json`
 - 8.5 integration in CLI and GUI: registration, German texts, demo mode
 - 8.6 documentation (README, `privacy.md`, `adding-a-scanner.md` if the interface changed), CHANGELOG
@@ -813,4 +813,5 @@ These features are only considered once the plain, traceable configuration scann
 | 7.6 Release `v0.4.0` | done (first tag run failed before publishing because the frontend build ended up among the release files; fixed in the workflow, tag moved to the fix) |
 | 8 – ChatGPT/Codex scanner | in progress |
 | 8.1 Research | done ([specification](codex-scanner.md); open checks for 8.3 in section 14) |
-| 8.2 Core groundwork | next: TOML parser, message keys |
+| 8.2 Core groundwork | done (`toml` without default features, `read::read_toml`, diagnostic `invalidToml` with line number only) |
+| 8.3 Scanner `codex` | next; message keys are added together with the code |

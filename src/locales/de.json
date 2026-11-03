@@ -5,6 +5,7 @@
   "diagnostic.ineffectiveRule": "Die Regel {rule} greift nie: Claude Code wertet Pfadregeln für {tool} nicht aus. Verwende stattdessen Read(...) oder Edit(...).",
   "diagnostic.internalScannerError": "Der Scanner '{scanner}' ist unerwartet fehlgeschlagen: {reason}",
   "diagnostic.invalidJson": "Die Datei ist kein gültiges JSON: {error}",
+  "diagnostic.invalidToml": "Die Datei ist kein gültiges TOML: {error}",
   "diagnostic.legacyAllowedTools": "~/.claude.json listet erlaubte Tools für {project} in einem älteren Format; sie werden nicht ausgewertet.",
   "diagnostic.managedOnlySetting": "{key} wirkt nur in verwalteten Einstellungen und wird hier ignoriert.",
   "diagnostic.mcpManagedExclusive": "managed-mcp.json ist vorhanden; MCP-Server aus anderen Ebenen werden nicht verwendet.",

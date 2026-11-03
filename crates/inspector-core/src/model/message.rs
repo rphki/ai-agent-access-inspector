@@ -108,6 +108,10 @@ pub const CATALOG: &[(&str, &str)] = &[
         "The file is not valid JSON: {error}",
     ),
     (
+        "diagnostic.invalidToml",
+        "The file is not valid TOML: {error}",
+    ),
+    (
         "diagnostic.legacyAllowedTools",
         "~/.claude.json lists allowed tools for {project} in an older format; they are not evaluated.",
     ),

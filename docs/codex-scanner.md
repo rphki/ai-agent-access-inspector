@@ -262,10 +262,11 @@ Fixtures contain only invented paths and values.
 
 ## 13. Consequences for the implementation (phase 8.2)
 
-- **TOML parser** in `inspector-core` (`toml` crate, parse into a value tree; `cargo deny`).
+- **TOML parser** in `inspector-core` (`toml` crate without default features, `read::read_toml` parses into the same `serde_json::Value` tree as JSON; `cargo deny`). Parse errors become the diagnostic `invalidToml` with line number and reason only, never the offending line.
 - **No model change for source positions:** `FindingSource.pointer` uses RFC 6901 syntax over the parsed TOML tables just as over JSON (e.g. `/sandbox_workspace_write/writable_roots/0`); `docs/findings-model.md` states this.
 - `FindingScope`, `FindingStatus`, `AccessKind` and `RuleEffect` suffice.
-- New message keys for the explanations, warnings, diagnostics and summary labels of sections 4 to 10.
+- New message keys for the explanations, warnings, diagnostics and summary labels of sections 4 to 10 are added in phase 8.3 together with the code that uses them.
+- `CODEX_HOME` must be added to `CAPTURED_ENV_VARS` (`context.rs`) in phase 8.3.
 
 ## 14. Open checks (for phase 8.3)
 

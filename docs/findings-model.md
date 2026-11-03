@@ -67,7 +67,7 @@ A finding is a path or rule that grants, restricts or suggests file access for a
 | `file` | file that was read; `null` for derived findings |
 | `configKind` | kind of configuration, e.g. `claude-code/settings` |
 | `documentation` | `documented` (officially described), `heuristic` (observed, not or barely documented), `derived` (computed by the inspector) |
-| `pointer` | JSON pointer to the value in `file`, e.g. `/permissions/deny/0` |
+| `pointer` | JSON pointer to the value in `file`, e.g. `/permissions/deny/0`; for TOML files the same syntax over the table tree, e.g. `/sandbox_workspace_write/writable_roots/0` |
 | `rawValue` | value before normalisation |
 | `anchor` | base for relative patterns: `filesystemRoot`, `home`, `workingDirectory` or `{ "kind": "directory", "path": "…" }` |
 | `parserVersion` | version of the scanner's parsing logic |
@@ -133,7 +133,7 @@ Diagnostics describe problems while scanning. They never abort the scan.
 | Field | Meaning |
 |---|---|
 | `level` | `info`, `warning`, `error` |
-| `code` | `unreadableFile`, `fileTooLarge`, `invalidJson`, `unexpectedType`, `unknownKey`, `unparsableRule`, `ineffectiveRule`, `ignoredSetting`, `unresolvedVariable`, `deprecatedLocation`, `unevaluatedSource`, `internal`, `other` |
+| `code` | `unreadableFile`, `fileTooLarge`, `invalidJson`, `invalidToml`, `unexpectedType`, `unknownKey`, `unparsableRule`, `ineffectiveRule`, `ignoredSetting`, `unresolvedVariable`, `deprecatedLocation`, `unevaluatedSource`, `internal`, `other` |
 | `message` | message describing the problem |
 | `file`, `pointer` | affected file and location, if known |
 

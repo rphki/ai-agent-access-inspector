@@ -26,7 +26,7 @@ export function maxSeverity(warnings: Warning[]): Severity | null {
 }
 
 const UNREADABLE_CODES = ["unreadableFile", "fileTooLarge", "notARegularFile"];
-const INVALID_CODES = ["invalidJson", "unexpectedType"];
+const INVALID_CODES = ["invalidJson", "invalidToml", "unexpectedType"];
 
 export interface ReportState {
   /** `noAgent`: nothing detected; `noConfig`: detected, but no findings. */
