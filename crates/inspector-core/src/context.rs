@@ -20,6 +20,7 @@ pub const CAPTURED_ENV_VARS: &[&str] = &[
     "APPDATA",
     "CLAUDE_CODE_PROJECT_DIR_NAME",
     "CLAUDE_CONFIG_DIR",
+    "CODEX_HOME",
     "HOME",
     "LOCALAPPDATA",
     "ProgramData",

@@ -11,7 +11,7 @@ Result of phase 8.1 of the [roadmap](roadmap.md). This document defines which fi
 | Local installation examined | ChatGPT desktop app 26.1021 (macOS, bundle ID `com.openai.codex`) with bundled Codex CLI 0.164.0-alpha |
 | Supported format | only the currently documented one (see roadmap, section 2) |
 | Scanner ID and display name | `codex`, "ChatGPT / Codex" |
-| Implementation | planned in phase 8.3 under `crates/inspector-core/src/scanners/codex/` |
+| Implementation | `crates/inspector-core/src/scanners/codex/` (phase 8.3); open checks resolved against the `openai/codex` source, see section 14 |
 
 The ChatGPT desktop app has merged with the Codex app: it is the same application (bundle ID `com.openai.codex`), runs the bundled Codex CLI as its agent and shares `~/.codex` with a separately installed Codex CLI and the IDE extension. One scanner covers all of them (roadmap, section 2).
 
@@ -41,11 +41,12 @@ Same as for Claude Code ([specification](claude-code-scanner.md), section 1): **
 1. **Sandbox.** Every command Codex runs goes through an OS sandbox (Seatbelt on macOS, bubblewrap on Linux/WSL2, a Windows sandbox). Three modes: `read-only`, `workspace-write`, `danger-full-access`.
 2. **Workspace.** In `workspace-write`, Codex may write in the working directory, the configured `writable_roots`, directories added with `--add-dir`, `$TMPDIR` and `/tmp` (the last two can be excluded).
 3. **Protected paths.** Inside a writable root, `.git` (directory or file) and the directories `.agents`, `.codex` and `.aws` stay read-only, recursively.
-4. **Reading.** `read-only` "can inspect files"; how far reading reaches is not documented (unconfirmed, see 14.1). The previous Seatbelt base policy allowed reading the whole file system.
+4. **Reading.** Both `read-only` and `workspace-write` grant reading on the whole file system; only `deny` entries and managed `deny_read` take areas away (source check, 14.1).
 5. **Permission profiles** (newer) replace the sandbox mode: `default_permissions` selects a profile, and `[permissions.<name>]` defines `read`, `write` and `deny` per path or glob. They are ignored as soon as `sandbox_mode` is set anywhere.
 6. **Approval policy** decides when Codex asks before leaving the sandbox (`on-request`, `never`, granular).
-7. **Trust.** Project configuration is only loaded for trusted projects. Version-controlled folders get Auto (`workspace-write` + `on-request`), others start `read-only`.
-8. **MCP servers** are separate processes. Whether they run inside the sandbox is not documented (unconfirmed, see 14.2).
+7. **Trust.** Project configuration is only loaded for trusted projects. Without a configured mode, a folder with a `[projects]` entry (trusted or untrusted) gets `workspace-write`, any other folder `read-only` (source check; the documentation describes this as "version-controlled folders get Auto").
+8. **MCP servers** are started as plain child processes with the user's rights, outside the sandbox (source check, 14.2).
+9. **Windows.** Without `[windows] sandbox`, Codex runs commands without a sandbox and the default profile is `:read-only` (source check, 14.5).
 
 Consequences for the scanner:
 
@@ -171,13 +172,14 @@ Configuration, highest first:
 
 Managed layers override all of these: MDM `config_toml_base64` (detected only), then `managed_config.toml`. Requirements constrain the result last and cannot be relaxed (order: system `requirements.toml`, cloud, legacy managed fields, MDM).
 
-Tables are merged key by key; arrays are replaced, not concatenated (unconfirmed, see 14.3).
+Tables are merged key by key; arrays (e.g. `writable_roots`) are replaced, not concatenated (14.3). A replaced `writable_roots` list gets a "not effective" warning.
 
-**Default without a configured mode:** a trusted project with version control gets `workspace-write` + `on-request`; anything else `read-only`. The scanner applies the default per project and states it in the explanation (classification `derived`).
+**Default without a configured mode:** a folder with a `[projects]` entry gets `workspace-write`, anything else (including folders only known from the app state, and everything outside projects) `read-only`; on Windows without a sandbox always `read-only`. The scanner applies the default per project and names the mode in the explanation.
 
 ## 6. Path resolution
 
-- Paths in `config.toml` are absolute or start with `~`; relative paths in `writable_roots` and profile entries are resolved against the directory of the configuration file and get a warning (unconfirmed, see 14.4).
+- Relative paths in `writable_roots` are resolved against the directory of the configuration file (for project configuration the `.codex` folder) (14.4).
+- Keys in `[permissions.<name>.filesystem]` must be absolute, start with `~/` or be a `:` token; anything else becomes the diagnostic `diagnostic.codex.relativePath`. Globs without an absolute base (e.g. `**/*.env`) are reported the same way, since they cannot be placed on a path.
 - Project keys in `[projects."<path>"]` are absolute target paths.
 - `$TMPDIR` comes from the scan environment; if it is not set, the finding has no path and says so.
 - Windows paths follow the existing `TargetPath` rules.
@@ -218,10 +220,11 @@ The app is recognised by `/Applications/ChatGPT.app/Contents/Resources/codex-cli
 | profile `filesystem` entry | Configured | Read / Write | Allow / Deny | High |
 | `deny_read` | Configured, scope Managed | Read | Deny | High |
 | `$TMPDIR`, `/tmp` in `workspace-write` | Potential | Write | Allow | High |
-| reading in `read-only` / `workspace-write` | Potential, pattern `Everything` | Read | Allow | Medium (unconfirmed, 14.1) |
+| reading in `read-only` / `workspace-write` | Potential, pattern `Everything` | Read | Allow | High |
+| Windows without `[windows] sandbox` | Potential, pattern `Everything` | ReadWrite | Allow | Medium, warning |
 | `danger-full-access` or `:danger-full-access` | Potential, pattern `Everything` | ReadWrite | Allow | High, warning |
 | `thread-projectless-output-directories` | Observed | Write | Allow | Low |
-| local MCP server | as for Claude Code ([specification](claude-code-scanner.md), section 10) | | | |
+| local MCP server | as for Claude Code ([specification](claude-code-scanner.md), section 10), but confidence High (source check) | | | |
 | enabled plugin `computer-use`, `unified-computer-use`, `browser` | Potential, no path | Unknown | NotApplicable | Low, heuristic |
 
 The plugin hint explains that the plugin lets Codex operate other applications or the browser with the user's rights, so file access is possible beyond the sandbox. Other enabled plugins appear only in the summary.
@@ -232,8 +235,9 @@ The plugin hint explains that the plugin lets Codex operate other applications o
 
 - **Session-only settings** (`--sandbox`, `--add-dir`, `--profile`, `-c`, `--yolo`, the permission mode chosen per chat in the app) are invisible.
 - **Cloud-managed** configuration and requirements are not visible locally; **MDM** values are only detected.
-- **Reading scope** of the sandbox is not documented (14.1).
-- **MCP servers** may run outside the sandbox and reach everything the user can reach.
+- **The permission mode chosen in the app** is stored in the app state but not read; folders known only from the app state are shown with the configured or default mode.
+- **MCP servers** run outside the sandbox and reach everything the user can reach.
+- **MCP server definitions** of several layers are not merged key by key; the definition from the highest layer is used.
 - **Plugins** are only hinted at; their own permissions (e.g. `computer_use.*`, `browser_use.*`) are not evaluated.
 - **App state** (`.codex-global-state.json`) is undocumented and may change without notice.
 - **Chat side of ChatGPT** (connectors, uploads) is out of scope.
@@ -268,10 +272,16 @@ Fixtures contain only invented paths and values.
 - New message keys for the explanations, warnings, diagnostics and summary labels of sections 4 to 10 are added in phase 8.3 together with the code that uses them.
 - `CODEX_HOME` must be added to `CAPTURED_ENV_VARS` (`context.rs`) in phase 8.3.
 
-## 14. Open checks (for phase 8.3)
+## 14. Resolved checks (phase 8.3)
 
-1. **Reading scope** of `read-only` and `workspace-write`: check the sandbox policies in the `openai/codex` source (Seatbelt policy, `:read-only` profile). Until confirmed: `Potential` read of everything with confidence Medium.
-2. **MCP servers and the sandbox:** check in the source whether stdio servers are started sandboxed. Until confirmed: treated like Claude Code (user rights).
-3. **Array merging** across configuration layers: check in the source.
-4. **Relative paths** in `writable_roots` and profile entries: check whether they are allowed and what they are relative to.
-5. **Default of `windows.sandbox`** and whether `--full-auto` still exists: check in the source; only affects the summary.
+Checked against the `openai/codex` source (`main`, 2026-11-03), read only.
+
+| # | Question | Result | Source | Implementation |
+|---|---|---|---|---|
+| 1 | Reading scope of `read-only` and `workspace-write` | whole file system: both policies start with Read on `:root`; macOS Seatbelt `(allow file-read*)`, Linux `--ro-bind / /`; no default deny-read list | `protocol/src/permissions.rs`, `sandboxing/src/seatbelt.rs`, `linux-sandbox/src/bwrap.rs` | `Potential` read of everything, confidence High |
+| 2 | MCP servers and the sandbox | stdio servers are spawned as plain child processes, no sandbox | `rmcp-client/src/stdio_server_launcher.rs` | like Claude Code, confidence High |
+| 3 | Merging of layers | tables recursively, everything else (arrays) replaced | `config/src/merge.rs` | `writable_roots` of lower layers get a "not effective" warning |
+| 4 | Relative paths | `writable_roots` relative to the file's directory (project: the `.codex` folder); profile filesystem keys must be absolute, `~/` or `:` tokens; `workspace_roots` relative to the session's working directory | `config/src/loader/mod.rs`, `core/src/config/permission_path.rs` | see section 6 |
+| 5 | `windows.sandbox` default, `--full-auto` | unset means no sandbox; `--full-auto` no longer exists (`--approve-for-me` instead) | `core/src/config/windows_sandbox_config.rs`, `utils/cli/src/shared_options.rs` | Windows finding with warning (section 10) |
+| – | Protected subpaths | `.git` (directory or file), `.agents`, `.aws`, `.codex` (directories) | `protocol/src/permissions.rs` | findings only for existing ones |
+| – | Default mode | `[projects]` entry (trusted or untrusted) → `workspace-write`, otherwise `read-only` | `config/src/config_toml.rs` | section 5 |

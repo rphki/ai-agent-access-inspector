@@ -2,8 +2,8 @@
 //!
 //! Specification: `docs/claude-code-scanner.md`.
 
-mod mcp;
-mod projects;
+pub(crate) mod mcp;
+pub(crate) mod projects;
 mod rules;
 mod settings;
 
