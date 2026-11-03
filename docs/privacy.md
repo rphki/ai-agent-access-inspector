@@ -11,13 +11,15 @@ The AI Agent Access Inspector works locally and only reads. This page describes 
 
 ## 2. What is read
 
-Only the configuration files of the supported agents, at the locations listed in the [Claude Code scanner specification](claude-code-scanner.md). The scanner reads only the keys it evaluates and drops everything else right after parsing; for example, account data in `~/.claude.json` is never kept. Session logs are read only up to their first lines, to find the project directory. Files are only read if they are regular files below a size limit.
+Only the configuration files of the supported agents, at the locations listed in the specifications of the [Claude Code scanner](claude-code-scanner.md) and the [ChatGPT/Codex scanner](codex-scanner.md). The scanners read only the keys they evaluate and drop everything else right after parsing; for example, account data in `~/.claude.json` is never kept. Session logs are read only up to their first lines, to find the project directory. Files are only read if they are regular files below a size limit.
+
+For ChatGPT/Codex, the scanner reads `config.toml` files, `requirements.toml`, and from the app's state file `~/.codex/.codex-global-state.json` only the project folders, the folders of chats without a project and the permission mode selected in the app. It never reads `auth.json`, sessions, logs, histories or the app's databases.
 
 Whether a path exists, and whether it is a file, directory or symlink, is checked on disk. File contents in these locations are not read.
 
 ## 3. What is never shown
 
-- Environment variables, headers and OAuth settings of MCP servers (`env`, `headers`, `headersHelper`, `oauth`), and the URLs of remote servers.
+- Environment variables, headers and OAuth settings of MCP servers (Claude Code: `env`, `headers`, `headersHelper`, `oauth`; Codex: `env`, `env_vars`, `http_headers`, `env_http_headers`, `bearer_token_env_var`, `auth`, `oauth`), and the URLs of remote servers.
 - Values that look like secrets, wherever they appear in the output. They are replaced by `<redacted>` (section 4).
 - Complete configuration files.
 

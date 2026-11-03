@@ -4,7 +4,15 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ## [Unreleased]
 
+### Added
+
+- Scanner for ChatGPT / Codex (the ChatGPT desktop app and the Codex CLI, which share `~/.codex`): configuration levels and `requirements.toml`, sandbox mode and permission profiles, writable folders, temporary directories, protected folders, the permission mode selected in the app, projects and chat folders from the app's state, MCP servers and hints for plugins such as computer use
+- TOML configuration files are read with the same limits as JSON; a new diagnostic for invalid TOML names only the line and the reason
+- GUI demo mode with ChatGPT / Codex data
+
 ### Changed
+
+- MCP server rows in the GUI name their agent, e.g. "Claude Code · MCP server files"
 
 - The application icon (`src-tauri/icons/`) is excluded from the Apache-2.0 license: Copyright Raphael Kirchner, all rights reserved; forks must use their own icon. New files `NOTICE` and `src-tauri/icons/LICENSE`; copyright line in the bundle metadata and the macOS About panel updated
 

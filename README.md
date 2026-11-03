@@ -2,7 +2,7 @@
 
 A local desktop application and command line tool that shows which folders local AI agents can access according to their configuration: what is granted, what is denied, what is only potentially reachable, and why.
 
-The first supported agent is **Claude Code**, including its MCP servers. More agents will follow as separate scanners.
+Supported agents: **Claude Code** and **ChatGPT / Codex** (the ChatGPT desktop app and the Codex CLI), each including its MCP servers. More agents will follow as separate scanners.
 
 - **Read-only:** it never changes agent configuration and never runs the agent or its MCP servers.
 - **Local:** no network access, no telemetry, no account. Nothing leaves your computer unless you export a report yourself.
@@ -29,7 +29,7 @@ Selecting a finding shows all details: the original rule, the exact position in 
 
 ![Results with a filter and the detail view](docs/images/results-detail.png)
 
-The full data model is described in [docs/findings-model.md](docs/findings-model.md); how Claude Code's configuration is evaluated in [docs/claude-code-scanner.md](docs/claude-code-scanner.md).
+The full data model is described in [docs/findings-model.md](docs/findings-model.md); how the agents' configuration is evaluated in [docs/claude-code-scanner.md](docs/claude-code-scanner.md) and [docs/codex-scanner.md](docs/codex-scanner.md).
 
 ## Installation
 
@@ -78,6 +78,7 @@ ai-agent-access-inspector list-scanners
 
 - Only the configuration is evaluated, not what an agent actually did or does at runtime. Without a sandbox, shell commands can reach everything your user can; the tool reports this as one *Potential* finding instead of listing every folder.
 - Settings given only on the command line or by a server-managed policy, plugins and their MCP servers are not evaluated; MDM profiles are only detected. Details: [Claude Code scanner, known limitations](docs/claude-code-scanner.md#11-known-limitations).
+- ChatGPT / Codex: command-line flags (`--sandbox`, `--add-dir`, `--profile`), cloud-managed requirements and a mode changed for a single chat are not visible; plugins such as computer use are only hinted at; the app's state file is undocumented and read heuristically. Only the local agent is covered, not ChatGPT's connectors or uploads. Details: [ChatGPT/Codex scanner, known limitations](docs/codex-scanner.md#11-known-limitations).
 - Redaction of secrets is a heuristic, and anonymisation covers the home directory and user directories only; read an export before you share it ([privacy](docs/privacy.md)).
 - Builds are not signed (see above). The GUI has been tested mainly on macOS.
 

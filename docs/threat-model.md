@@ -21,7 +21,7 @@ Releases are built by GitHub Actions from tagged commits and downloaded by users
 
 | Asset | Why it matters |
 |---|---|
-| Secrets in agent configuration (MCP `env`/`headers`, tokens in arguments or rules, account data in `~/.claude.json`) | disclosure gives access to external services |
+| Secrets in agent configuration (MCP `env`/`headers`, tokens in arguments or rules, account data in `~/.claude.json`, Codex `auth.json`) | disclosure gives access to external services |
 | Paths and user names | reveal personal information, projects, the system layout |
 | The user's system | the tool runs with the user's rights and must not become a way to run code or change files |
 | Agent configuration | must never be changed (the tool's promise) |
@@ -29,7 +29,7 @@ Releases are built by GitHub Actions from tagged commits and downloaded by users
 
 ## 3. Actors
 
-- **Crafted configuration files:** a project folder from someone else (e.g. a cloned repository with `.claude/settings.json` or `.mcp.json`) contains hostile values: huge files, deeply nested JSON, special files, symlinks, strings that try to look like paths or markup.
+- **Crafted configuration files:** a project folder from someone else (e.g. a cloned repository with `.claude/settings.json`, `.mcp.json` or `.codex/config.toml`) contains hostile values: huge files, deeply nested JSON, special files, symlinks, strings that try to look like paths or markup.
 - **Hostile content in the frontend:** values from configuration files are displayed in the web view and could try to inject markup or scripts.
 - **A local attacker with write access to the user's files.** Such an attacker already acts with the user's rights; the tool only must not make things worse (e.g. hang or run programs).
 - **A compromised dependency or GitHub Action** in the build or release pipeline.
@@ -44,9 +44,9 @@ Out of scope: an attacker with administrator rights on the user's machine, side 
 | Threat | Mitigation | Evidence |
 |---|---|---|
 | Resource exhaustion through huge files, devices (`/dev/zero`), pipes | all reads through `read.rs`: regular files only, 16 MiB limit checked before and after reading, session logs at most 4 MiB, directory listings capped | tests in `read.rs`; [security-checks.md](security-checks.md), phase 4 |
-| Stack exhaustion through deeply nested JSON | `serde_json` limits recursion depth | fixture `malformed` |
+| Stack exhaustion through deeply nested JSON or TOML | `serde_json` and `toml` limit the nesting depth | fixture `malformed`; `read.rs` test `deeply_nested_toml_does_not_overflow_the_stack` |
 | Crash on malformed input | scanners never fail as a whole; problems become diagnostics; a panicking scanner is caught in `scanner::run_one` | fixture `malformed`, `scanner.rs` tests |
-| Running configured programs | `claude`, MCP servers and policy helpers are never executed; no `std::process` use in the core | code review |
+| Running configured programs | `claude`, `codex`, MCP servers and policy helpers are never executed; no `std::process` use in the core | code review |
 | Changing configuration | no write, rename or delete calls in `inspector-core` outside tests | code review |
 | Symlinks pointing elsewhere | followed for reading but reported (`symlinkTarget`, warning `symlinkElsewhere`) | analysis tests |
 

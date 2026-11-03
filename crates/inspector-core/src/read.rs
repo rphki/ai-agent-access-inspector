@@ -293,6 +293,20 @@ mod tests {
     }
 
     #[test]
+    fn deeply_nested_toml_does_not_overflow_the_stack() {
+        let dir = TempDir::new("read-deep-toml");
+        let depth = 200_000;
+        let text = format!("a = {}{}\n", "[".repeat(depth), "]".repeat(depth));
+        std::fs::write(dir.path().join("deep.toml"), text).unwrap();
+        let tables = format!("a = {}1{}\n", "{ b = ".repeat(depth), " }".repeat(depth));
+        std::fs::write(dir.path().join("tables.toml"), tables).unwrap();
+        for name in ["deep.toml", "tables.toml"] {
+            // Either result is fine; it must not crash.
+            let _ = read_toml(&system_context(), &path(&dir, name));
+        }
+    }
+
+    #[test]
     fn directories_are_not_read() {
         let dir = TempDir::new("read-dir");
         let ParsedFile::Failed(diagnostic) =
