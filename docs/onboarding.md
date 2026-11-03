@@ -137,16 +137,17 @@ pnpm test                                    # frontend tests (Vitest)
 |---|---|---|
 | Unit tests | `#[cfg(test)] mod tests` at the end of a source file, or a `tests.rs` next to it (e.g. `analysis/tests.rs`) | test functions of one module, with access to private items |
 | Integration tests | `crates/inspector-cli/tests/cli.rs` | start the built binary as a separate process and check its output and exit code |
-| Fixture tests | `crates/inspector-core/tests/claude_code_fixtures.rs` | scan every fixture in `fixtures/claude-code/` and compare the result with its `expected.json` |
+| Fixture tests | `crates/inspector-core/tests/claude_code_fixtures.rs`, `codex_fixtures.rs` (helpers in `tests/common/mod.rs`) | scan every fixture in `fixtures/claude-code/` or `fixtures/codex/` and compare the result with its `expected.json` |
 | Frontend tests | `src/**/*.test.ts(x)` | render the GUI with React Testing Library against a mocked backend; the reports come from the fixtures' `expected.json` |
 
 Things worth knowing:
 
 - **No access to your real configuration.** Tests build their own `ScanContext` or use fixtures; they never read your home directory's agent configuration.
-- **Fixtures** simulate a whole system: `fixture.json` names the operating system, home directory and environment; every file of the simulated system lives below `system/` (e.g. `system/home/alice/.claude/settings.json`, `system/C/Users/alice/...` for Windows). Fixtures contain only invented paths and values. After an intended change to the scanner, regenerate the expectations and review the diff:
+- **Fixtures** simulate a whole system: `fixture.json` names the operating system, home directory and environment; every file of the simulated system lives below `system/` (e.g. `system/home/alice/.claude/settings.json`, `system/C/Users/alice/...` for Windows). Fixtures contain only invented paths and values. Git never stores a path named `.git`, so a project root is marked with a `dot-git` directory; the fixture tests copy each fixture to a temporary directory and rename it to `.git` before scanning (`tests/common/mod.rs`). After an intended change to the scanner, regenerate the expectations and review the diff:
 
   ```bash
   UPDATE_EXPECT=1 cargo test -p inspector-core --test claude_code_fixtures
+  UPDATE_EXPECT=1 cargo test -p inspector-core --test codex_fixtures
   git diff fixtures/
   ```
 

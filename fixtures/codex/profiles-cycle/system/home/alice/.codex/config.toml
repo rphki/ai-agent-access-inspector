@@ -1,0 +1,10 @@
+default_permissions = "loop-a"
+
+[permissions.loop-a]
+extends = "loop-b"
+
+[permissions.loop-a.filesystem]
+"/srv/a" = "read"
+
+[permissions.loop-b]
+extends = "loop-a"

@@ -1,0 +1,7 @@
+{
+  "operatingSystem": "windows",
+  "home": "C:\\Users\\alice",
+  "env": {
+    "ProgramData": "C:\\ProgramData"
+  }
+}

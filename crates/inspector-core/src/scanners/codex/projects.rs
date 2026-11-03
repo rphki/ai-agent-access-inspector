@@ -3,7 +3,7 @@
 
 use serde_json::Value;
 
-use super::sandbox::{Mode, Policies};
+use super::sandbox::{Mode, Policies, rejected_warning};
 use super::{Scan, View, pointer_key};
 use crate::analysis::path::TargetPath;
 use crate::model::{
@@ -237,6 +237,8 @@ pub(crate) fn findings(scan: &mut Scan, projects: &[Project], policies: &Policie
         .confidence(confidence)
         .explanation(Message::new(explanation).arg("mode", &policy.label))
         .build();
+        let mut finding = finding;
+        finding.warnings.extend(rejected_warning(policy));
         scan.finding(finding);
     }
 }

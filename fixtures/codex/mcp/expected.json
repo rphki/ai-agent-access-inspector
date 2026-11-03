@@ -1,0 +1,825 @@
+{
+  "scanner": {
+    "id": "codex",
+    "name": "ChatGPT / Codex",
+    "description": "Sandbox, permission profiles, projects, MCP servers and plugins of the ChatGPT app and the Codex CLI",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/home/alice/.codex"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "codex-2c58af86e4652b53",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "sandbox: read",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "sandbox: read"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.readEverything",
+        "args": {},
+        "text": "Codex's sandbox allows reading files across the whole computer; it limits writing, not reading."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-22a5ed92431e80f6",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/tmp",
+        "patternKind": "directory",
+        "basePath": "/tmp",
+        "displayPath": "/tmp"
+      },
+      "effect": "allow",
+      "access": "write",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.slashTmp",
+        "args": {},
+        "text": "/tmp: writable in sandbox mode workspace-write (sandbox_workspace_write.exclude_slash_tmp turns this off)."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "codex-5956b525fca5eda4",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/home/alice/app/.git",
+        "patternKind": "directory",
+        "basePath": "/home/alice/app/.git",
+        "displayPath": "/home/alice/app/.git"
+      },
+      "effect": "deny",
+      "access": "write",
+      "status": "configured",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.protectedPath",
+        "args": {
+          "name": ".git"
+        },
+        "text": "Protected: inside a writable folder Codex keeps .git read-only."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": [
+        {
+          "relation": "containedIn",
+          "findingId": "codex-7db44f6963484352"
+        }
+      ]
+    },
+    {
+      "id": "codex-9ee370a908ce9451",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/home/alice/app/.codex",
+        "patternKind": "directory",
+        "basePath": "/home/alice/app/.codex",
+        "displayPath": "/home/alice/app/.codex"
+      },
+      "effect": "deny",
+      "access": "write",
+      "status": "configured",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.protectedPath",
+        "args": {
+          "name": ".codex"
+        },
+        "text": "Protected: inside a writable folder Codex keeps .codex read-only."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": [
+        {
+          "relation": "containedIn",
+          "findingId": "codex-7db44f6963484352"
+        }
+      ]
+    },
+    {
+      "id": "codex-7db44f6963484352",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/home/alice/app",
+        "patternKind": "directory",
+        "basePath": "/home/alice/app",
+        "displayPath": "/home/alice/app"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/projects/~1home~1alice~1app",
+        "rawValue": "/home/alice/app",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.workingDirectory.write",
+        "args": {
+          "mode": "workspace-write"
+        },
+        "text": "Working directory, sandbox workspace-write: Codex can read and write here without asking; .git, .codex, .agents and .aws stay read-only."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": [
+        {
+          "relation": "contains",
+          "findingId": "codex-5956b525fca5eda4"
+        },
+        {
+          "relation": "contains",
+          "findingId": "codex-9ee370a908ce9451"
+        }
+      ]
+    },
+    {
+      "id": "codex-b0fc8765f3aafcc5",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "files"
+      },
+      "target": {
+        "raw": "npx -y @modelcontextprotocol/server-filesystem ~/Documents /srv/data",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "npx -y @modelcontextprotocol/server-filesystem ~/Documents /srv/data"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/mcp_servers/files",
+        "rawValue": "npx -y @modelcontextprotocol/server-filesystem ~/Documents /srv/data",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.mcpServer",
+        "args": {
+          "command": "npx -y @modelcontextprotocol/server-filesystem ~/Documents /srv/data",
+          "server": "files"
+        },
+        "text": "Local MCP server 'files' (npx -y @modelcontextprotocol/server-filesystem ~/Documents /srv/data): a separate program with your user rights. Codex's sandbox does not restrict it."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-13661f527ee1d2a1",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "files"
+      },
+      "target": {
+        "raw": "~/Documents",
+        "patternKind": "directory",
+        "basePath": "/home/alice/Documents",
+        "displayPath": "/home/alice/Documents"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/mcp_servers/files/args/2",
+        "rawValue": "~/Documents",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpFilesystemPath",
+        "args": {
+          "server": "files"
+        },
+        "text": "Directory the filesystem MCP server 'files' may read and write."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "broadPath"
+          },
+          "severity": "medium",
+          "message": {
+            "key": "warning.personalFolder",
+            "args": {
+              "folder": "/home/alice/Documents"
+            },
+            "text": "Grants the personal folder /home/alice/Documents."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "codex-91559ff8403a13d8",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "files"
+      },
+      "target": {
+        "raw": "/srv/data",
+        "patternKind": "directory",
+        "basePath": "/srv/data",
+        "displayPath": "/srv/data"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/mcp_servers/files/args/3",
+        "rawValue": "/srv/data",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpFilesystemPath",
+        "args": {
+          "server": "files"
+        },
+        "text": "Directory the filesystem MCP server 'files' may read and write."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-ae1ab6a1e7d8a72d",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "shared"
+      },
+      "target": {
+        "raw": "user-version",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "user-version"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/mcp_servers/shared",
+        "rawValue": "user-version",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.mcpServer",
+        "args": {
+          "command": "user-version",
+          "server": "shared"
+        },
+        "text": "Local MCP server 'shared' (user-version): a separate program with your user rights. Codex's sandbox does not restrict it."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-37d8aad70f84ce68",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "tool"
+      },
+      "target": {
+        "raw": "python3 server.py ./data --token <redacted>",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "python3 server.py ./data --token <redacted>"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/mcp_servers/tool",
+        "rawValue": "python3 server.py ./data --token <redacted>",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.mcpServer",
+        "args": {
+          "command": "python3 server.py ./data --token <redacted>",
+          "server": "tool"
+        },
+        "text": "Local MCP server 'tool' (python3 server.py ./data --token <redacted>): a separate program with your user rights. Codex's sandbox does not restrict it."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-1ff79707e99abf4e",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "tool"
+      },
+      "target": {
+        "raw": "./data",
+        "patternKind": "exactPath",
+        "basePath": "/opt/tool/data",
+        "displayPath": "/opt/tool/data"
+      },
+      "effect": "allow",
+      "access": "unknown",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/mcp_servers/tool/args/1",
+        "rawValue": "./data",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.mcpPathArgument",
+        "args": {
+          "server": "tool"
+        },
+        "text": "Path argument of the local MCP server 'tool'."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "codex-257cfd0cfb0d84c0",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "project_only"
+      },
+      "target": {
+        "raw": "project-server ../outside",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "project-server ../outside"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/app/.codex/config.toml",
+        "configKind": "codex/project-config",
+        "documentation": "documented",
+        "pointer": "/mcp_servers/project_only",
+        "rawValue": "project-server ../outside",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.mcpServer",
+        "args": {
+          "command": "project-server ../outside",
+          "server": "project_only"
+        },
+        "text": "Local MCP server 'project_only' (project-server ../outside): a separate program with your user rights. Codex's sandbox does not restrict it."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-2b4d2bf261ab9d05",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "shared"
+      },
+      "target": {
+        "raw": "project-version",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "project-version"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "project",
+      "source": {
+        "file": "/home/alice/app/.codex/config.toml",
+        "configKind": "codex/project-config",
+        "documentation": "documented",
+        "pointer": "/mcp_servers/shared",
+        "rawValue": "project-version",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.mcpServer",
+        "args": {
+          "command": "project-version",
+          "server": "shared"
+        },
+        "text": "Local MCP server 'shared' (project-version): a separate program with your user rights. Codex's sandbox does not restrict it."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "level": "info",
+      "code": "other",
+      "message": {
+        "key": "diagnostic.mcpServerDisabled",
+        "args": {
+          "server": "off"
+        },
+        "text": "The MCP server 'off' is disabled and is not evaluated."
+      },
+      "file": "/home/alice/.codex/config.toml",
+      "pointer": "/mcp_servers/off"
+    },
+    {
+      "level": "info",
+      "code": "other",
+      "message": {
+        "key": "diagnostic.mcpServerShadowed",
+        "args": {
+          "server": "shared"
+        },
+        "text": "The MCP server 'shared' is defined on several levels; only the definition with the highest priority is evaluated."
+      },
+      "file": "/home/alice/app/.codex/config.toml",
+      "pointer": null
+    }
+  ],
+  "summary": [
+    {
+      "key": "sandboxMode",
+      "label": {
+        "key": "summary.codex.sandboxMode",
+        "args": {},
+        "text": "Sandbox mode (outside projects)"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "read-only"
+        },
+        "text": "read-only"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "5"
+        },
+        "text": "5"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    },
+    {
+      "key": "plugins",
+      "label": {
+        "key": "summary.codex.plugins",
+        "args": {},
+        "text": "Enabled plugins"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "installation",
+      "label": {
+        "key": "summary.codex.installation",
+        "args": {},
+        "text": "Installation"
+      },
+      "value": {
+        "key": "value.codex.cli",
+        "args": {},
+        "text": "Codex CLI"
+      }
+    },
+    {
+      "key": "approvalPolicy",
+      "label": {
+        "key": "summary.codex.approvalPolicy",
+        "args": {},
+        "text": "Approval policy"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "on-request"
+        },
+        "text": "on-request"
+      }
+    },
+    {
+      "key": "networkAccess",
+      "label": {
+        "key": "summary.codex.networkAccess",
+        "args": {},
+        "text": "Network access in the sandbox"
+      },
+      "value": {
+        "key": "value.disabled",
+        "args": {},
+        "text": "disabled"
+      }
+    },
+    {
+      "key": "profileFiles",
+      "label": {
+        "key": "summary.codex.profileFiles",
+        "args": {},
+        "text": "Profile files (only used with --profile)"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSources",
+      "label": {
+        "key": "summary.codex.managedSources",
+        "args": {},
+        "text": "Managed configuration files"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    }
+  ]
+}

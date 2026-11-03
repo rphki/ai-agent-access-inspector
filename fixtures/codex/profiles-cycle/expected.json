@@ -1,0 +1,226 @@
+{
+  "scanner": {
+    "id": "codex",
+    "name": "ChatGPT / Codex",
+    "description": "Sandbox, permission profiles, projects, MCP servers and plugins of the ChatGPT app and the Codex CLI",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/home/alice/.codex"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "codex-5165ae5667cd4af3",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/srv/a",
+        "patternKind": "directory",
+        "basePath": "/srv/a",
+        "displayPath": "/srv/a"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/permissions/loop-a/filesystem/~1srv~1a",
+        "rawValue": "/srv/a",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.profile.read",
+        "args": {
+          "profile": "loop-a"
+        },
+        "text": "Permission profile loop-a: Codex's commands may read here."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        }
+      ],
+      "related": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "level": "warning",
+      "code": "other",
+      "message": {
+        "key": "diagnostic.codex.profileCycle",
+        "args": {
+          "profile": "loop-a"
+        },
+        "text": "The permission profile loop-a is part of an extends cycle; the chain is cut there."
+      },
+      "file": null,
+      "pointer": null
+    }
+  ],
+  "summary": [
+    {
+      "key": "sandboxMode",
+      "label": {
+        "key": "summary.codex.sandboxMode",
+        "args": {},
+        "text": "Sandbox mode (outside projects)"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "loop-a"
+        },
+        "text": "loop-a"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "plugins",
+      "label": {
+        "key": "summary.codex.plugins",
+        "args": {},
+        "text": "Enabled plugins"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "installation",
+      "label": {
+        "key": "summary.codex.installation",
+        "args": {},
+        "text": "Installation"
+      },
+      "value": {
+        "key": "value.codex.cli",
+        "args": {},
+        "text": "Codex CLI"
+      }
+    },
+    {
+      "key": "approvalPolicy",
+      "label": {
+        "key": "summary.codex.approvalPolicy",
+        "args": {},
+        "text": "Approval policy"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "on-request"
+        },
+        "text": "on-request"
+      }
+    },
+    {
+      "key": "networkAccess",
+      "label": {
+        "key": "summary.codex.networkAccess",
+        "args": {},
+        "text": "Network access in the sandbox"
+      },
+      "value": {
+        "key": "value.disabled",
+        "args": {},
+        "text": "disabled"
+      }
+    },
+    {
+      "key": "profileFiles",
+      "label": {
+        "key": "summary.codex.profileFiles",
+        "args": {},
+        "text": "Profile files (only used with --profile)"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSources",
+      "label": {
+        "key": "summary.codex.managedSources",
+        "args": {},
+        "text": "Managed configuration files"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "0"
+        },
+        "text": "0"
+      }
+    }
+  ]
+}

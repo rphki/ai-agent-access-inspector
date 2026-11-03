@@ -1,0 +1,444 @@
+{
+  "scanner": {
+    "id": "codex",
+    "name": "ChatGPT / Codex",
+    "description": "Sandbox, permission profiles, projects, MCP servers and plugins of the ChatGPT app and the Codex CLI",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/Users/alice/.codex",
+      "/etc/codex/requirements.toml"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "codex-2c58af86e4652b53",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "sandbox: read",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "sandbox: read"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.readEverything",
+        "args": {},
+        "text": "Codex's sandbox allows reading files across the whole computer; it limits writing, not reading."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-2234b03f23b41f1d",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/Users/alice/work",
+        "patternKind": "directory",
+        "basePath": "/Users/alice/work",
+        "displayPath": "/Users/alice/work"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/Users/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/projects/~1Users~1alice~1work",
+        "rawValue": "/Users/alice/work",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.workingDirectory.read",
+        "args": {
+          "mode": "read-only"
+        },
+        "text": "Working directory, sandbox read-only: Codex can read here; writing is blocked by the sandbox and needs approval."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "overriddenByHigherScope"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.codex.notAllowedByRequirements",
+            "args": {
+              "fallback": "read-only",
+              "value": "workspace-write"
+            },
+            "text": "workspace-write is not allowed by the managed requirements; Codex falls back to read-only."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "codex-a95c6eb159230f31",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/Users/alice/app-project",
+        "patternKind": "directory",
+        "basePath": "/Users/alice/app-project",
+        "displayPath": "/Users/alice/app-project"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "observed",
+      "scope": "project",
+      "source": {
+        "file": "/Users/alice/.codex/.codex-global-state.json",
+        "configKind": "codex/app-state",
+        "documentation": "heuristic",
+        "pointer": "/local-projects/p1/rootPaths/0",
+        "rawValue": "/Users/alice/app-project",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.workingDirectory.read",
+        "args": {
+          "mode": "read-only"
+        },
+        "text": "Working directory, sandbox read-only: Codex can read here; writing is blocked by the sandbox and needs approval."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "overriddenByHigherScope"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.codex.notAllowedByRequirements",
+            "args": {
+              "fallback": "read-only",
+              "value": "danger-full-access (app: full-access)"
+            },
+            "text": "danger-full-access (app: full-access) is not allowed by the managed requirements; Codex falls back to read-only."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "codex-85bfbb206e620cae",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "mcpServer",
+        "name": "allowed"
+      },
+      "target": {
+        "raw": "allowed-server",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "allowed-server"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "user",
+      "source": {
+        "file": "/Users/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/mcp_servers/allowed",
+        "rawValue": "allowed-server",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.mcpServer",
+        "args": {
+          "command": "allowed-server",
+          "server": "allowed"
+        },
+        "text": "Local MCP server 'allowed' (allowed-server): a separate program with your user rights. Codex's sandbox does not restrict it."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-022bc79aa66deaec",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "plugin: browser@openai-bundled",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "plugin: browser@openai-bundled"
+      },
+      "effect": "notApplicable",
+      "access": "unknown",
+      "status": "potential",
+      "scope": "user",
+      "source": {
+        "file": "/Users/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "heuristic",
+        "pointer": "/plugins/browser@openai-bundled/enabled",
+        "rawValue": "browser@openai-bundled",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.plugin",
+        "args": {
+          "plugin": "browser@openai-bundled"
+        },
+        "text": "Plugin browser@openai-bundled is enabled: it lets Codex operate other applications or the browser with your user rights, beyond the sandbox. Its own permissions are not evaluated."
+      },
+      "confidence": "low",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    }
+  ],
+  "diagnostics": [
+    {
+      "level": "info",
+      "code": "other",
+      "message": {
+        "key": "diagnostic.codex.mcpServerNotAllowed",
+        "args": {
+          "server": "blocked"
+        },
+        "text": "The MCP server 'blocked' is not in the managed allow-list (requirements.toml) and is not evaluated."
+      },
+      "file": "/Users/alice/.codex/config.toml",
+      "pointer": "/mcp_servers/blocked"
+    }
+  ],
+  "summary": [
+    {
+      "key": "sandboxMode",
+      "label": {
+        "key": "summary.codex.sandboxMode",
+        "args": {},
+        "text": "Sandbox mode (outside projects)"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "read-only"
+        },
+        "text": "read-only"
+      }
+    },
+    {
+      "key": "appMode",
+      "label": {
+        "key": "summary.codex.appMode",
+        "args": {},
+        "text": "Permission mode in the ChatGPT app"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "full-access"
+        },
+        "text": "full-access"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "plugins",
+      "label": {
+        "key": "summary.codex.plugins",
+        "args": {},
+        "text": "Enabled plugins"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "2"
+        },
+        "text": "2"
+      }
+    },
+    {
+      "key": "installation",
+      "label": {
+        "key": "summary.codex.installation",
+        "args": {},
+        "text": "Installation"
+      },
+      "value": {
+        "key": "value.codex.cli",
+        "args": {},
+        "text": "Codex CLI"
+      }
+    },
+    {
+      "key": "approvalPolicy",
+      "label": {
+        "key": "summary.codex.approvalPolicy",
+        "args": {},
+        "text": "Approval policy"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "on-request"
+        },
+        "text": "on-request"
+      }
+    },
+    {
+      "key": "networkAccess",
+      "label": {
+        "key": "summary.codex.networkAccess",
+        "args": {},
+        "text": "Network access in the sandbox"
+      },
+      "value": {
+        "key": "value.disabled",
+        "args": {},
+        "text": "disabled"
+      }
+    },
+    {
+      "key": "profileFiles",
+      "label": {
+        "key": "summary.codex.profileFiles",
+        "args": {},
+        "text": "Profile files (only used with --profile)"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSources",
+      "label": {
+        "key": "summary.codex.managedSources",
+        "args": {},
+        "text": "Managed configuration files"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "2"
+        },
+        "text": "2"
+      }
+    }
+  ]
+}

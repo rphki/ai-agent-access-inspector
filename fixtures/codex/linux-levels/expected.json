@@ -1,0 +1,647 @@
+{
+  "scanner": {
+    "id": "codex",
+    "name": "ChatGPT / Codex",
+    "description": "Sandbox, permission profiles, projects, MCP servers and plugins of the ChatGPT app and the Codex CLI",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/home/alice/.codex",
+      "/etc/codex/config.toml",
+      "/etc/codex/requirements.toml"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "codex-2c58af86e4652b53",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "sandbox: read",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "sandbox: read"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.readEverything",
+        "args": {},
+        "text": "Codex's sandbox allows reading files across the whole computer; it limits writing, not reading."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-c4909e0285e07948",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "$TMPDIR",
+        "patternKind": "directory",
+        "basePath": "/tmp/session-1",
+        "displayPath": "/tmp/session-1"
+      },
+      "effect": "allow",
+      "access": "write",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.tmpdir",
+        "args": {},
+        "text": "Temporary directory ($TMPDIR): writable in sandbox mode workspace-write (sandbox_workspace_write.exclude_tmpdir_env_var turns this off)."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-041e5f4e61a80114",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "cache",
+        "patternKind": "directory",
+        "basePath": "/home/alice/.codex/cache",
+        "displayPath": "/home/alice/.codex/cache"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/sandbox_workspace_write/writable_roots/0",
+        "rawValue": "cache",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.writableRoot",
+        "args": {},
+        "text": "Additional writable folder (sandbox_workspace_write.writable_roots): Codex can write here without asking."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-1b73eec9482c652b",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "~/shared",
+        "patternKind": "directory",
+        "basePath": "/home/alice/shared",
+        "displayPath": "/home/alice/shared"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/sandbox_workspace_write/writable_roots/1",
+        "rawValue": "~/shared",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.writableRoot",
+        "args": {},
+        "text": "Additional writable folder (sandbox_workspace_write.writable_roots): Codex can write here without asking."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-7657ddf02ef527b3",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/srv/system-root",
+        "patternKind": "directory",
+        "basePath": "/srv/system-root",
+        "displayPath": "/srv/system-root"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "configured",
+      "scope": "managed",
+      "source": {
+        "file": "/etc/codex/config.toml",
+        "configKind": "codex/system-config",
+        "documentation": "documented",
+        "pointer": "/sandbox_workspace_write/writable_roots/0",
+        "rawValue": "/srv/system-root",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.writableRoot",
+        "args": {},
+        "text": "Additional writable folder (sandbox_workspace_write.writable_roots): Codex can write here without asking."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "missingPath"
+          },
+          "severity": "low",
+          "message": {
+            "key": "warning.missingPath",
+            "args": {},
+            "text": "The path does not exist (anymore)."
+          }
+        },
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "overriddenByHigherScope"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.codex.writableRootsReplaced",
+            "args": {},
+            "text": "A configuration with higher precedence sets its own writable_roots list, which replaces this one."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "codex-c463c729e37bae77",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/srv/untrusted/.codex",
+        "patternKind": "directory",
+        "basePath": "/srv/untrusted/.codex",
+        "displayPath": "/srv/untrusted/.codex"
+      },
+      "effect": "deny",
+      "access": "write",
+      "status": "configured",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.protectedPath",
+        "args": {
+          "name": ".codex"
+        },
+        "text": "Protected: inside a writable folder Codex keeps .codex read-only."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": [
+        {
+          "relation": "containedIn",
+          "findingId": "codex-9aa31a1269a81d62"
+        }
+      ]
+    },
+    {
+      "id": "codex-111bd26ffedd0b31",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "~/.ssh",
+        "patternKind": "directory",
+        "basePath": "/home/alice/.ssh",
+        "displayPath": "/home/alice/.ssh"
+      },
+      "effect": "deny",
+      "access": "read",
+      "status": "configured",
+      "scope": "managed",
+      "source": {
+        "file": "/etc/codex/requirements.toml",
+        "configKind": "codex/requirements",
+        "documentation": "documented",
+        "pointer": "/permissions/filesystem/deny_read/0",
+        "rawValue": "~/.ssh",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.denyRead",
+        "args": {},
+        "text": "Managed requirement: Codex's commands may not read here (permissions.filesystem.deny_read)."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-d1128da644f880a0",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/srv/app/**/*.env",
+        "patternKind": "glob",
+        "basePath": "/srv/app",
+        "displayPath": "/srv/app"
+      },
+      "effect": "deny",
+      "access": "read",
+      "status": "configured",
+      "scope": "managed",
+      "source": {
+        "file": "/etc/codex/requirements.toml",
+        "configKind": "codex/requirements",
+        "documentation": "documented",
+        "pointer": "/permissions/filesystem/deny_read/1",
+        "rawValue": "/srv/app/**/*.env",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.denyRead",
+        "args": {},
+        "text": "Managed requirement: Codex's commands may not read here (permissions.filesystem.deny_read)."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-c602d5e6a2eb0e84",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/srv/app",
+        "patternKind": "directory",
+        "basePath": "/srv/app",
+        "displayPath": "/srv/app"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/projects/~1srv~1app",
+        "rawValue": "/srv/app",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.workingDirectory.read",
+        "args": {
+          "mode": "read-only"
+        },
+        "text": "Working directory, sandbox read-only: Codex can read here; writing is blocked by the sandbox and needs approval."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-9aa31a1269a81d62",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/srv/untrusted",
+        "patternKind": "directory",
+        "basePath": "/srv/untrusted",
+        "displayPath": "/srv/untrusted"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/projects/~1srv~1untrusted",
+        "rawValue": "/srv/untrusted",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.workingDirectory.write",
+        "args": {
+          "mode": "workspace-write"
+        },
+        "text": "Working directory, sandbox workspace-write: Codex can read and write here without asking; .git, .codex, .agents and .aws stay read-only."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": [
+        {
+          "relation": "contains",
+          "findingId": "codex-c463c729e37bae77"
+        }
+      ]
+    }
+  ],
+  "diagnostics": [
+    {
+      "level": "info",
+      "code": "ignoredSetting",
+      "message": {
+        "key": "diagnostic.codex.untrustedProjectConfig",
+        "args": {
+          "path": "/srv/untrusted/.codex/config.toml"
+        },
+        "text": "/srv/untrusted/.codex/config.toml is ignored: the project is not trusted."
+      },
+      "file": "/srv/untrusted/.codex/config.toml",
+      "pointer": null
+    },
+    {
+      "level": "info",
+      "code": "ignoredSetting",
+      "message": {
+        "key": "diagnostic.codex.profileIgnored",
+        "args": {},
+        "text": "default_permissions is ignored because sandbox_mode is set."
+      },
+      "file": "/home/alice/.codex/config.toml",
+      "pointer": "/sandbox_mode"
+    }
+  ],
+  "summary": [
+    {
+      "key": "sandboxMode",
+      "label": {
+        "key": "summary.codex.sandboxMode",
+        "args": {},
+        "text": "Sandbox mode (outside projects)"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "workspace-write"
+        },
+        "text": "workspace-write"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "plugins",
+      "label": {
+        "key": "summary.codex.plugins",
+        "args": {},
+        "text": "Enabled plugins"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "installation",
+      "label": {
+        "key": "summary.codex.installation",
+        "args": {},
+        "text": "Installation"
+      },
+      "value": {
+        "key": "value.codex.cli",
+        "args": {},
+        "text": "Codex CLI"
+      }
+    },
+    {
+      "key": "approvalPolicy",
+      "label": {
+        "key": "summary.codex.approvalPolicy",
+        "args": {},
+        "text": "Approval policy"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "on-request"
+        },
+        "text": "on-request"
+      }
+    },
+    {
+      "key": "networkAccess",
+      "label": {
+        "key": "summary.codex.networkAccess",
+        "args": {},
+        "text": "Network access in the sandbox"
+      },
+      "value": {
+        "key": "value.enabled",
+        "args": {},
+        "text": "enabled"
+      }
+    },
+    {
+      "key": "profileFiles",
+      "label": {
+        "key": "summary.codex.profileFiles",
+        "args": {},
+        "text": "Profile files (only used with --profile)"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    },
+    {
+      "key": "managedSources",
+      "label": {
+        "key": "summary.codex.managedSources",
+        "args": {},
+        "text": "Managed configuration files"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "2"
+        },
+        "text": "2"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "2"
+        },
+        "text": "2"
+      }
+    }
+  ]
+}

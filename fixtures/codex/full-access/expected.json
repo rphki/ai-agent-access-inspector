@@ -1,0 +1,267 @@
+{
+  "scanner": {
+    "id": "codex",
+    "name": "ChatGPT / Codex",
+    "description": "Sandbox, permission profiles, projects, MCP servers and plugins of the ChatGPT app and the Codex CLI",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "/home/alice/.codex"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "codex-0760ca480110d129",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "sandbox: danger-full-access",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "sandbox: danger-full-access"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/sandbox_mode",
+        "rawValue": "danger-full-access",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.fullAccess",
+        "args": {
+          "mode": "danger-full-access"
+        },
+        "text": "Sandbox danger-full-access: Codex runs commands without a sandbox; they can reach everything the user can."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "dangerousMode"
+          },
+          "severity": "high",
+          "message": {
+            "key": "warning.codex.fullAccess",
+            "args": {},
+            "text": "Without a sandbox, commands can change or delete any file the user can."
+          }
+        },
+        {
+          "kind": {
+            "type": "dangerousMode"
+          },
+          "severity": "high",
+          "message": {
+            "key": "warning.codex.neverAsks",
+            "args": {},
+            "text": "Approval policy never: Codex does not ask before acting."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "codex-230d40d76e88e96c",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "/home/alice/code",
+        "patternKind": "directory",
+        "basePath": "/home/alice/code",
+        "displayPath": "/home/alice/code"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "/home/alice/.codex/config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/projects/~1home~1alice~1code",
+        "rawValue": "/home/alice/code",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.workingDirectory.full",
+        "args": {
+          "mode": "danger-full-access"
+        },
+        "text": "Working directory, sandbox danger-full-access: Codex can read and write here and everywhere else without a sandbox."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    }
+  ],
+  "diagnostics": [],
+  "summary": [
+    {
+      "key": "sandboxMode",
+      "label": {
+        "key": "summary.codex.sandboxMode",
+        "args": {},
+        "text": "Sandbox mode (outside projects)"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "danger-full-access"
+        },
+        "text": "danger-full-access"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "plugins",
+      "label": {
+        "key": "summary.codex.plugins",
+        "args": {},
+        "text": "Enabled plugins"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "installation",
+      "label": {
+        "key": "summary.codex.installation",
+        "args": {},
+        "text": "Installation"
+      },
+      "value": {
+        "key": "value.codex.cli",
+        "args": {},
+        "text": "Codex CLI"
+      }
+    },
+    {
+      "key": "approvalPolicy",
+      "label": {
+        "key": "summary.codex.approvalPolicy",
+        "args": {},
+        "text": "Approval policy"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "never"
+        },
+        "text": "never"
+      }
+    },
+    {
+      "key": "networkAccess",
+      "label": {
+        "key": "summary.codex.networkAccess",
+        "args": {},
+        "text": "Network access in the sandbox"
+      },
+      "value": {
+        "key": "value.disabled",
+        "args": {},
+        "text": "disabled"
+      }
+    },
+    {
+      "key": "profileFiles",
+      "label": {
+        "key": "summary.codex.profileFiles",
+        "args": {},
+        "text": "Profile files (only used with --profile)"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSources",
+      "label": {
+        "key": "summary.codex.managedSources",
+        "args": {},
+        "text": "Managed configuration files"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    }
+  ]
+}

@@ -148,7 +148,8 @@ pub(crate) fn evaluate(
     let mut all: Vec<&Policy> = vec![&global];
     all.extend(project_policies.iter());
 
-    mode_findings(scan, &all);
+    let never_asks = global_view.get_str("/approval_policy").map(|(_, p)| p) == Some("never");
+    mode_findings(scan, &all, never_asks);
     if scan.os() == OperatingSystem::Windows && global_view.get("/windows/sandbox").is_none() {
         windows_finding(scan);
     }
@@ -474,7 +475,7 @@ fn constrain(policy: &mut Policy, requirements: &Requirements) {
     policy.profile = None;
 }
 
-fn rejected_warning(policy: &Policy) -> Option<Warning> {
+pub(crate) fn rejected_warning(policy: &Policy) -> Option<Warning> {
     let rejected = policy.rejected.as_ref()?;
     Some(Warning::new(
         WarningKind::NotEffective {
@@ -488,7 +489,7 @@ fn rejected_warning(policy: &Policy) -> Option<Warning> {
 }
 
 /// Reading across the computer (every mode with a sandbox) and full access.
-fn mode_findings(scan: &mut Scan, policies: &[&Policy]) {
+fn mode_findings(scan: &mut Scan, policies: &[&Policy], never_asks: bool) {
     let reads_everywhere = policies.iter().any(|p| match &p.profile {
         Some(profile) => profile.base.is_some(),
         None => p.mode != Mode::FullAccess,
@@ -537,7 +538,7 @@ fn mode_findings(scan: &mut Scan, policies: &[&Policy]) {
             continue;
         }
         seen.push(key);
-        let finding = Finding::builder(
+        let builder = Finding::builder(
             &scan.meta,
             scope,
             FindingTarget::unresolved(
@@ -555,9 +556,18 @@ fn mode_findings(scan: &mut Scan, policies: &[&Policy]) {
             WarningKind::DangerousMode,
             Severity::High,
             Message::new("warning.codex.fullAccess"),
-        ))
-        .build();
-        scan.finding(finding);
+        ));
+        // The app's full access mode never asks either.
+        let builder = if never_asks || matches!(policy.origin, Origin::App { .. }) {
+            builder.warning(Warning::new(
+                WarningKind::DangerousMode,
+                Severity::High,
+                Message::new("warning.codex.neverAsks"),
+            ))
+        } else {
+            builder
+        };
+        scan.finding(builder.build());
     }
 }
 
@@ -594,12 +604,14 @@ fn temp_findings(scan: &mut Scan, global: &View, policies: &[&Policy]) {
         return;
     }
     let mut targets = Vec::new();
-    if global.get_bool("/sandbox_workspace_write/exclude_tmpdir_env_var") != Some(true) {
-        let path = scan
+    // Codex only uses `$TMPDIR` when it is set.
+    if global.get_bool("/sandbox_workspace_write/exclude_tmpdir_env_var") != Some(true)
+        && let Some(path) = scan
             .context
             .env_var("TMPDIR")
-            .and_then(|tmp| scan.target_path(tmp));
-        targets.push(("$TMPDIR", path, "finding.codex.tmpdir"));
+            .and_then(|tmp| scan.target_path(tmp))
+    {
+        targets.push(("$TMPDIR", Some(path), "finding.codex.tmpdir"));
     }
     if scan.os() != OperatingSystem::Windows
         && global.get_bool("/sandbox_workspace_write/exclude_slash_tmp") != Some(true)

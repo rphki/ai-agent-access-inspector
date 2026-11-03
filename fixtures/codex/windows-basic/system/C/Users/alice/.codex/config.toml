@@ -1,0 +1,5 @@
+[projects.'C:\Users\alice\source\app']
+trust_level = "trusted"
+
+[sandbox_workspace_write]
+writable_roots = ['D:\data']

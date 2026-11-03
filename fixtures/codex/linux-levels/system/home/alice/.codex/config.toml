@@ -1,0 +1,14 @@
+sandbox_mode = "workspace-write"
+default_permissions = ":read-only"
+approval_policy = "on-request"
+
+[sandbox_workspace_write]
+writable_roots = ["cache", "~/shared"]
+exclude_slash_tmp = true
+network_access = true
+
+[projects."/srv/app"]
+trust_level = "trusted"
+
+[projects."/srv/untrusted"]
+trust_level = "untrusted"

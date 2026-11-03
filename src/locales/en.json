@@ -158,6 +158,7 @@
   "value.withPrompt": "with prompt",
   "warning.codex.denyReadUnelevated": "The unelevated Windows sandbox does not enforce deny-read paths.",
   "warning.codex.fullAccess": "Without a sandbox, commands can change or delete any file the user can.",
+  "warning.codex.neverAsks": "Approval policy never: Codex does not ask before acting.",
   "warning.codex.notAllowedByRequirements": "{value} is not allowed by the managed requirements; Codex falls back to {fallback}.",
   "warning.codex.windowsUnsandboxed": "Commands may run with the user's rights on Windows; set [windows] sandbox to confine them.",
   "warning.codex.workspaceWriteOnly": "Only takes effect in sandbox mode workspace-write; the effective mode here is {mode}.",

@@ -1,0 +1,7 @@
+{
+  "operatingSystem": "macos",
+  "home": "/Users/alice",
+  "env": {
+    "TMPDIR": "/var/folders/xy/T"
+  }
+}

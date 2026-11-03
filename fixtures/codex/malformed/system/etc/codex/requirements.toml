@@ -1,0 +1,3 @@
+allowed_sandbox_modes = "read-only"
+[permissions.filesystem]
+deny_read = "/srv/not-a-list"

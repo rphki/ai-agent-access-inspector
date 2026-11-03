@@ -158,6 +158,7 @@
   "value.withPrompt": "mit Nachfrage",
   "warning.codex.denyReadUnelevated": "Die nicht erhöhte Windows-Sandbox setzt Lesesperren nicht durch.",
   "warning.codex.fullAccess": "Ohne Sandbox können Befehle jede Datei ändern oder löschen, auf die der Benutzer Zugriff hat.",
+  "warning.codex.neverAsks": "Freigaberegel never: Codex fragt vor dem Handeln nicht nach.",
   "warning.codex.notAllowedByRequirements": "{value} ist laut den verwalteten Vorgaben nicht erlaubt; Codex weicht auf {fallback} aus.",
   "warning.codex.windowsUnsandboxed": "Befehle laufen unter Windows möglicherweise mit den Rechten des Benutzers; setze [windows] sandbox, um sie einzuschränken.",
   "warning.codex.workspaceWriteOnly": "Wirkt nur im Sandbox-Modus workspace-write; hier gilt {mode}.",

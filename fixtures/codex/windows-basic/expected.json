@@ -1,0 +1,464 @@
+{
+  "scanner": {
+    "id": "codex",
+    "name": "ChatGPT / Codex",
+    "description": "Sandbox, permission profiles, projects, MCP servers and plugins of the ChatGPT app and the Codex CLI",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "configured",
+    "evidence": [
+      "C:\\Users\\alice\\.codex",
+      "C:\\Users\\alice\\.codex\\managed_config.toml",
+      "C:\\ProgramData\\OpenAI\\Codex\\requirements.toml"
+    ],
+    "version": null
+  },
+  "findings": [
+    {
+      "id": "codex-2c58af86e4652b53",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "sandbox: read",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "sandbox: read"
+      },
+      "effect": "allow",
+      "access": "read",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.readEverything",
+        "args": {},
+        "text": "Codex's sandbox allows reading files across the whole computer; it limits writing, not reading."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-4d399dcbd8b1edcd",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "windows.sandbox: not set",
+        "patternKind": "everything",
+        "basePath": null,
+        "displayPath": "windows.sandbox: not set"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "potential",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.windowsUnsandboxed",
+        "args": {},
+        "text": "No Windows sandbox is configured ([windows] sandbox): Codex may run commands without a sandbox, with the user's rights."
+      },
+      "confidence": "medium",
+      "pathState": {
+        "existence": "notChecked",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "unsandboxedShell"
+          },
+          "severity": "high",
+          "message": {
+            "key": "warning.codex.windowsUnsandboxed",
+            "args": {},
+            "text": "Commands may run with the user's rights on Windows; set [windows] sandbox to confine them."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "codex-962fdb2b3c959596",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "D:\\data",
+        "patternKind": "directory",
+        "basePath": "D:\\data",
+        "displayPath": "D:\\data"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "C:\\Users\\alice\\.codex\\config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/sandbox_workspace_write/writable_roots/0",
+        "rawValue": "D:\\data",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.writableRoot",
+        "args": {},
+        "text": "Additional writable folder (sandbox_workspace_write.writable_roots): Codex can write here without asking."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": []
+    },
+    {
+      "id": "codex-cfade90cdb3df92b",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "C:\\Users\\alice\\source\\app\\.git",
+        "patternKind": "directory",
+        "basePath": "C:\\Users\\alice\\source\\app\\.git",
+        "displayPath": "C:\\Users\\alice\\source\\app\\.git"
+      },
+      "effect": "deny",
+      "access": "write",
+      "status": "configured",
+      "scope": "operatingSystem",
+      "source": {
+        "file": null,
+        "configKind": "codex/derived",
+        "documentation": "derived",
+        "pointer": null,
+        "rawValue": null,
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.protectedPath",
+        "args": {
+          "name": ".git"
+        },
+        "text": "Protected: inside a writable folder Codex keeps .git read-only."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": [
+        {
+          "relation": "containedIn",
+          "findingId": "codex-6afff270404d58fe"
+        }
+      ]
+    },
+    {
+      "id": "codex-527a554ecd965d90",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "C:\\Users\\alice\\.aws",
+        "patternKind": "directory",
+        "basePath": "C:\\Users\\alice\\.aws",
+        "displayPath": "C:\\Users\\alice\\.aws"
+      },
+      "effect": "deny",
+      "access": "read",
+      "status": "configured",
+      "scope": "managed",
+      "source": {
+        "file": "C:\\ProgramData\\OpenAI\\Codex\\requirements.toml",
+        "configKind": "codex/requirements",
+        "documentation": "documented",
+        "pointer": "/permissions/filesystem/deny_read/0",
+        "rawValue": "C:\\Users\\alice\\.aws",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.denyRead",
+        "args": {},
+        "text": "Managed requirement: Codex's commands may not read here (permissions.filesystem.deny_read)."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "missing",
+        "kind": "unknown",
+        "symlinkTarget": null
+      },
+      "warnings": [
+        {
+          "kind": {
+            "type": "notEffective",
+            "reason": "platformUnsupported"
+          },
+          "severity": "info",
+          "message": {
+            "key": "warning.codex.denyReadUnelevated",
+            "args": {},
+            "text": "The unelevated Windows sandbox does not enforce deny-read paths."
+          }
+        }
+      ],
+      "related": []
+    },
+    {
+      "id": "codex-6afff270404d58fe",
+      "agentId": "codex",
+      "agentName": "ChatGPT / Codex",
+      "subject": {
+        "kind": "agent"
+      },
+      "target": {
+        "raw": "C:\\Users\\alice\\source\\app",
+        "patternKind": "directory",
+        "basePath": "C:\\Users\\alice\\source\\app",
+        "displayPath": "C:\\Users\\alice\\source\\app"
+      },
+      "effect": "allow",
+      "access": "readWrite",
+      "status": "configured",
+      "scope": "user",
+      "source": {
+        "file": "C:\\Users\\alice\\.codex\\config.toml",
+        "configKind": "codex/config",
+        "documentation": "documented",
+        "pointer": "/projects/C:\\Users\\alice\\source\\app",
+        "rawValue": "C:\\Users\\alice\\source\\app",
+        "anchor": null,
+        "parserVersion": "1",
+        "excerpt": null
+      },
+      "additionalSources": [],
+      "explanation": {
+        "key": "finding.codex.workingDirectory.write",
+        "args": {
+          "mode": "workspace-write"
+        },
+        "text": "Working directory, sandbox workspace-write: Codex can read and write here without asking; .git, .codex, .agents and .aws stay read-only."
+      },
+      "confidence": "high",
+      "pathState": {
+        "existence": "exists",
+        "kind": "directory",
+        "symlinkTarget": null
+      },
+      "warnings": [],
+      "related": [
+        {
+          "relation": "contains",
+          "findingId": "codex-cfade90cdb3df92b"
+        }
+      ]
+    }
+  ],
+  "diagnostics": [],
+  "summary": [
+    {
+      "key": "sandboxMode",
+      "label": {
+        "key": "summary.codex.sandboxMode",
+        "args": {},
+        "text": "Sandbox mode (outside projects)"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "workspace-write"
+        },
+        "text": "workspace-write"
+      }
+    },
+    {
+      "key": "localMcpServers",
+      "label": {
+        "key": "summary.localMcpServers",
+        "args": {},
+        "text": "Local MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "remoteMcpServers",
+      "label": {
+        "key": "summary.remoteMcpServers",
+        "args": {},
+        "text": "Remote MCP servers"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "plugins",
+      "label": {
+        "key": "summary.codex.plugins",
+        "args": {},
+        "text": "Enabled plugins"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "installation",
+      "label": {
+        "key": "summary.codex.installation",
+        "args": {},
+        "text": "Installation"
+      },
+      "value": {
+        "key": "value.codex.cli",
+        "args": {},
+        "text": "Codex CLI"
+      }
+    },
+    {
+      "key": "approvalPolicy",
+      "label": {
+        "key": "summary.codex.approvalPolicy",
+        "args": {},
+        "text": "Approval policy"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "on-request"
+        },
+        "text": "on-request"
+      }
+    },
+    {
+      "key": "networkAccess",
+      "label": {
+        "key": "summary.codex.networkAccess",
+        "args": {},
+        "text": "Network access in the sandbox"
+      },
+      "value": {
+        "key": "value.disabled",
+        "args": {},
+        "text": "disabled"
+      }
+    },
+    {
+      "key": "windowsSandbox",
+      "label": {
+        "key": "summary.codex.windowsSandbox",
+        "args": {},
+        "text": "Windows sandbox"
+      },
+      "value": {
+        "key": "value.default",
+        "args": {},
+        "text": "default"
+      }
+    },
+    {
+      "key": "profileFiles",
+      "label": {
+        "key": "summary.codex.profileFiles",
+        "args": {},
+        "text": "Profile files (only used with --profile)"
+      },
+      "value": {
+        "key": "value.none",
+        "args": {},
+        "text": "none"
+      }
+    },
+    {
+      "key": "managedSources",
+      "label": {
+        "key": "summary.codex.managedSources",
+        "args": {},
+        "text": "Managed configuration files"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "2"
+        },
+        "text": "2"
+      }
+    },
+    {
+      "key": "projects",
+      "label": {
+        "key": "summary.projects",
+        "args": {},
+        "text": "Known projects"
+      },
+      "value": {
+        "key": "value.raw",
+        "args": {
+          "value": "1"
+        },
+        "text": "1"
+      }
+    }
+  ]
+}

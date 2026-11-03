@@ -249,23 +249,21 @@ The plugin hint explains that the plugin lets Codex operate other applications o
 
 ## 12. Fixture requirements
 
-Phase 8.4 needs at least the following under `fixtures/codex/`:
+Implemented in phase 8.4 under `fixtures/codex/` (test `codex_fixtures`):
 
 | Fixture | Content |
 |---|---|
-| `macos/basic` | user config with trusted project, app state with `local-projects`, `codex-package.json` in an app bundle |
-| `linux/basic` | Linux paths, `/etc/codex/config.toml`, `requirements.toml` |
-| `windows/basic` | Windows paths, `%ProgramData%` requirements, `managed_config.toml` in Codex home, `windows.sandbox = "unelevated"` with `deny_read` |
-| `sandbox/workspace-write` | `writable_roots`, both tmp excludes |
-| `sandbox/full-access` | `danger-full-access` with `approval_policy = "never"` |
-| `profiles/custom` | `default_permissions` with `extends`, `filesystem` read/write/deny, globs, `:workspace_roots` subpath, a cycle |
-| `profiles/ignored` | `default_permissions` together with `sandbox_mode` |
-| `projects/untrusted` | project with `.codex/config.toml` but `trust_level = "untrusted"` |
-| `requirements/constrained` | disallowed sandbox mode, MCP allow-list, `features.computer_use = false` |
-| `mcp/servers` | stdio filesystem server, HTTP server, server with `env` and `http_headers` secrets |
-| `plugins/broad` | computer use, browser and an unrelated plugin enabled |
+| `macos-app` | user config with trusted project, app state (projects, chat folders, output folders, app mode `auto`), app package manifest, MDM profile, MCP server with an `env` secret, plugins |
+| `linux-levels` | system, user and project configuration, `writable_roots` replaced and relative, `exclude_slash_tmp`, untrusted project with ignored configuration, `default_permissions` ignored, profile file, `requirements.toml` with `deny_read` |
+| `windows-basic` | Windows paths, `managed_config.toml` in Codex home, `%ProgramData%` requirements with `deny_read`, no `[windows] sandbox` |
+| `full-access` | `danger-full-access` with `approval_policy = "never"` |
+| `profiles` | `default_permissions` with an `extends` chain, read/write/deny entries, globs, `:workspace_roots` subpaths, `:tmpdir`, extra workspace root |
+| `profiles-cycle` | active profile in an `extends` cycle |
+| `requirements` | disallowed sandbox mode and app mode, MCP allow-list, `features.computer_use = false` |
+| `mcp` | filesystem server, server with `cwd` and a token argument, HTTP server with header secret, disabled server, project server shadowing a user server |
 | `codex-home` | `CODEX_HOME` set to a non-default folder |
-| `malformed/*` | invalid TOML, wrong types, unknown keys, invalid app state JSON, unreadable file |
+| `malformed` | invalid TOML, invalid app state JSON, wrong types, unknown values, a directory instead of a file |
+| `not-detected` | no Codex files |
 
 Fixtures contain only invented paths and values.
 

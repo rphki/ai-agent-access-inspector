@@ -2,6 +2,7 @@
 // runs the GUI in a browser with a fixture report, e.g. for screenshots.
 // Not part of the application build.
 import mcp from "../../fixtures/claude-code/mcp/expected.json";
+import codex from "../../fixtures/codex/mcp/expected.json";
 import type { StoredScan } from "../types/report";
 
 const scan = {
@@ -9,7 +10,7 @@ const scan = {
     formatVersion: "0.1",
     tool: { name: "ai-agent-access-inspector", version: "demo" },
     operatingSystem: "linux",
-    results: [mcp],
+    results: [mcp, codex],
   },
   finishedAt: Date.UTC(2026, 10, 1, 9, 30),
 } as unknown as StoredScan;

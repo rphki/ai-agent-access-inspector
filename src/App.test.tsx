@@ -53,7 +53,7 @@ describe("App", () => {
     const table = screen.getByRole("table");
     expect(within(table).getByRole("button", { name: "Show details for /home/alice/app" })).toBeInTheDocument();
     expect(within(table).queryByRole("button", { name: "Show details for /etc/shadow" })).not.toBeInTheDocument();
-    expect(within(table).getAllByText("MCP server files").length).toBeGreaterThan(0);
+    expect(within(table).getAllByText("Claude Code · MCP server files").length).toBeGreaterThan(0);
     expect(screen.queryByText("Scan completed.")).not.toBeInTheDocument();
   });
 

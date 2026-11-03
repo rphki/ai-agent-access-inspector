@@ -2,6 +2,19 @@
 
 Record of the security check that ends each phase (see [roadmap](roadmap.md), section 14). Each entry lists what was checked, how, and what remains open.
 
+## Phase 8 – ChatGPT/Codex scanner (2026-11-03)
+
+| Topic | Check | Result |
+|---|---|---|
+| Files read | the scanner reads only the files in [codex-scanner.md](codex-scanner.md), section 3, through `read.rs`; the MDM plist is only checked for existence; `auth.json`, sessions, logs, histories and databases are never opened; no `std::fs`, `std::env` or `std::process` outside tests | code review of `scanners/codex/`; unit test `mcp_secrets_and_app_state_extras_are_not_output` (with an `auth.json`) |
+| App state | from `.codex-global-state.json` only project folders, chat folders, output folders and the app mode are kept; the parsed value is dropped right after | code review of `projects.rs`; fixture `macos-app` with an invented secret in another key |
+| Malformed and hostile TOML | same limits as JSON (regular files, 16 MiB); parse errors name only line and reason, never the offending line; 200,000 levels of nested arrays and inline tables end in an error, not a stack overflow | `read.rs` tests `invalid_toml_becomes_a_diagnostic_without_the_line`, `deeply_nested_toml_does_not_overflow_the_stack`; fixture `malformed` |
+| Secrets in output | MCP `env`, `env_vars`, `http_headers`, `env_http_headers`, `bearer_token_env_var`, `auth`, `oauth` and remote URLs are never read into findings; command lines go through `redact_args` | fixtures `macos-app`, `mcp` (`fixture-` secrets in `env`, headers, arguments, app state, `auth.json`); `no_secret_from_any_fixture_appears_in_the_output`; `exports_contain_no_secrets_home_or_user_names` for all Codex fixtures |
+| Nothing executed | `codex` and MCP servers are never started; the version comes from the app's package manifest | code review |
+| Dependencies | new: `toml` 1.1 without default features (MIT/Apache-2.0, with `toml_parser`, `toml_datetime`, `serde_spanned`, `winnow`); `async-executor` updated after a yank | `cargo deny check`, `pnpm audit` |
+
+Open points, carried forward: anonymisation still covers only the home directory and user directories; a user name in another path (e.g. a `TMPDIR` such as `/tmp/alice`) stays in exports, as documented in [privacy.md](privacy.md), section 5. The app state file is undocumented and may change without notice (heuristic, at most medium confidence).
+
 ## Phase 7 – Full security review before the first public release (2026-11-01)
 
 Basis: [threat-model.md](threat-model.md). All security-relevant code was reviewed again: `read.rs`, `redact.rs`, `export/anonymize.rs`, `src-tauri/src/commands/*`, capability and CSP, the frontend (rendering, clipboard, export dialog), both workflows.

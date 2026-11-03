@@ -1,0 +1,16 @@
+{
+  "scanner": {
+    "id": "codex",
+    "name": "ChatGPT / Codex",
+    "description": "Sandbox, permission profiles, projects, MCP servers and plugins of the ChatGPT app and the Codex CLI",
+    "parserVersion": "1"
+  },
+  "detection": {
+    "status": "notDetected",
+    "evidence": [],
+    "version": null
+  },
+  "findings": [],
+  "diagnostics": [],
+  "summary": []
+}
