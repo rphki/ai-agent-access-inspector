@@ -1,6 +1,7 @@
 //! Shared helpers for the fixture tests of all scanners.
 
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use inspector_core::context::ScanContext;
 use inspector_core::model::ScanResult;
@@ -13,8 +14,59 @@ pub fn fixtures_dir(name: &str) -> PathBuf {
         .join(name)
 }
 
+/// A copy of a fixture in a temporary directory, with every `dot-git`
+/// directory renamed to `.git`: Git never stores a path named `.git`, so
+/// fixtures keep project roots under this stand-in name.
+pub struct Prepared {
+    pub root: PathBuf,
+}
+
+impl Prepared {
+    pub fn new(fixture: &Path) -> Self {
+        static NEXT: AtomicUsize = AtomicUsize::new(0);
+        let name = format!(
+            "inspector-fixture-{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        );
+        let root = std::env::temp_dir().join(name);
+        copy_tree(fixture, &root);
+        Self { root }
+    }
+
+    pub fn context(&self) -> ScanContext {
+        ScanContext::from_fixture(&self.root).unwrap()
+    }
+}
+
+impl Drop for Prepared {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.root);
+    }
+}
+
+fn copy_tree(from: &Path, to: &Path) {
+    std::fs::create_dir_all(to).unwrap();
+    for entry in std::fs::read_dir(from).unwrap() {
+        let entry = entry.unwrap();
+        let name = entry.file_name();
+        let target = if name == "dot-git" {
+            to.join(".git")
+        } else {
+            to.join(&name)
+        };
+        if entry.file_type().unwrap().is_dir() {
+            copy_tree(&entry.path(), &target);
+        } else {
+            std::fs::copy(entry.path(), target).unwrap();
+        }
+    }
+}
+
 pub fn scan(fixture: &Path, scanner: &str) -> ScanResult {
-    let context = ScanContext::from_fixture(fixture).unwrap();
+    // Kept until the scan is done; dropping it deletes the copy.
+    let prepared = Prepared::new(fixture);
+    let context = prepared.context();
     let scanner = find_scanner(scanner).unwrap();
     run_scan(&context, &[scanner]).results.remove(0)
 }
@@ -90,7 +142,8 @@ pub fn check_exports(dir: &Path, scanner: &str) {
     use inspector_core::redact::{REDACTED, looks_like_secret};
 
     for fixture in fixtures(dir) {
-        let context = ScanContext::from_fixture(&fixture).unwrap();
+        let prepared = Prepared::new(&fixture);
+        let context = prepared.context();
         let report = run_scan(&context, &[find_scanner(scanner).unwrap()]);
         let home = context.home_dir.to_string_lossy().into_owned();
         let user = home.rsplit(['/', '\\']).next().unwrap().to_lowercase();

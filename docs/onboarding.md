@@ -143,7 +143,7 @@ pnpm test                                    # frontend tests (Vitest)
 Things worth knowing:
 
 - **No access to your real configuration.** Tests build their own `ScanContext` or use fixtures; they never read your home directory's agent configuration.
-- **Fixtures** simulate a whole system: `fixture.json` names the operating system, home directory and environment; every file of the simulated system lives below `system/` (e.g. `system/home/alice/.claude/settings.json`, `system/C/Users/alice/...` for Windows). Fixtures contain only invented paths and values. After an intended change to the scanner, regenerate the expectations and review the diff:
+- **Fixtures** simulate a whole system: `fixture.json` names the operating system, home directory and environment; every file of the simulated system lives below `system/` (e.g. `system/home/alice/.claude/settings.json`, `system/C/Users/alice/...` for Windows). Fixtures contain only invented paths and values. Git never stores a path named `.git`, so a project root is marked with a `dot-git` directory; the fixture tests copy each fixture to a temporary directory and rename it to `.git` before scanning (`tests/common/mod.rs`). After an intended change to the scanner, regenerate the expectations and review the diff:
 
   ```bash
   UPDATE_EXPECT=1 cargo test -p inspector-core --test claude_code_fixtures
