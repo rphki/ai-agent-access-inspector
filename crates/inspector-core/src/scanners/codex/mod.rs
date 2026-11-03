@@ -673,13 +673,17 @@ mod tests {
             .write("/home/alice/.codex/auth.json", r#"{"token":"secret-auth"}"#);
         let result = system.scan();
         let json = serde_json::to_string(&result).unwrap();
-        for secret in [
+        // The message names the index only, never the value.
+        for (index, secret) in [
             "secret-env-value",
             "secret-header",
             "secret-state",
             "secret-auth",
-        ] {
-            assert!(!json.contains(secret), "{secret} leaked");
+        ]
+        .iter()
+        .enumerate()
+        {
+            assert!(!json.contains(secret), "test secret #{index} leaked");
         }
         assert_eq!(find(&result, "finding.mcpFilesystemPath").len(), 1);
         assert_eq!(
