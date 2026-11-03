@@ -4,6 +4,8 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-03
+
 ### Added
 
 - Scanner for ChatGPT / Codex (the ChatGPT desktop app and the Codex CLI, which share `~/.codex`): configuration levels and `requirements.toml`, sandbox mode and permission profiles, writable folders, temporary directories, protected folders, the permission mode selected in the app, projects and chat folders from the app's state, MCP servers and hints for plugins such as computer use
@@ -74,7 +76,8 @@ First release: a command line tool that shows which folders Claude Code can acce
 - Release workflow for CLI archives (macOS, Linux, Windows) with checksums
 - Documentation: roadmap, architecture, data model, Claude Code scanner specification, onboarding, release process, security checks, `SECURITY.md`
 
-[Unreleased]: https://github.com/rphki/ai-agent-access-inspector/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/rphki/ai-agent-access-inspector/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/rphki/ai-agent-access-inspector/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/rphki/ai-agent-access-inspector/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/rphki/ai-agent-access-inspector/compare/v0.1.0...v0.4.0
 [0.1.0]: https://github.com/rphki/ai-agent-access-inspector/releases/tag/v0.1.0
