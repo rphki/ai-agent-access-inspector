@@ -89,8 +89,11 @@ The project root is the nearest directory with `.git` (`project_root_markers` ca
 | `local-projects.<id>.rootPaths` | folders of projects added in the app | working directories (section 7) |
 | `thread-workspace-root-hints.<thread>` | workspace folder of a chat without a project | observed working directories |
 | `thread-projectless-output-directories.<thread>` | output folder of a chat without a project | observed write targets |
+| `electron-persisted-atom-state.agent-mode-by-host-id.local` | permission mode selected in the app | mode of the folders the app uses (section 5) |
 
-Everything else in the file (window state, model choices, thread read states, `electron-persisted-atom-state`) is not read. Not evaluated, but noted: `electron-persisted-atom-state.agent-mode-by-host-id` holds the permission mode selected in the app (observed: `auto`), and `heartbeat-thread-permissions-by-id` holds the sandbox policy of individual automations.
+Everything else in the file (window state, model choices, thread read states, the rest of `electron-persisted-atom-state`) is not read. Not evaluated, but noted: `heartbeat-thread-permissions-by-id` holds the sandbox policy of individual automations.
+
+App permission modes, taken from the app bundle (26.1021): `read-only`, `auto` (`workspace-write`, `on-request`), `granular` (`workspace-write`, granular approvals), `guardian-approvals` (`workspace-write`, or `read-only` if configured, with an automatic reviewer), `full-access` (`danger-full-access`, approval `never`), `custom` (the configuration applies).
 
 ### 3.5 Files that are never read
 
@@ -174,6 +177,8 @@ Managed layers override all of these: MDM `config_toml_base64` (detected only), 
 
 Tables are merged key by key; arrays (e.g. `writable_roots`) are replaced, not concatenated (14.3). A replaced `writable_roots` list gets a "not effective" warning.
 
+**Folders the app uses** (projects added in the app and folders of chats without a project, unless they also have a `[projects]` entry) run with the mode selected in the app; `custom` and unknown values fall back to the configuration. Requirements constrain the app mode as well. Folders with a `[projects]` entry keep the configured mode, since the CLI uses it.
+
 **Default without a configured mode:** a folder with a `[projects]` entry gets `workspace-write`, anything else (including folders only known from the app state, and everything outside projects) `read-only`; on Windows without a sandbox always `read-only`. The scanner applies the default per project and names the mode in the explanation.
 
 ## 6. Path resolution
@@ -235,7 +240,7 @@ The plugin hint explains that the plugin lets Codex operate other applications o
 
 - **Session-only settings** (`--sandbox`, `--add-dir`, `--profile`, `-c`, `--yolo`, the permission mode chosen per chat in the app) are invisible.
 - **Cloud-managed** configuration and requirements are not visible locally; **MDM** values are only detected.
-- **The permission mode chosen in the app** is stored in the app state but not read; folders known only from the app state are shown with the configured or default mode.
+- **The permission mode chosen in the app** is read from the app state (heuristic); a mode changed for a single chat is not visible.
 - **MCP servers** run outside the sandbox and reach everything the user can reach.
 - **MCP server definitions** of several layers are not merged key by key; the definition from the highest layer is used.
 - **Plugins** are only hinted at; their own permissions (e.g. `computer_use.*`, `browser_use.*`) are not evaluated.

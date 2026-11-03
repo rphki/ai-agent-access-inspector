@@ -36,7 +36,7 @@ The application:
 | Approach | phase by phase; acceptance check and alignment after each phase |
 | ChatGPT/Codex | one scanner `codex` (display name "ChatGPT / Codex") for the ChatGPT desktop app (bundle ID `com.openai.codex`) and the Codex CLI, because both share `~/.codex`; the chat side of ChatGPT (connectors, uploads) is configured server-side and out of scope (see phase 8) |
 | Codex plugins | enabled plugins (e.g. computer use, browser) are only detected and reported as a heuristic hint; their permissions are not evaluated |
-| Codex app state | `.codex-global-state.json` is read heuristically, only the keys holding project folders, with at most medium confidence |
+| Codex app state | `.codex-global-state.json` is read heuristically, only the keys holding project folders and the permission mode selected in the app (decided 2026-11-03), with at most medium confidence |
 
 ## 3. Technology stack
 

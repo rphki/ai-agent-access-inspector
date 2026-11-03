@@ -279,7 +279,7 @@ impl Scan<'_> {
             layers.extend(self.read_layer(Level::System, system, None));
         }
 
-        let projects = projects::discover(self, &View::global(&layers));
+        let (projects, app_mode) = projects::discover(self, &View::global(&layers));
         for (index, project) in projects.iter().enumerate() {
             let files = self.read_project_layers(index, project);
             // Project files rank below managed and above user configuration.
@@ -290,7 +290,13 @@ impl Scan<'_> {
             layers.splice(at..at, files);
         }
 
-        let policies = sandbox::evaluate(self, &layers, &projects, requirements.as_ref());
+        let policies = sandbox::evaluate(
+            self,
+            &layers,
+            &projects,
+            requirements.as_ref(),
+            app_mode.as_ref(),
+        );
         projects::findings(self, &projects, &policies);
         mcp::evaluate(self, &layers, requirements.as_ref());
         mcp::plugins(self, &View::global(&layers), requirements.as_ref());
@@ -690,5 +696,57 @@ mod tests {
             find(&result, "finding.codex.workingDirectory.read").len(),
             1
         );
+    }
+
+    #[test]
+    fn app_mode_applies_to_folders_the_app_uses() {
+        let system = System::new("codex-app-mode");
+        system
+            .write(
+                "/home/alice/.codex/config.toml",
+                "sandbox_mode = \"read-only\"\n[projects.\"/srv/listed\"]\ntrust_level = \"trusted\"\n",
+            )
+            .write(
+                "/home/alice/.codex/.codex-global-state.json",
+                r#"{"local-projects":{"p1":{"rootPaths":["/srv/app"]}},
+                    "electron-persisted-atom-state":{"agent-mode-by-host-id":{"local":"full-access"}}}"#,
+            );
+        let result = system.scan();
+        let listed = find(&result, "finding.codex.workingDirectory.read");
+        assert_eq!(listed.len(), 1);
+        assert_eq!(listed[0].target.raw, "/srv/listed");
+        let app = find(&result, "finding.codex.workingDirectory.full");
+        assert_eq!(
+            app[0].explanation.args["mode"],
+            "danger-full-access (app: full-access)"
+        );
+        let full = find(&result, "finding.codex.fullAccess");
+        assert_eq!(full[0].source.config_kind, "codex/app-state");
+        assert!(result.summary.iter().any(|s| s.key == "appMode"));
+    }
+
+    #[test]
+    fn custom_and_unknown_app_modes_fall_back_to_the_configuration() {
+        for (mode, diagnostics) in [("custom", 0), ("something-new", 1)] {
+            let system = System::new("codex-app-custom");
+            system.write(
+                "/home/alice/.codex/.codex-global-state.json",
+                &format!(
+                    r#"{{"local-projects":{{"p1":{{"rootPaths":["/srv/app"]}}}},
+                        "electron-persisted-atom-state":{{"agent-mode-by-host-id":{{"local":"{mode}"}}}}}}"#
+                ),
+            );
+            let result = system.scan();
+            assert_eq!(
+                find(&result, "finding.codex.workingDirectory.read").len(),
+                1
+            );
+            let unknown = result
+                .diagnostics
+                .iter()
+                .filter(|d| d.message.key == "diagnostic.codex.unknownAppMode")
+                .count();
+            assert_eq!(unknown, diagnostics, "{mode}");
+        }
     }
 }

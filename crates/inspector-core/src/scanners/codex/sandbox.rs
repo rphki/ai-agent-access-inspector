@@ -3,15 +3,15 @@
 
 use serde_json::{Map, Value};
 
-use super::projects::Project;
+use super::projects::{AppMode, Origin as ProjectOrigin, Project};
 use super::{Layer, Requirements, Scan, View, pointer_key, unexpected_type};
 use crate::analysis::path::TargetPath;
 use crate::analysis::pattern::split_pattern;
 use crate::analysis::resolve::resolve_path;
 use crate::model::{
     AccessKind, Confidence, Diagnostic, DiagnosticCode, DiagnosticLevel, Finding, FindingScope,
-    FindingStatus, FindingTarget, IneffectiveReason, Message, PatternKind, RuleEffect, Severity,
-    SourceDocumentation, SummaryEntry, Warning, WarningKind,
+    FindingSource, FindingStatus, FindingTarget, IneffectiveReason, Message, PatternKind,
+    RuleEffect, Severity, SourceDocumentation, SummaryEntry, Warning, WarningKind,
 };
 use crate::platform::OperatingSystem;
 use crate::read;
@@ -70,6 +70,8 @@ pub(crate) enum Origin {
         file: TargetPath,
         scope: FindingScope,
     },
+    /// The permission mode selected in the ChatGPT app (app state).
+    App { source: FindingSource },
     /// Nothing configured: Codex's default for the folder.
     Default,
 }
@@ -120,19 +122,26 @@ pub(crate) fn evaluate(
     layers: &[Layer],
     projects: &[Project],
     requirements: Option<&Requirements>,
+    app_mode: Option<&AppMode>,
 ) -> Policies {
     let global_view = View::global(layers);
     let global = policy(scan, &global_view, None, requirements);
+    let configured = global_view
+        .get_str("/sandbox_mode")
+        .and_then(|(_, mode)| Mode::parse(mode));
+    let app_policy = app_mode.and_then(|mode| app_policy(scan, mode, configured, requirements));
     let project_policies: Vec<Policy> = projects
         .iter()
         .enumerate()
-        .map(|(index, project)| {
-            policy(
+        .map(|(index, project)| match &app_policy {
+            // Folders the app uses run with the mode selected there.
+            Some(app) if project.origin != ProjectOrigin::Config => app.clone(),
+            _ => policy(
                 scan,
                 &View::project(layers, index),
                 Some(project),
                 requirements,
-            )
+            ),
         })
         .collect();
 
@@ -157,6 +166,13 @@ pub(crate) fn evaluate(
         Message::new("summary.codex.sandboxMode"),
         Message::raw(&global.label),
     ));
+    if let Some(app_mode) = app_mode {
+        scan.out.summary.push(SummaryEntry::new(
+            "appMode",
+            Message::new("summary.codex.appMode"),
+            Message::raw(&app_mode.value),
+        ));
+    }
     Policies {
         projects: project_policies,
     }
@@ -217,6 +233,55 @@ fn policy(
         constrain(&mut policy, requirements);
     }
     policy
+}
+
+/// The app's permission modes (`agent-mode-by-host-id`, values taken from
+/// the app bundle): `auto`, `granular` and `guardian-approvals` write in the
+/// workspace (`guardian-approvals` follows a configured `read-only`),
+/// `custom` uses the configuration, unknown values are reported and ignored.
+fn app_policy(
+    scan: &mut Scan,
+    app_mode: &AppMode,
+    global_mode: Option<Mode>,
+    requirements: Option<&Requirements>,
+) -> Option<Policy> {
+    let mode = match app_mode.value.as_str() {
+        "read-only" => Mode::ReadOnly,
+        "auto" | "granular" => Mode::WorkspaceWrite,
+        "guardian-approvals" => {
+            if global_mode == Some(Mode::ReadOnly) {
+                Mode::ReadOnly
+            } else {
+                Mode::WorkspaceWrite
+            }
+        }
+        "full-access" => Mode::FullAccess,
+        "custom" => return None,
+        other => {
+            scan.diagnostic(
+                Diagnostic::new(
+                    DiagnosticLevel::Info,
+                    DiagnosticCode::Other,
+                    Message::new("diagnostic.codex.unknownAppMode").arg("mode", other),
+                )
+                .file(scan.locations.app_state().to_path_buf()),
+            );
+            return None;
+        }
+    };
+    let mut policy = Policy {
+        mode,
+        label: format!("{} (app: {})", mode.name(), app_mode.value),
+        origin: Origin::App {
+            source: app_mode.source.clone(),
+        },
+        profile: None,
+        rejected: None,
+    };
+    if let Some(requirements) = requirements {
+        constrain(&mut policy, requirements);
+    }
+    Some(policy)
 }
 
 fn default_policy(scan: &Scan, project: Option<&Project>) -> Policy {
@@ -464,6 +529,7 @@ fn mode_findings(scan: &mut Scan, policies: &[&Policy]) {
                 ),
                 *scope,
             ),
+            Origin::App { source } => (source.clone(), FindingScope::User),
             Origin::Default => (scan.derived_source(), FindingScope::OperatingSystem),
         };
         let key = format!("{:?}{:?}", source.file, source.pointer);

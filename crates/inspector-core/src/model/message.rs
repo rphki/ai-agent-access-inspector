@@ -100,6 +100,10 @@ pub const CATALOG: &[(&str, &str)] = &[
         "The path {path} must be absolute or start with ~; it was not evaluated.",
     ),
     (
+        "diagnostic.codex.unknownAppMode",
+        "The ChatGPT app uses the permission mode {mode}, which is not known; it was not evaluated.",
+    ),
+    (
         "diagnostic.codex.unknownProfile",
         "The permission profile {profile} is not defined.",
     ),
@@ -423,6 +427,10 @@ pub const CATALOG: &[(&str, &str)] = &[
     ("report.status.unknown", "unknown"),
     ("report.title", "AI Agent Access Inspector report"),
     ("report.totals", "{findings}, {warnings}."),
+    (
+        "summary.codex.appMode",
+        "Permission mode in the ChatGPT app",
+    ),
     ("summary.codex.approvalPolicy", "Approval policy"),
     ("summary.codex.installation", "Installation"),
     (
