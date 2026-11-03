@@ -34,6 +34,9 @@ The application:
 | Internationalisation | only the GUI is translated (German and English); the CLI is English only. The core emits user-facing texts as message keys with parameters plus an English default text (see 12.5) |
 | Security | automated dependency audit in CI from phase 3.5; a security check per phase from phase 4; a full security review before the first public release (see 14) |
 | Approach | phase by phase; acceptance check and alignment after each phase |
+| ChatGPT/Codex | one scanner `codex` (display name "ChatGPT / Codex") for the ChatGPT desktop app (bundle ID `com.openai.codex`) and the Codex CLI, because both share `~/.codex`; the chat side of ChatGPT (connectors, uploads) is configured server-side and out of scope (see phase 8) |
+| Codex plugins | enabled plugins (e.g. computer use, browser) are only detected and reported as a heuristic hint; their permissions are not evaluated |
+| Codex app state | `.codex-global-state.json` is read heuristically, only the keys holding project folders, with at most medium confidence |
 
 ## 3. Technology stack
 
@@ -614,9 +617,9 @@ The first development phase may produce unsigned builds. Before a stable public 
 | `0.2.0` | first Tauri GUI |
 | `0.3.0` | exports and improved path analysis |
 | `0.4.0` | cross-platform GitHub releases of the GUI |
-| `0.5.0` | Claude Desktop scanner |
-| `0.6.0` | Codex/ChatGPT scanner |
-| `0.7.0` | Cursor scanner |
+| `0.5.0` | GUI polish (icon, colour scheme, compact overview) |
+| `0.6.0` | ChatGPT/Codex scanner |
+| later | Claude Desktop scanner, Cursor scanner |
 | `1.0.0` | stable data structure, signed releases, documented extension interface |
 
 Until `1.0.0` the scanner interface and export format may change incompatibly.
@@ -724,7 +727,19 @@ Every phase ends with an acceptance check. Only then is the next phase planned i
 
 ### Afterwards
 
-More scanners (Claude Desktop, Codex/ChatGPT, Cursor) and `1.0.0` according to section 18.
+More scanners (Claude Desktop, Cursor) and `1.0.0` according to section 18.
+
+### Phase 8 – ChatGPT/Codex scanner → `v0.6.0`
+
+- 8.1 research: official Codex configuration docs and the local installation (structure only, no values); every source classified as documented or heuristic; precedence of CLI flags, profiles, `config.toml`, project configuration and managed requirements → `docs/codex-scanner.md`
+- 8.2 core groundwork: TOML parser in `inspector-core` (`cargo deny`), source positions for TOML (key path instead of JSON pointer), new message keys
+- 8.3 scanner `codex`: detection (app bundle, CLI, `~/.codex`), all configuration levels via `ScanContext`, sandbox mode and writable roots, approval policy as effect, trusted projects, MCP servers without `env`/`headers`, plugin hints, diagnostics instead of aborts
+- 8.4 fixtures for macOS, Linux, Windows, profiles and malformed TOML with reviewed `expected.json`
+- 8.5 integration in CLI and GUI: registration, German texts, demo mode
+- 8.6 documentation (README, `privacy.md`, `adding-a-scanner.md` if the interface changed), CHANGELOG
+- **security check:** size limits and tolerant parsing of TOML and the app state file, `auth.json`, sessions and databases are never read, no `env`/`headers` values in output, only the needed keys of `.codex-global-state.json`
+
+**Acceptance:** `docs/codex-scanner.md` documents every evaluated source and key; the scanner produces reproducible, explained findings from all fixtures; a system scan on the maintainer's Mac shows the ChatGPT app's access.
 
 ## 20. Definition of done for the MVP
 
@@ -796,3 +811,6 @@ These features are only considered once the plain, traceable configuration scann
 | 7.4 CONTRIBUTING, issue templates, adding a scanner | done |
 | 7.5 Full security review, threat model, SECURITY.md | done |
 | 7.6 Release `v0.4.0` | done (first tag run failed before publishing because the frontend build ended up among the release files; fixed in the workflow, tag moved to the fix) |
+| 8 – ChatGPT/Codex scanner | in progress |
+| 8.1 Research | done ([specification](codex-scanner.md); open checks for 8.3 in section 14) |
+| 8.2 Core groundwork | next: TOML parser, message keys |
