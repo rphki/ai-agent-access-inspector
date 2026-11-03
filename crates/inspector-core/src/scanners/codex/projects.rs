@@ -36,6 +36,15 @@ pub(crate) struct Project {
     pub source: FindingSource,
 }
 
+/// The permission mode selected in the app for the local machine.
+#[derive(Debug, Clone)]
+pub(crate) struct AppMode {
+    pub value: String,
+    pub source: FindingSource,
+}
+
+const APP_MODE_POINTER: &str = "/electron-persisted-atom-state/agent-mode-by-host-id/local";
+
 /// Paths the app wrote for chats without a project.
 #[derive(Debug, Clone)]
 pub(crate) struct OutputDirectory {
@@ -43,7 +52,7 @@ pub(crate) struct OutputDirectory {
     pub source: FindingSource,
 }
 
-pub(crate) fn discover(scan: &mut Scan, global: &View) -> Vec<Project> {
+pub(crate) fn discover(scan: &mut Scan, global: &View) -> (Vec<Project>, Option<AppMode>) {
     let mut projects: Vec<Project> = Vec::new();
     for layer in global.layers() {
         let Some(table) = layer.value.get("projects").and_then(Value::as_object) else {
@@ -69,7 +78,7 @@ pub(crate) fn discover(scan: &mut Scan, global: &View) -> Vec<Project> {
 
     let state = scan.locations.app_state();
     let Some(value) = scan.read_json(&state) else {
-        return projects;
+        return (projects, None);
     };
     if let Some(local) = value.get("local-projects").and_then(Value::as_object) {
         for (id, project) in local.iter().take(MAX_APP_PATHS) {
@@ -124,10 +133,24 @@ pub(crate) fn discover(scan: &mut Scan, global: &View) -> Vec<Project> {
                 Some(OutputDirectory { path, source })
             })
             .collect();
+    let app_mode = value
+        .pointer(APP_MODE_POINTER)
+        .and_then(Value::as_str)
+        .map(|mode| AppMode {
+            value: mode.to_string(),
+            source: scan
+                .source(
+                    "app-state",
+                    SourceDocumentation::Heuristic,
+                    &state,
+                    APP_MODE_POINTER,
+                )
+                .raw_value(mode),
+        });
     // The rest of the app state is dropped here.
     drop(value);
     output_findings(scan, outputs);
-    projects
+    (projects, app_mode)
 }
 
 /// Adds a project unless its path is known already; a later source for the
