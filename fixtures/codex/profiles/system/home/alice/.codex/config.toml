@@ -1,0 +1,33 @@
+default_permissions = "team"
+
+[projects."/home/alice/repo"]
+trust_level = "trusted"
+
+[permissions.base]
+extends = ":workspace"
+
+[permissions.base.filesystem]
+"~/reference" = "read"
+
+[permissions.team]
+extends = "base"
+
+[permissions.team.workspace_roots]
+"/srv/extra" = true
+
+[permissions.team.filesystem]
+"/srv/out" = "write"
+"~/secrets/**" = "deny"
+"**/*.pem" = "deny"
+":tmpdir" = "read"
+glob_scan_max_depth = 4
+
+[permissions.team.filesystem.":workspace_roots"]
+"docs" = "read"
+"." = "write"
+
+[permissions.loop-a]
+extends = "loop-b"
+
+[permissions.loop-b]
+extends = "loop-a"

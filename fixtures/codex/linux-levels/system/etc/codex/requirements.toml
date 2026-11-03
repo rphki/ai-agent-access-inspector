@@ -1,0 +1,4 @@
+allowed_sandbox_modes = ["read-only", "workspace-write"]
+
+[permissions.filesystem]
+deny_read = ["~/.ssh", "/srv/app/**/*.env"]

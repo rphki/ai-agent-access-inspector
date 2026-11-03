@@ -1,0 +1,16 @@
+sandbox_mode = "workspace-write"
+
+[projects."/Users/alice/work"]
+trust_level = "trusted"
+
+[mcp_servers.allowed]
+command = "allowed-server"
+
+[mcp_servers.blocked]
+command = "blocked-server"
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true

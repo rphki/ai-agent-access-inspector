@@ -815,4 +815,5 @@ These features are only considered once the plain, traceable configuration scann
 | 8.1 Research | done ([specification](codex-scanner.md); open checks for 8.3 in section 14) |
 | 8.2 Core groundwork | done (`toml` without default features, `read::read_toml`, diagnostic `invalidToml` with line number only) |
 | 8.3 Scanner `codex` | done (open checks resolved against the Codex source, unit tests; system scan on the maintainer's Mac works) |
-| 8.4 Fixtures | next |
+| 8.4 Fixtures | done (11 fixtures in `fixtures/codex/`, test `codex_fixtures` with shared helpers) |
+| 8.5 GUI integration | next |

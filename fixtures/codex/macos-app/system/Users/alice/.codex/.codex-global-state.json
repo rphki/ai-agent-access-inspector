@@ -1,0 +1,32 @@
+{
+  "local-projects": {
+    "p1": {
+      "id": "p1",
+      "name": "Notes",
+      "rootPaths": [
+        "/Users/alice/Documents/Notes"
+      ],
+      "createdAt": 1,
+      "updatedAt": 2
+    }
+  },
+  "thread-workspace-root-hints": {
+    "t1": "/Users/alice/Documents/Codex",
+    "t2": "/Users/alice/Documents/Codex"
+  },
+  "thread-projectless-output-directories": {
+    "t1": "/Users/alice/Documents/Codex/2026-11-01/report/outputs"
+  },
+  "electron-persisted-atom-state": {
+    "agent-mode-by-host-id": {
+      "local": "auto"
+    },
+    "chatgpt-last-selected-model-v1": {
+      "fixture": "fixture-state-never-shown"
+    }
+  },
+  "electron-main-window-bounds": {
+    "x": 1,
+    "y": 2
+  }
+}

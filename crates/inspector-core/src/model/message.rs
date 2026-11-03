@@ -483,6 +483,10 @@ pub const CATALOG: &[(&str, &str)] = &[
         "Without a sandbox, commands can change or delete any file the user can.",
     ),
     (
+        "warning.codex.neverAsks",
+        "Approval policy never: Codex does not ask before acting.",
+    ),
+    (
         "warning.codex.notAllowedByRequirements",
         "{value} is not allowed by the managed requirements; Codex falls back to {fallback}.",
     ),

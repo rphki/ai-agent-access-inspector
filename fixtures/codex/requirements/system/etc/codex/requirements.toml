@@ -1,0 +1,7 @@
+allowed_sandbox_modes = ["read-only"]
+
+[mcp_servers.allowed]
+identity = { command = "allowed-server" }
+
+[features]
+computer_use = false

@@ -1,0 +1,14 @@
+{
+  "local-projects": {
+    "p1": {
+      "rootPaths": [
+        "/Users/alice/app-project"
+      ]
+    }
+  },
+  "electron-persisted-atom-state": {
+    "agent-mode-by-host-id": {
+      "local": "full-access"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+sandbox_mode = "sometimes"
+mcp_servers = "not a table"
+unknown_key = 1
+
+[sandbox_workspace_write]
+writable_roots = "/srv/not-a-list"
+
+[projects."relative/path"]
+trust_level = "trusted"
+
+[projects."/srv/ok"]
+trust_level = 5

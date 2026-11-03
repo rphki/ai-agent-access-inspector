@@ -137,7 +137,7 @@ pnpm test                                    # frontend tests (Vitest)
 |---|---|---|
 | Unit tests | `#[cfg(test)] mod tests` at the end of a source file, or a `tests.rs` next to it (e.g. `analysis/tests.rs`) | test functions of one module, with access to private items |
 | Integration tests | `crates/inspector-cli/tests/cli.rs` | start the built binary as a separate process and check its output and exit code |
-| Fixture tests | `crates/inspector-core/tests/claude_code_fixtures.rs` | scan every fixture in `fixtures/claude-code/` and compare the result with its `expected.json` |
+| Fixture tests | `crates/inspector-core/tests/claude_code_fixtures.rs`, `codex_fixtures.rs` (helpers in `tests/common/mod.rs`) | scan every fixture in `fixtures/claude-code/` or `fixtures/codex/` and compare the result with its `expected.json` |
 | Frontend tests | `src/**/*.test.ts(x)` | render the GUI with React Testing Library against a mocked backend; the reports come from the fixtures' `expected.json` |
 
 Things worth knowing:
@@ -147,6 +147,7 @@ Things worth knowing:
 
   ```bash
   UPDATE_EXPECT=1 cargo test -p inspector-core --test claude_code_fixtures
+  UPDATE_EXPECT=1 cargo test -p inspector-core --test codex_fixtures
   git diff fixtures/
   ```
 

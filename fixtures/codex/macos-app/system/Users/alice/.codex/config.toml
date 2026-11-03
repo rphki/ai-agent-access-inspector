@@ -1,0 +1,25 @@
+model = "gpt-test"
+notify = ["say", "fixture-notify-never-shown"]
+
+[projects."/Users/alice/Developer/shop"]
+trust_level = "trusted"
+
+[mcp_servers.node_repl]
+command = "/Applications/ChatGPT.app/Contents/Resources/node/bin/node"
+args = ["repl.js"]
+env_vars = ["FIXTURE_VAR"]
+
+[mcp_servers.node_repl.env]
+API_TOKEN = "fixture-env-never-shown"
+
+[plugins."computer-use@openai-bundled"]
+enabled = true
+
+[plugins."browser@openai-bundled"]
+enabled = true
+
+[plugins."documents@openai-primary-runtime"]
+enabled = true
+
+[plugins."visualize@openai-bundled"]
+enabled = false

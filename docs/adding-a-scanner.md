@@ -266,7 +266,7 @@ fixtures/example-agent/linux-basic/
 Steps:
 
 1. Create fixtures for the cases in your specification: at least one per operating system, *not detected*, malformed JSON and unexpected types, and a fixture with invented secrets that must not appear in the output. Use the existing `fixtures/claude-code/*` as examples.
-2. Add a test `crates/inspector-core/tests/example_agent_fixtures.rs`, modelled on [`claude_code_fixtures.rs`](../crates/inspector-core/tests/claude_code_fixtures.rs): change the fixture directory and the scanner id. Keep its three tests (expectations, reproducibility, no secrets in the output) and list your invented secrets in the last one.
+2. Add a test `crates/inspector-core/tests/example_agent_fixtures.rs`, modelled on [`codex_fixtures.rs`](../crates/inspector-core/tests/codex_fixtures.rs): change the fixture directory and the scanner id. The shared helpers in `tests/common/mod.rs` provide its four checks (expectations, reproducibility, no secrets in the output, exports without secrets, home or user names); list your invented secrets in the third one.
 3. Generate the expectations and **review the diff** line by line: is every finding, scope, confidence and diagnostic what the specification says?
 
    ```bash
